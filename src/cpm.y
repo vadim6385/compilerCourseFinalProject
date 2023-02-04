@@ -8,7 +8,7 @@
 #include <stdbool.h>
 
 #define ERROR_STRING_LEN 100
-#define STUDENTS_DETAILS "Vadim Darchuk and Yotam Alter\n\n"
+#define STUDENTS_DETAILS "Vadim Darchuk 316920974 and Yotam Alter 302955679\n\n"
 #define SYM_TBL_ROWS_COUNT 10
 
 extern int yylex();
@@ -131,7 +131,7 @@ symTblEntry* createSymTblEntery(symTbl* symTbl, char * lexeme, Type type, bool i
 
 
 /*
-* Add a symbol to a symbol table. Added symbol is added to the head of the appropriate line of the symbol table
+* Add a symbol to the symbol table. Added symbol is added to the head of the appropriate line of the symbol table
 */
 void insertEntry(symTbl* symTbl, symTblEntry* newEntry, int hashValue)
 {
@@ -159,7 +159,7 @@ void insertEntry(symTbl* symTbl, symTblEntry* newEntry, int hashValue)
 */
 Type charType2EnumType(char* type)
 {
-	Type newType;		//enum Type {integer, floating, string}
+	Type newType;		// enum Type {integer, floating, string}
 	if(type == NULL)	// for argument protection only
 		newType = integer;
 	else 
@@ -181,7 +181,7 @@ Type charType2EnumType(char* type)
 */
 char* EnumType2charType(Type type)
 {
-	char* newType;		//enum Type {integer, floating, string}
+	char* newType;		// enum Type {integer, floating, string}
 
 	if(type == integer)
 		newType = strdup("int");
@@ -219,7 +219,7 @@ void addSymbol(symTbl* symTbl, char* lexeme, char* type, bool isConst)
 		return;
 	}
 
-	Type newType = charType2EnumType(type);		// Convrting char* type to Enum Type
+	Type newType = charType2EnumType(type);		// Converting char* type to Enum Type
 	symTblEntry* newSymbol = createSymTblEntery(symTbl, lexeme, newType, isConst, hashValue);
 
 	if (newSymbol == NULL)
@@ -295,7 +295,7 @@ int idxT=0;
 int idxF=0;
 // ############### End of global variables ####################
 
-// ############### Useful functions ####################
+// ############### Service functions ####################
 
 /*
 * Writes an error to listing file
@@ -372,7 +372,7 @@ void freeRegisterF(char* reg)
 
 
 /*
-* Generates a uniqe label
+* Generates a unique label
 */
 char* getLabel()
 {
@@ -382,7 +382,7 @@ char* getLabel()
 }
 
 
-// ############### End of useful functions ####################
+// ############### End of service functions ###################
 // ############### BISON related definitions ##################
 %}
 %locations
@@ -1057,7 +1057,7 @@ CONTROL_STMT : IF'('BOOLEXPR')'STMT ELSE STMT
 						freeRegisterF(reg3);
 						assignDone = true;
 					}
-					else	// attrmpting to assign a float into an int
+					else	// attempting to assign a float into an int
 					{
 						sprintf(errorMessage,"Can't convert from a real number to integer");
 						outputError(errorMessage);
@@ -1975,7 +1975,7 @@ int main (int argc, char **argv)
 		else
 		{
 			printf("Creating MIPS file\n");
-			mipsFile = fopen("MIPS.S","w+");
+			mipsFile = fopen("MIPS.asm","w+");
 			if (mipsFile == NULL)
 			{
 				fprintf(stderr, "Failed to open mips file. Operation terminated!\n");
@@ -1992,7 +1992,7 @@ int main (int argc, char **argv)
 
 	}
 	else
-		fprintf(stderr, "Errors were found. See liting file for details\n");
+		fprintf(stderr, "Errors were found. See listing file for details\n");
 	
 	fclose (yyin);
 	printf("Destroying symbol table\n");
