@@ -1,13 +1,9 @@
 %{
 #define _CRT_SECURE_NO_WARNINGS
-#include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
-#include <malloc.h>
+#include <string.h>
 #include "y.tab.h"
 
-extern int atoi (const char *);
-extern void addError(char*, char*);
 int col = 1;
 int line = 1;
 %}

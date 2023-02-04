@@ -491,19 +491,15 @@ char *yytext;
 #define INITIAL 0
 #line 2 "cpm.lex"
 #define _CRT_SECURE_NO_WARNINGS
-#include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
-#include <malloc.h>
+#include <string.h>
 #include "y.tab.h"
 
-extern int atoi (const char *);
-extern void addError(char*, char*);
 int col = 1;
 int line = 1;
 #define comment 1
 
-#line 507 "lex.yy.c"
+#line 503 "lex.yy.c"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -654,10 +650,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
 
-#line 18 "cpm.lex"
+#line 14 "cpm.lex"
 
 
-#line 661 "lex.yy.c"
+#line 657 "lex.yy.c"
 
 	if ( yy_init )
 		{
@@ -750,187 +746,187 @@ do_action:	/* This label is used only to access EOF actions. */
 	{ /* beginning of action switch */
 case 1:
 YY_RULE_SETUP
-#line 20 "cpm.lex"
+#line 16 "cpm.lex"
 BEGIN(comment);
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 21 "cpm.lex"
+#line 17 "cpm.lex"
 
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 22 "cpm.lex"
+#line 18 "cpm.lex"
 BEGIN(0);
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 23 "cpm.lex"
+#line 19 "cpm.lex"
 { line++; col = 1; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 24 "cpm.lex"
+#line 20 "cpm.lex"
 { col += 4;}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 25 "cpm.lex"
+#line 21 "cpm.lex"
 { col += 1;}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 26 "cpm.lex"
+#line 22 "cpm.lex"
 { col += yyleng; return BGN;}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 27 "cpm.lex"
+#line 23 "cpm.lex"
 { col += yyleng; return BREAK;}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 28 "cpm.lex"
+#line 24 "cpm.lex"
 { col += yyleng; return CASE;} 
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 29 "cpm.lex"
+#line 25 "cpm.lex"
 { col += yyleng; return FINAL;}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 30 "cpm.lex"
+#line 26 "cpm.lex"
 { col += yyleng; return DEFAULT;}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 31 "cpm.lex"
+#line 27 "cpm.lex"
 { col += yyleng; return DO;}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 32 "cpm.lex"
+#line 28 "cpm.lex"
 { col += yyleng; return ELSE;}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 33 "cpm.lex"
+#line 29 "cpm.lex"
 { col += yyleng; return END;}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 34 "cpm.lex"
+#line 30 "cpm.lex"
 { col += yyleng; return FOREACH;}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 35 "cpm.lex"
+#line 31 "cpm.lex"
 { col += yyleng; return IF;}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 36 "cpm.lex"
+#line 32 "cpm.lex"
 { col += yyleng; return INT;}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 37 "cpm.lex"
+#line 33 "cpm.lex"
 { col += yyleng; return LET;}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 38 "cpm.lex"
+#line 34 "cpm.lex"
 { col += yyleng; return OUT;}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 39 "cpm.lex"
+#line 35 "cpm.lex"
 { col += yyleng; return PROGRAM;}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 40 "cpm.lex"
+#line 36 "cpm.lex"
 { col += yyleng; return REAL;}
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 41 "cpm.lex"
+#line 37 "cpm.lex"
 { col += yyleng; return READ;}
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 42 "cpm.lex"
+#line 38 "cpm.lex"
 { col += yyleng; return STRING;}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 43 "cpm.lex"
+#line 39 "cpm.lex"
 { col += yyleng; return SWITCH;}
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 44 "cpm.lex"
+#line 40 "cpm.lex"
 { col += yyleng; return TILL;}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 45 "cpm.lex"
+#line 41 "cpm.lex"
 { col += yyleng; return VAR;}
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 46 "cpm.lex"
+#line 42 "cpm.lex"
 { col += yyleng; return WHILE;}
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 47 "cpm.lex"
+#line 43 "cpm.lex"
 { col += yyleng; return WITH;}
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 49 "cpm.lex"
+#line 45 "cpm.lex"
 { col += yyleng; return ')';}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 50 "cpm.lex"
+#line 46 "cpm.lex"
 { col += yyleng; return '(';}
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 51 "cpm.lex"
+#line 47 "cpm.lex"
 { col += yyleng; return '{';}
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 52 "cpm.lex"
+#line 48 "cpm.lex"
 { col += yyleng; return '}';}
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 53 "cpm.lex"
+#line 49 "cpm.lex"
 { col += yyleng; return ',';}
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 54 "cpm.lex"
+#line 50 "cpm.lex"
 { col += yyleng; return ':';}
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 55 "cpm.lex"
+#line 51 "cpm.lex"
 { col += yyleng; return ';';}
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 56 "cpm.lex"
+#line 52 "cpm.lex"
 { col += yyleng; return '!';}
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 58 "cpm.lex"
+#line 54 "cpm.lex"
 {
 col += yyleng;
 yylval.sval = (char*)malloc(yyleng*sizeof(char) +1);
@@ -940,7 +936,7 @@ return ID;}
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 65 "cpm.lex"
+#line 61 "cpm.lex"
 { col += yyleng;
 				 yylval.nVal.val.ival = atoi(yytext); 
 				 yylval.nVal.type = I;    
@@ -948,7 +944,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 70 "cpm.lex"
+#line 66 "cpm.lex"
 { col += yyleng;
 				 yylval.nVal.val.fval = atof(yytext); 
 				 yylval.nVal.type = F;
@@ -956,7 +952,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 75 "cpm.lex"
+#line 71 "cpm.lex"
 {
 col += yyleng;
 yylval.sval = (char*)malloc(yyleng*sizeof(char) +1);
@@ -965,75 +961,75 @@ return SENTENCE;}
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 81 "cpm.lex"
+#line 77 "cpm.lex"
 { col += yyleng; yylval.op = PLUS; return ADDOP;}
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 82 "cpm.lex"
+#line 78 "cpm.lex"
 { col += yyleng; yylval.op = MINUS; return ADDOP;}
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 83 "cpm.lex"
+#line 79 "cpm.lex"
 { col += yyleng; yylval.op = EQ; return RELOP;}
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 84 "cpm.lex"
+#line 80 "cpm.lex"
 { col += yyleng; yylval.op = NEQ; return RELOP;}
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 85 "cpm.lex"
+#line 81 "cpm.lex"
 { col += yyleng; yylval.op = LT; return RELOP;}
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 86 "cpm.lex"
+#line 82 "cpm.lex"
 { col += yyleng; yylval.op = GT; return RELOP;}
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 87 "cpm.lex"
+#line 83 "cpm.lex"
 { col += yyleng; yylval.op = GTEQ; return RELOP;}
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 88 "cpm.lex"
+#line 84 "cpm.lex"
 { col += yyleng; yylval.op = LTEQ; return RELOP;}
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 89 "cpm.lex"
+#line 85 "cpm.lex"
 { col += yyleng; yylval.op = MUL; return MULOP;}
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 90 "cpm.lex"
+#line 86 "cpm.lex"
 { col += yyleng; yylval.op = DIV; return MULOP;}
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 91 "cpm.lex"
+#line 87 "cpm.lex"
 { col += yyleng; yylval.op = ASSIGN; return ASSIGNOP;}
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 92 "cpm.lex"
+#line 88 "cpm.lex"
 { col += yyleng; yylval.op = OR; return OROP;}
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 93 "cpm.lex"
+#line 89 "cpm.lex"
 { col += yyleng; yylval.op = AND; return ANDOP;}
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 94 "cpm.lex"
+#line 90 "cpm.lex"
 ECHO;
 	YY_BREAK
-#line 1037 "lex.yy.c"
+#line 1033 "lex.yy.c"
 			case YY_STATE_EOF(INITIAL):
 			case YY_STATE_EOF(comment):
 				yyterminate();
@@ -1918,4 +1914,4 @@ int main()
 	return 0;
 	}
 #endif
-#line 94 "cpm.lex"
+#line 90 "cpm.lex"

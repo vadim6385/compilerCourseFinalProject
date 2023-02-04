@@ -130,38 +130,38 @@ extern int yydebug;
 typedef union YYSTYPE
 {
 /* Line 2058 of yacc.c  */
-#line 390 "cpm.y"
+#line 389 "cpm.y"
 
-	struct nVal
-	{
-		enum {I, F} type;
-		union
-		{
-			float fval;
-			int   ival;
-		}val;
-	}nVal;
+   struct nVal
+   {
+      enum {I, F} type;
+      union
+      {
+         float fval;
+         int   ival;
+      }val;
+   }nVal;
 
-	char* sval;
+   char* sval;
 
-	enum {PLUS, MINUS, MUL, DIV, ASSIGN, OR, AND, EQ, NEQ, LT, GT, GTEQ, LTEQ} op;
+   enum {PLUS, MINUS, MUL, DIV, ASSIGN, OR, AND, EQ, NEQ, LT, GT, GTEQ, LTEQ} op;
 
-	struct declaration{
+   struct declaration{
                  int ival;
-	             float fval;
-	             char *idval;
-				 char* type;
-	             char *IDarray[5];
-	             char *reg;
-	             char *label;
-	             char *codeHead;
-	             char *codeBody;
+                float fval;
+                char *idval;
+             char* type;
+                char *IDarray[5];
+                char *reg;
+                char *label;
+                char *codeHead;
+                char *codeBody;
                  } decl;
 
-	struct mipsCode{
-	               char *label;
-	               char *head;
-	               char *body;
+   struct mipsCode{
+                  char *label;
+                  char *head;
+                  char *body;
                    } code;
 
 
