@@ -19,7 +19,7 @@ LETTER [a-zA-Z]
 [\n]		{ line++; col = 1; }
 [\t]		{ col += 4;}
 [" "]		{ col += 1;}
-"bgn"		{ col += yyleng; return BGN;}
+"start"		{ col += yyleng; return START;}
 "break"		{ col += yyleng; return BREAK;}
 "case"		{ col += yyleng; return CASE;} 
 "final"		{ col += yyleng; return FINAL;}
@@ -30,7 +30,7 @@ LETTER [a-zA-Z]
 "foreach"   { col += yyleng; return FOREACH;}
 "if"		{ col += yyleng; return IF;}
 "int"		{ col += yyleng; return INT;}
-"let"		{ col += yyleng; return LET;}
+"decl"		{ col += yyleng; return DCL;}
 "out"		{ col += yyleng; return OUT;}
 "program"   { col += yyleng; return PROGRAM;}
 "real"		{ col += yyleng; return REAL;}

@@ -519,7 +519,7 @@ extern int yydebug;
      RELOP = 264,
      ID = 265,
      SENTENCE = 266,
-     BGN = 267,
+     START = 267,
      BREAK = 268,
      CASE = 269,
      FINAL = 270,
@@ -530,7 +530,7 @@ extern int yydebug;
      FOREACH = 275,
      IF = 276,
      INT = 277,
-     LET = 278,
+     DCL = 278,
      OUT = 279,
      REAL = 280,
      READ = 281,
@@ -559,7 +559,7 @@ extern int yydebug;
 #define RELOP 264
 #define ID 265
 #define SENTENCE 266
-#define BGN 267
+#define START 267
 #define BREAK 268
 #define CASE 269
 #define FINAL 270
@@ -570,7 +570,7 @@ extern int yydebug;
 #define FOREACH 275
 #define IF 276
 #define INT 277
-#define LET 278
+#define DCL 278
 #define OUT 279
 #define REAL 280
 #define READ 281
@@ -1041,8 +1041,8 @@ static const yytype_uint16 yyrline[] =
 static const char *const yytname[] =
 {
   "$end", "error", "$undefined", "NUM", "ADDOP", "MULOP", "ASSIGNOP",
-  "OROP", "ANDOP", "RELOP", "ID", "SENTENCE", "BGN", "BREAK", "CASE",
-  "FINAL", "DEFAULT", "DO", "ELSE", "END", "FOREACH", "IF", "INT", "LET",
+  "OROP", "ANDOP", "RELOP", "ID", "SENTENCE", "START", "BREAK", "CASE",
+  "FINAL", "DEFAULT", "DO", "ELSE", "END", "FOREACH", "IF", "INT", "DCL",
   "OUT", "REAL", "READ", "SWITCH", "TILL", "WHILE", "WITH", "STRING",
   "VAR", "PROGRAM", "addop", "mulop", "orop", "andop", "relop", "assignop",
   "':'", "','", "';'", "'('", "')'", "'{'", "'}'", "'!'", "$accept",
@@ -2213,7 +2213,7 @@ yyreduce:
 /* Line 1792 of yacc.c  */
 #line 465 "cpm.y"
     {// 0      1     2     3     4         5      6
-   printf("PROGRAM --> PROGRAM ID BGN DECLARATIONS STMTLIST END\n");
+   printf("PROGRAM --> PROGRAM ID START DECLARATIONS STMTLIST END\n");
    char* str = (char*)calloc(1000, sizeof(char));
    
    if((yyvsp[(5) - (6)].code).head == NULL)
@@ -2229,7 +2229,7 @@ yyreduce:
 /* Line 1792 of yacc.c  */
 #line 479 "cpm.y"
     {//0         1      2      3
-   printf("DECLARATIONS --> LET DECLARLIST CDECL\n");
+   printf("DECLARATIONS --> DCL DECLARLIST CDECL\n");
    (yyval.decl).codeHead = strdup(strcat((yyvsp[(2) - (3)].decl).codeHead, (yyvsp[(3) - (3)].decl).codeHead));
    (yyval.decl).codeBody = strdup((yyvsp[(3) - (3)].decl).codeBody);
 }

@@ -1,0 +1,12 @@
+program  Min  /* Finding minimum between two numbers */
+start
+decl real : a,b;
+    string: d;
+    
+    in(a);
+    in(b);
+    d="the result is ";
+    out(d);
+    if (a<b) then out(a);
+	else   out(b);
+end

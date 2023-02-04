@@ -55,7 +55,7 @@ extern int yydebug;
      RELOP = 264,
      ID = 265,
      SENTENCE = 266,
-     BGN = 267,
+     START = 267,
      BREAK = 268,
      CASE = 269,
      FINAL = 270,
@@ -66,7 +66,7 @@ extern int yydebug;
      FOREACH = 275,
      IF = 276,
      INT = 277,
-     LET = 278,
+     DCL = 278,
      OUT = 279,
      REAL = 280,
      READ = 281,
@@ -95,7 +95,7 @@ extern int yydebug;
 #define RELOP 264
 #define ID 265
 #define SENTENCE 266
-#define BGN 267
+#define START 267
 #define BREAK 268
 #define CASE 269
 #define FINAL 270
@@ -106,7 +106,7 @@ extern int yydebug;
 #define FOREACH 275
 #define IF 276
 #define INT 277
-#define LET 278
+#define DCL 278
 #define OUT 279
 #define REAL 280
 #define READ 281
