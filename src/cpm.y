@@ -72,7 +72,9 @@ symTbl* initSymTbl()
 int getHash(char* lexeme)
 {
    if (lexeme == NULL || strlen(lexeme) < 1)
+   {
       return -1;
+   }
    return strlen(lexeme) % SYM_TBL_ROWS_COUNT;
 }
 
@@ -98,9 +100,10 @@ symTblEntry* lookup(symTbl* symTbl, char* lexeme)
       symTblEntry* ptr = symTbl->symbolTableHead[hashValue];   // lookup only in the line matched  by the hash
       while (ptr != NULL)
       {   
-         if (strcmp(ptr->name, lexeme) == 0)
+         if (!strcmp(ptr->name, lexeme))
+         {
             return ptr;
-
+         }
          ptr = ptr->next;
       }
    }
@@ -170,11 +173,22 @@ void insertEntry(symTbl* symTbl, symTblEntry* newEntry, int hashValue)
 Type charType2EnumType(char* type)
 {
    Type newType;      // enum Type {integer, floating, string}
-   if(type == NULL)   // for argument protection only
+   if (type == NULL)   // for argument protection only
+   {
       newType = integer;
-   else if (!strcmp(type, "int")) newType = integer;
-   else if (!strcmp(type, "float")) newType = floating;
-   else if (!strcmp(type, "string")) newType = string;
+   }
+   else if (!strcmp(type, "int")) 
+   {
+      newType = integer;
+   }
+   else if (!strcmp(type, "float")) 
+   {
+      newType = floating;
+   }
+   else if (!strcmp(type, "string")) 
+   {
+      newType = string;
+   }
 
    return newType;
 }
@@ -185,12 +199,20 @@ Type charType2EnumType(char* type)
 */
 char* EnumType2charType(Type type)
 {
-   char* newType;      // enum Type {integer, floating, string}
+   char* newType = NULL;      // enum Type {integer, floating, string}
 
-   if(type == integer) newType = strdup("int");
-   else if (type == floating) newType = strdup("float");
-   else if (type == string) newType = strdup("string");
-
+   switch (type)
+   {
+      case integer:
+         newType = strdup("float");
+         break;
+      case floating:
+         newType = strdup("float");
+         break;
+      case string:
+         newType = strdup("string");
+         break;
+   }
    return newType;
 }
 
@@ -199,13 +221,14 @@ char* EnumType2charType(Type type)
 */
 void addSymbol(symTbl* symTbl, char* lexeme, char* type, bool isConst)
 {
+   int hashValue;
    if (symTbl == NULL || lexeme == NULL || type == NULL)
    {
       fprintf(stderr, "Bad arguments passed to addSymbol\n");
       return;
    }
 
-   int hashValue = getHash(lexeme);
+   hashValue = getHash(lexeme);
    if (hashValue == -1)
    {
       fprintf(stderr, "Bad hash value returned\n");
@@ -222,8 +245,9 @@ void addSymbol(symTbl* symTbl, char* lexeme, char* type, bool isConst)
    symTblEntry* newSymbol = createSymTblEntery(symTbl, lexeme, newType, isConst, hashValue);
 
    if (newSymbol == NULL)
+   {
       return;
-   
+   }
    insertEntry(symTbl, newSymbol, hashValue);
 }
 
@@ -236,7 +260,6 @@ void addSymbol(symTbl* symTbl, char* lexeme, char* type, bool isConst)
 */
 void destroyEntry(symTblEntry* entry)
 {
-   int x;
    if (entry == NULL)
    {
       fprintf(stderr, "Entry to be destroyed is NULL!!\n");
@@ -267,29 +290,27 @@ void destroySymTable(symTbl* symTbl)
    for (i = 0; i < SYM_TBL_ROWS_COUNT; i++)
    {
       symbol = symTbl->symbolTableHead[i];
-      if (symbol != NULL)   // not an empty row
+      while (symbol != NULL)
       {
-         while (symbol != NULL)
-         {
-            nextSymbol = symbol->next;
-            destroyEntry(symbol);
-            symbol = nextSymbol;
-         }
+         nextSymbol = symbol->next;
+         destroyEntry(symbol);
+         symbol = nextSymbol;
       }
    }
    free(symTbl);
 }
+
+
 // ############### End of symbol table related functions ####################
 
 // ############### Global variables ####################
 
-//symTbl* symbolTable = initSymTbl();
 symTbl** ptr2symbolTable = NULL;
 char* mipsCode;
 bool hasErrors = false;
 int nextLabelNum = 0;
 char* registerT[8] = {"$t0","$t1","$t2","$t3","$t4","$t5","$t6","$t7"};   // available MIPS T registers
-char* registerF[8] = {"$f0","$f1","$f2","$f3","$f4","$f5","$f6","$f7"}; // available MIPS F registers
+char* registerF[8] = {"$f0","$f1","$f2","$f3","$f4","$f5","$f6","$f7"};   // available MIPS F registers
 int idxT=0;
 int idxF=0;
 // ############### End of global variables ####################
@@ -303,9 +324,11 @@ int idxF=0;
 */
 void outputError(char* s){
      FILE* listFile;
-    listFile = fopen("listing.lst","a+");
+     listFile = fopen("listing.lst","a+");
      if (listFile == NULL)
-        return;
+     {
+       return;
+     }
      else
      {
        fprintf(listFile,"ERROR in line: %d, %s\n", yylineno, s);
@@ -319,7 +342,7 @@ void outputError(char* s){
 */
 char* strConcat(char* str1, char* str2)
 {
-   char* newString =(char*)malloc(sizeof(char) * (strlen(str1) + strlen(str2) + 1));
+   char* newString = (char*)calloc(strlen(str1) + strlen(str2) + 1, sizeof(char));
    newString[0] = '\0';
    strcat(newString, str1);
    strcat(newString, str2);
@@ -375,9 +398,9 @@ void freeRegisterF(char* reg)
 */
 char* getLabel()
 {
-   char str[100];
+   char* str = (char*)calloc(100, sizeof(char));
    sprintf(str,"Label%d",nextLabelNum++);
-   return strdup(str);
+   return str;
 }
 
 
@@ -401,23 +424,25 @@ char* getLabel()
 
    enum {PLUS, MINUS, MUL, DIV, ASSIGN, OR, AND, EQ, NEQ, LT, GT, GTEQ, LTEQ} op;
 
-   struct declaration{
-                 int ival;
-                float fval;
-                char *idval;
-             char* type;
-                char *IDarray[5];
-                char *reg;
-                char *label;
-                char *codeHead;
-                char *codeBody;
-                 } decl;
+   struct declaration
+   {
+      int ival;
+      float fval;
+      char *idval;
+      char* type;
+      char *IDarray[5];
+      char *reg;
+      char *label;
+      char *codeHead;
+      char *codeBody;
+   }decl;
 
-   struct mipsCode{
-                  char *label;
-                  char *head;
-                  char *body;
-                   } code;
+   struct mipsCode
+   {
+      char *label;
+      char *head;
+      char *body;
+   }code;
 }
 
 %token <nVal>  NUM
@@ -1952,7 +1977,8 @@ int main (int argc, char **argv)
 
    fprintf(listFile, STUDENTS_DETAILS);
    printf("Copying input code to listing file\n");
-   do{
+   do
+   {
       fgets(line, 500, yyin);
       fprintf(listFile, "%d: %s", linesCounter++, line);
    }while(!feof(yyin));
@@ -1962,15 +1988,17 @@ int main (int argc, char **argv)
 
 // ########  End of copy to list file section  ########
 
-   fseek(yyin, 0, SEEK_SET); //moving cursor to the beginning for lexical analysis
+   fseek(yyin, 0, SEEK_SET); // moving cursor to the beginning for lexical analysis
    printf("Starting parsing process\n");
    yyparse();
    printf("Parsing process completed\n");
 
-   if (hasErrors == false) //no errors were found during parsing process -> creating MIPS file
+   if (hasErrors == false) // no errors were found during parsing process -> creating MIPS file
    {
       if (strlen(mipsCode) == 0)
+      {
          fprintf(stderr, "Unexpected error occurred. MIPS file can not be created\n");
+      }
       else
       {
          printf("Creating MIPS file\n");
@@ -1991,8 +2019,10 @@ int main (int argc, char **argv)
 
    }
    else
+   {
       fprintf(stderr, "Errors were found. See listing file for details\n");
-   
+   }
+
    fclose (yyin);
    printf("Destroying symbol table\n");
    printf("Compilation process is done\n");

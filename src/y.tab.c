@@ -138,7 +138,9 @@ symTbl* initSymTbl()
 int getHash(char* lexeme)
 {
    if (lexeme == NULL || strlen(lexeme) < 1)
+   {
       return -1;
+   }
    return strlen(lexeme) % SYM_TBL_ROWS_COUNT;
 }
 
@@ -164,9 +166,10 @@ symTblEntry* lookup(symTbl* symTbl, char* lexeme)
       symTblEntry* ptr = symTbl->symbolTableHead[hashValue];   // lookup only in the line matched  by the hash
       while (ptr != NULL)
       {   
-         if (strcmp(ptr->name, lexeme) == 0)
+         if (!strcmp(ptr->name, lexeme))
+         {
             return ptr;
-
+         }
          ptr = ptr->next;
       }
    }
@@ -236,11 +239,22 @@ void insertEntry(symTbl* symTbl, symTblEntry* newEntry, int hashValue)
 Type charType2EnumType(char* type)
 {
    Type newType;      // enum Type {integer, floating, string}
-   if(type == NULL)   // for argument protection only
+   if (type == NULL)   // for argument protection only
+   {
       newType = integer;
-   else if (!strcmp(type, "int")) newType = integer;
-   else if (!strcmp(type, "float")) newType = floating;
-   else if (!strcmp(type, "string")) newType = string;
+   }
+   else if (!strcmp(type, "int")) 
+   {
+      newType = integer;
+   }
+   else if (!strcmp(type, "float")) 
+   {
+      newType = floating;
+   }
+   else if (!strcmp(type, "string")) 
+   {
+      newType = string;
+   }
 
    return newType;
 }
@@ -251,12 +265,20 @@ Type charType2EnumType(char* type)
 */
 char* EnumType2charType(Type type)
 {
-   char* newType;      // enum Type {integer, floating, string}
+   char* newType = NULL;      // enum Type {integer, floating, string}
 
-   if(type == integer) newType = strdup("int");
-   else if (type == floating) newType = strdup("float");
-   else if (type == string) newType = strdup("string");
-
+   switch (type)
+   {
+      case integer:
+         newType = strdup("float");
+         break;
+      case floating:
+         newType = strdup("float");
+         break;
+      case string:
+         newType = strdup("string");
+         break;
+   }
    return newType;
 }
 
@@ -265,13 +287,14 @@ char* EnumType2charType(Type type)
 */
 void addSymbol(symTbl* symTbl, char* lexeme, char* type, bool isConst)
 {
+   int hashValue;
    if (symTbl == NULL || lexeme == NULL || type == NULL)
    {
       fprintf(stderr, "Bad arguments passed to addSymbol\n");
       return;
    }
 
-   int hashValue = getHash(lexeme);
+   hashValue = getHash(lexeme);
    if (hashValue == -1)
    {
       fprintf(stderr, "Bad hash value returned\n");
@@ -288,8 +311,9 @@ void addSymbol(symTbl* symTbl, char* lexeme, char* type, bool isConst)
    symTblEntry* newSymbol = createSymTblEntery(symTbl, lexeme, newType, isConst, hashValue);
 
    if (newSymbol == NULL)
+   {
       return;
-   
+   }
    insertEntry(symTbl, newSymbol, hashValue);
 }
 
@@ -302,7 +326,6 @@ void addSymbol(symTbl* symTbl, char* lexeme, char* type, bool isConst)
 */
 void destroyEntry(symTblEntry* entry)
 {
-   int x;
    if (entry == NULL)
    {
       fprintf(stderr, "Entry to be destroyed is NULL!!\n");
@@ -333,29 +356,27 @@ void destroySymTable(symTbl* symTbl)
    for (i = 0; i < SYM_TBL_ROWS_COUNT; i++)
    {
       symbol = symTbl->symbolTableHead[i];
-      if (symbol != NULL)   // not an empty row
+      while (symbol != NULL)
       {
-         while (symbol != NULL)
-         {
-            nextSymbol = symbol->next;
-            destroyEntry(symbol);
-            symbol = nextSymbol;
-         }
+         nextSymbol = symbol->next;
+         destroyEntry(symbol);
+         symbol = nextSymbol;
       }
    }
    free(symTbl);
 }
+
+
 // ############### End of symbol table related functions ####################
 
 // ############### Global variables ####################
 
-//symTbl* symbolTable = initSymTbl();
 symTbl** ptr2symbolTable = NULL;
 char* mipsCode;
 bool hasErrors = false;
 int nextLabelNum = 0;
 char* registerT[8] = {"$t0","$t1","$t2","$t3","$t4","$t5","$t6","$t7"};   // available MIPS T registers
-char* registerF[8] = {"$f0","$f1","$f2","$f3","$f4","$f5","$f6","$f7"}; // available MIPS F registers
+char* registerF[8] = {"$f0","$f1","$f2","$f3","$f4","$f5","$f6","$f7"};   // available MIPS F registers
 int idxT=0;
 int idxF=0;
 // ############### End of global variables ####################
@@ -369,9 +390,11 @@ int idxF=0;
 */
 void outputError(char* s){
      FILE* listFile;
-    listFile = fopen("listing.lst","a+");
+     listFile = fopen("listing.lst","a+");
      if (listFile == NULL)
-        return;
+     {
+       return;
+     }
      else
      {
        fprintf(listFile,"ERROR in line: %d, %s\n", yylineno, s);
@@ -385,7 +408,7 @@ void outputError(char* s){
 */
 char* strConcat(char* str1, char* str2)
 {
-   char* newString =(char*)malloc(sizeof(char) * (strlen(str1) + strlen(str2) + 1));
+   char* newString = (char*)calloc(strlen(str1) + strlen(str2) + 1, sizeof(char));
    newString[0] = '\0';
    strcat(newString, str1);
    strcat(newString, str2);
@@ -441,9 +464,9 @@ void freeRegisterF(char* reg)
 */
 char* getLabel()
 {
-   char str[100];
+   char* str = (char*)calloc(100, sizeof(char));
    sprintf(str,"Label%d",nextLabelNum++);
-   return strdup(str);
+   return str;
 }
 
 
@@ -451,7 +474,7 @@ char* getLabel()
 // ############### BISON related definitions ##################
 
 /* Line 371 of yacc.c  */
-#line 455 "y.tab.c"
+#line 478 "y.tab.c"
 
 # ifndef YY_NULL
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -571,7 +594,7 @@ extern int yydebug;
 typedef union YYSTYPE
 {
 /* Line 387 of yacc.c  */
-#line 389 "cpm.y"
+#line 412 "cpm.y"
 
    struct nVal
    {
@@ -587,27 +610,29 @@ typedef union YYSTYPE
 
    enum {PLUS, MINUS, MUL, DIV, ASSIGN, OR, AND, EQ, NEQ, LT, GT, GTEQ, LTEQ} op;
 
-   struct declaration{
-                 int ival;
-                float fval;
-                char *idval;
-             char* type;
-                char *IDarray[5];
-                char *reg;
-                char *label;
-                char *codeHead;
-                char *codeBody;
-                 } decl;
+   struct declaration
+   {
+      int ival;
+      float fval;
+      char *idval;
+      char* type;
+      char *IDarray[5];
+      char *reg;
+      char *label;
+      char *codeHead;
+      char *codeBody;
+   }decl;
 
-   struct mipsCode{
-                  char *label;
-                  char *head;
-                  char *body;
-                   } code;
+   struct mipsCode
+   {
+      char *label;
+      char *head;
+      char *body;
+   }code;
 
 
 /* Line 387 of yacc.c  */
-#line 611 "y.tab.c"
+#line 636 "y.tab.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -648,7 +673,7 @@ int yyparse ();
 /* Copy the second part of user declarations.  */
 
 /* Line 390 of yacc.c  */
-#line 652 "y.tab.c"
+#line 677 "y.tab.c"
 
 #ifdef short
 # undef short
@@ -996,17 +1021,17 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   439,   439,   453,   460,   467,   472,   479,   517,   525,
-     547,   560,   561,   568,   573,   578,   585,   613,   621,   628,
-     634,   640,   646,   701,   707,   712,   718,   724,   733,   748,
-     755,   763,   770,   785,   792,   800,   809,   851,   857,   863,
-     871,   931,   940,   955,   962,   969,   987,   994,  1001,  1008,
-    1115,  1122,  1129,  1136,  1143,  1161,  1168,  1175,  1182,  1190,
-    1196,  1203,  1212,  1218,  1225,  1232,  1239,  1246,  1255,  1289,
-    1314,  1328,  1335,  1342,  1354,  1363,  1405,  1412,  1419,  1426,
-    1433,  1473,  1480,  1489,  1507,  1514,  1523,  1540,  1547,  1556,
-    1570,  1577,  1584,  1591,  1651,  1708,  1718,  1775,  1782,  1789,
-    1799,  1807,  1814,  1852
+       0,   464,   464,   478,   485,   492,   497,   504,   542,   550,
+     572,   585,   586,   593,   598,   603,   610,   638,   646,   653,
+     659,   665,   671,   726,   732,   737,   743,   749,   758,   773,
+     780,   788,   795,   810,   817,   825,   834,   876,   882,   888,
+     896,   956,   965,   980,   987,   994,  1012,  1019,  1026,  1033,
+    1140,  1147,  1154,  1161,  1168,  1186,  1193,  1200,  1207,  1215,
+    1221,  1228,  1237,  1243,  1250,  1257,  1264,  1271,  1280,  1314,
+    1339,  1353,  1360,  1367,  1379,  1388,  1430,  1437,  1444,  1451,
+    1458,  1498,  1505,  1514,  1532,  1539,  1548,  1565,  1572,  1581,
+    1595,  1602,  1609,  1616,  1676,  1733,  1743,  1800,  1807,  1814,
+    1824,  1832,  1839,  1877
 };
 #endif
 
@@ -2186,7 +2211,7 @@ yyreduce:
     {
         case 2:
 /* Line 1792 of yacc.c  */
-#line 440 "cpm.y"
+#line 465 "cpm.y"
     {// 0      1     2     3     4         5      6
    printf("PROGRAM --> PROGRAM ID BGN DECLARATIONS STMTLIST END\n");
    char* str = (char*)calloc(1000, sizeof(char));
@@ -2202,7 +2227,7 @@ yyreduce:
 
   case 3:
 /* Line 1792 of yacc.c  */
-#line 454 "cpm.y"
+#line 479 "cpm.y"
     {//0         1      2      3
    printf("DECLARATIONS --> LET DECLARLIST CDECL\n");
    (yyval.decl).codeHead = strdup(strcat((yyvsp[(2) - (3)].decl).codeHead, (yyvsp[(3) - (3)].decl).codeHead));
@@ -2212,7 +2237,7 @@ yyreduce:
 
   case 4:
 /* Line 1792 of yacc.c  */
-#line 460 "cpm.y"
+#line 485 "cpm.y"
     {
    printf("DECLARATIONS --> epsilon\n");
    (yyval.decl).codeHead = strdup("");
@@ -2222,7 +2247,7 @@ yyreduce:
 
   case 5:
 /* Line 1792 of yacc.c  */
-#line 468 "cpm.y"
+#line 493 "cpm.y"
     {
    printf("DECLARLIST --> DECLARLIST DECL\n");
    (yyval.decl).codeHead = strConcat((yyvsp[(1) - (2)].decl).codeHead, (yyvsp[(2) - (2)].decl).codeHead);
@@ -2231,7 +2256,7 @@ yyreduce:
 
   case 6:
 /* Line 1792 of yacc.c  */
-#line 473 "cpm.y"
+#line 498 "cpm.y"
     {
    printf("DECLARLIST --> DECL\n");
    (yyval.decl).codeHead = strdup((yyvsp[(1) - (1)].decl).codeHead);
@@ -2240,7 +2265,7 @@ yyreduce:
 
   case 7:
 /* Line 1792 of yacc.c  */
-#line 480 "cpm.y"
+#line 505 "cpm.y"
     {//0   1     2      3
    printf("DECL -->  TYPE ':' LIST\n");
    char* tempCodeHeadStr = (char*)calloc(200, sizeof(char));
@@ -2282,7 +2307,7 @@ yyreduce:
 
   case 8:
 /* Line 1792 of yacc.c  */
-#line 518 "cpm.y"
+#line 543 "cpm.y"
     {
 outputError("Expected ':' ");
 hasErrors = true;
@@ -2292,7 +2317,7 @@ hasErrors = true;
 
   case 9:
 /* Line 1792 of yacc.c  */
-#line 526 "cpm.y"
+#line 551 "cpm.y"
     {//0   1  2   3
    printf("LIST --> ID ',' LIST\n");
    int i, j;
@@ -2317,7 +2342,7 @@ hasErrors = true;
 
   case 10:
 /* Line 1792 of yacc.c  */
-#line 548 "cpm.y"
+#line 573 "cpm.y"
     {//1
    printf("LIST --> ID ';'\n");
    int i;
@@ -2334,13 +2359,13 @@ hasErrors = true;
 
   case 11:
 /* Line 1792 of yacc.c  */
-#line 560 "cpm.y"
+#line 585 "cpm.y"
     { outputError("Expected ';' "); hasErrors = true; }
     break;
 
   case 12:
 /* Line 1792 of yacc.c  */
-#line 562 "cpm.y"
+#line 587 "cpm.y"
     {
    outputError("Expected ',' ");
    hasErrors = true;
@@ -2349,7 +2374,7 @@ hasErrors = true;
 
   case 13:
 /* Line 1792 of yacc.c  */
-#line 569 "cpm.y"
+#line 594 "cpm.y"
     {//0    1
    printf("TYPE --> INT\n");
    (yyval.decl).type = strdup("int");
@@ -2358,7 +2383,7 @@ hasErrors = true;
 
   case 14:
 /* Line 1792 of yacc.c  */
-#line 574 "cpm.y"
+#line 599 "cpm.y"
     {//1
    printf("TYPE --> REAL\n");
    (yyval.decl).type = strdup("float");
@@ -2367,7 +2392,7 @@ hasErrors = true;
 
   case 15:
 /* Line 1792 of yacc.c  */
-#line 579 "cpm.y"
+#line 604 "cpm.y"
     {//1
    printf("TYPE --> STRING\n");
    (yyval.decl).type = strdup("string");
@@ -2376,7 +2401,7 @@ hasErrors = true;
 
   case 16:
 /* Line 1792 of yacc.c  */
-#line 586 "cpm.y"
+#line 611 "cpm.y"
     {//0   1      2   3   4      5  6   7
    printf("CDECL --> FINAL TYPE ID ASSIGNOP NUM ';' CDECL\n");
    char* codeBodyStr = (char*)calloc(200, sizeof(char));
@@ -2408,7 +2433,7 @@ hasErrors = true;
 
   case 17:
 /* Line 1792 of yacc.c  */
-#line 614 "cpm.y"
+#line 639 "cpm.y"
     {
    outputError("Expected ';' ");
    hasErrors = true;
@@ -2419,7 +2444,7 @@ hasErrors = true;
 
   case 18:
 /* Line 1792 of yacc.c  */
-#line 621 "cpm.y"
+#line 646 "cpm.y"
     {
    printf("CDECL --> epsilon\n");
    (yyval.decl).codeHead = strdup("");
@@ -2429,7 +2454,7 @@ hasErrors = true;
 
   case 19:
 /* Line 1792 of yacc.c  */
-#line 629 "cpm.y"
+#line 654 "cpm.y"
     {//0      1       2
    printf("STMTLIST --> STMTLIST STMT\n");
    (yyval.code).body = strConcat((yyvsp[(1) - (2)].code).body, (yyvsp[(2) - (2)].code).body);
@@ -2438,7 +2463,7 @@ hasErrors = true;
 
   case 20:
 /* Line 1792 of yacc.c  */
-#line 634 "cpm.y"
+#line 659 "cpm.y"
     {
    printf("STMTLIST --> epsilon\n");
    (yyval.code).body = strdup("");
@@ -2447,7 +2472,7 @@ hasErrors = true;
 
   case 21:
 /* Line 1792 of yacc.c  */
-#line 641 "cpm.y"
+#line 666 "cpm.y"
     {//0   1
    printf("STMT --> ASSIGNMENT_STMT\n");
    (yyval.code).head = strdup((yyvsp[(1) - (1)].code).head);
@@ -2457,7 +2482,7 @@ hasErrors = true;
 
   case 22:
 /* Line 1792 of yacc.c  */
-#line 647 "cpm.y"
+#line 672 "cpm.y"
     {//1   2      3      4
    printf("STMT --> ID ASSIGNOP SENTENCE ';'\n");
    
@@ -2516,7 +2541,7 @@ hasErrors = true;
 
   case 23:
 /* Line 1792 of yacc.c  */
-#line 702 "cpm.y"
+#line 727 "cpm.y"
     {   //1
    printf("STMT --> CONTROL_STMT\n");
    (yyval.code).head = strdup((yyvsp[(1) - (1)].code).head);
@@ -2526,7 +2551,7 @@ hasErrors = true;
 
   case 24:
 /* Line 1792 of yacc.c  */
-#line 708 "cpm.y"
+#line 733 "cpm.y"
     { //1
    printf("STMT --> READ_STMT\n");
    (yyval.code).body = strdup((yyvsp[(1) - (1)].code).body);
@@ -2535,7 +2560,7 @@ hasErrors = true;
 
   case 25:
 /* Line 1792 of yacc.c  */
-#line 713 "cpm.y"
+#line 738 "cpm.y"
     { //1 
    printf("STMT --> OUT_STMT\n");
    (yyval.code).head = strdup((yyvsp[(1) - (1)].code).head);
@@ -2545,7 +2570,7 @@ hasErrors = true;
 
   case 26:
 /* Line 1792 of yacc.c  */
-#line 719 "cpm.y"
+#line 744 "cpm.y"
     { //1
    printf("STMT --> STMT_BLOCK\n");
    (yyval.code).head = strdup((yyvsp[(1) - (1)].code).head);
@@ -2555,7 +2580,7 @@ hasErrors = true;
 
   case 27:
 /* Line 1792 of yacc.c  */
-#line 725 "cpm.y"
+#line 750 "cpm.y"
     { 
    outputError("Expected ';' ");
    hasErrors = true;
@@ -2566,7 +2591,7 @@ hasErrors = true;
 
   case 28:
 /* Line 1792 of yacc.c  */
-#line 734 "cpm.y"
+#line 759 "cpm.y"
     {//0      1   2   3         4   5
    printf("OUT_STMT --> OUT '(' EXPRESSION ')' ';'\n");
    char* codeBodyStr = (char*)calloc(200,sizeof(char));
@@ -2585,7 +2610,7 @@ hasErrors = true;
 
   case 29:
 /* Line 1792 of yacc.c  */
-#line 749 "cpm.y"
+#line 774 "cpm.y"
     {
    outputError("Expected '(' ");
    hasErrors = true;
@@ -2596,7 +2621,7 @@ hasErrors = true;
 
   case 30:
 /* Line 1792 of yacc.c  */
-#line 756 "cpm.y"
+#line 781 "cpm.y"
     {
    outputError("Expected ')'");
    hasErrors = true;
@@ -2607,7 +2632,7 @@ hasErrors = true;
 
   case 31:
 /* Line 1792 of yacc.c  */
-#line 764 "cpm.y"
+#line 789 "cpm.y"
     { 
    outputError("expected ';' ");
    hasErrors = true;
@@ -2618,7 +2643,7 @@ hasErrors = true;
 
   case 32:
 /* Line 1792 of yacc.c  */
-#line 771 "cpm.y"
+#line 796 "cpm.y"
     {//1   2   3      4   5
    printf("OUT_STMT --> OUT '(' SENTENCE ')' ';'\n");
    char* codeBodyStr = (char*)calloc(200,sizeof(char));
@@ -2637,7 +2662,7 @@ hasErrors = true;
 
   case 33:
 /* Line 1792 of yacc.c  */
-#line 786 "cpm.y"
+#line 811 "cpm.y"
     {
    outputError("Expected '('");
    hasErrors = true;
@@ -2648,7 +2673,7 @@ hasErrors = true;
 
   case 34:
 /* Line 1792 of yacc.c  */
-#line 793 "cpm.y"
+#line 818 "cpm.y"
     {
    outputError("Expected ')'");
    hasErrors = true;
@@ -2659,7 +2684,7 @@ hasErrors = true;
 
   case 35:
 /* Line 1792 of yacc.c  */
-#line 801 "cpm.y"
+#line 826 "cpm.y"
     {
    outputError("expected ';'");
    hasErrors = true;
@@ -2670,7 +2695,7 @@ hasErrors = true;
 
   case 36:
 /* Line 1792 of yacc.c  */
-#line 810 "cpm.y"
+#line 835 "cpm.y"
     {//0      1     2     3    4    5
    printf("READ_STMT --> READ '(' ID ')' ';'\n");
    char* codeBodyStr = (char*)calloc(200,sizeof(char));
@@ -2716,7 +2741,7 @@ hasErrors = true;
 
   case 37:
 /* Line 1792 of yacc.c  */
-#line 852 "cpm.y"
+#line 877 "cpm.y"
     {
    outputError("expected '('");
    hasErrors = true;
@@ -2726,7 +2751,7 @@ hasErrors = true;
 
   case 38:
 /* Line 1792 of yacc.c  */
-#line 858 "cpm.y"
+#line 883 "cpm.y"
     {
    outputError("expected ')'");
    hasErrors = true;
@@ -2736,7 +2761,7 @@ hasErrors = true;
 
   case 39:
 /* Line 1792 of yacc.c  */
-#line 864 "cpm.y"
+#line 889 "cpm.y"
     {
    outputError("expected ';'");
    hasErrors = true;
@@ -2746,7 +2771,7 @@ hasErrors = true;
 
   case 40:
 /* Line 1792 of yacc.c  */
-#line 872 "cpm.y"
+#line 897 "cpm.y"
     {//0           1      2      3       4
    printf("ASSIGNMENT_STMT --> ID ASSIGNOP EXPRESSION';'\n");
    char* codeBodyStr = (char*)calloc(200,sizeof(char));
@@ -2810,7 +2835,7 @@ hasErrors = true;
 
   case 41:
 /* Line 1792 of yacc.c  */
-#line 932 "cpm.y"
+#line 957 "cpm.y"
     {
    outputError("expected ';'");
    hasErrors = true;
@@ -2821,7 +2846,7 @@ hasErrors = true;
 
   case 42:
 /* Line 1792 of yacc.c  */
-#line 941 "cpm.y"
+#line 966 "cpm.y"
     {//0         1   2   3      4   5    6     7
    printf("CONTROL_STMT --> IF '(' BOOLEXPR ')' STMT ELSE STMT\n");
    char* codeBodyStr = (char*)calloc((200 + strlen((yyvsp[(5) - (7)].code).body)+ strlen((yyvsp[(7) - (7)].code).body)),sizeof(char));
@@ -2840,7 +2865,7 @@ hasErrors = true;
 
   case 43:
 /* Line 1792 of yacc.c  */
-#line 956 "cpm.y"
+#line 981 "cpm.y"
     {
    outputError("expected '('");
    hasErrors = true;
@@ -2851,7 +2876,7 @@ hasErrors = true;
 
   case 44:
 /* Line 1792 of yacc.c  */
-#line 963 "cpm.y"
+#line 988 "cpm.y"
     {
    outputError("Expected a boolean expression");
    hasErrors = true;
@@ -2862,7 +2887,7 @@ hasErrors = true;
 
   case 45:
 /* Line 1792 of yacc.c  */
-#line 970 "cpm.y"
+#line 995 "cpm.y"
     {//1    2      3     4      5
    printf("CONTROL_STMT --> WHILE '(' BOOLEXPR ')' STMT_BLOCK\n");
    char* codeBodyStr = (char*)calloc((200 + strlen((yyvsp[(5) - (5)].code).body)),sizeof(char));
@@ -2884,7 +2909,7 @@ hasErrors = true;
 
   case 46:
 /* Line 1792 of yacc.c  */
-#line 988 "cpm.y"
+#line 1013 "cpm.y"
     {
    outputError("expected '('");
    hasErrors = true;
@@ -2895,7 +2920,7 @@ hasErrors = true;
 
   case 47:
 /* Line 1792 of yacc.c  */
-#line 995 "cpm.y"
+#line 1020 "cpm.y"
     {
    outputError("Expected a boolean expression");
    hasErrors = true; 
@@ -2906,7 +2931,7 @@ hasErrors = true;
 
   case 48:
 /* Line 1792 of yacc.c  */
-#line 1002 "cpm.y"
+#line 1027 "cpm.y"
     {
    outputError("expected ')'");
    hasErrors = true; 
@@ -2917,7 +2942,7 @@ hasErrors = true;
 
   case 49:
 /* Line 1792 of yacc.c  */
-#line 1009 "cpm.y"
+#line 1034 "cpm.y"
     {//1     2      3      4  5   6   7    8    9
    printf("CONTROL_STMT --> FOREACH ID ASSIGNOP NUM ':' NUM WITH STEP STMT\n");
    char* codeBodyStr = (char*)calloc((200 + strlen((yyvsp[(8) - (9)].code).body) + strlen((yyvsp[(9) - (9)].code).body)),sizeof(char));
@@ -3028,7 +3053,7 @@ hasErrors = true;
 
   case 50:
 /* Line 1792 of yacc.c  */
-#line 1116 "cpm.y"
+#line 1141 "cpm.y"
     { //1      2   3      4  5  6   7      8   9 // @@@
    printf("CONTROL_STMT --> FOREACH ID ASSIGNOP NUM':'ID WITH STEP STMT\n");
    (yyval.code).body = strdup("");
@@ -3039,7 +3064,7 @@ hasErrors = true;
 
   case 51:
 /* Line 1792 of yacc.c  */
-#line 1123 "cpm.y"
+#line 1148 "cpm.y"
     {
    outputError("expected an assignment operation");
    hasErrors = true;
@@ -3050,7 +3075,7 @@ hasErrors = true;
 
   case 52:
 /* Line 1792 of yacc.c  */
-#line 1130 "cpm.y"
+#line 1155 "cpm.y"
     {
    outputError("expected ':'");
    hasErrors = true;
@@ -3061,7 +3086,7 @@ hasErrors = true;
 
   case 53:
 /* Line 1792 of yacc.c  */
-#line 1137 "cpm.y"
+#line 1162 "cpm.y"
     {
    outputError("expected ':'");
    hasErrors = true;
@@ -3072,7 +3097,7 @@ hasErrors = true;
 
   case 54:
 /* Line 1792 of yacc.c  */
-#line 1144 "cpm.y"
+#line 1169 "cpm.y"
     {//1   2      3     4      5      6
 /*do the block until BOOLEXPR is true*/
    printf("CONTROL_STMT --> DO STMT_BLOCK TILL '(' BOOLEXPR ')'\n");
@@ -3094,7 +3119,7 @@ hasErrors = true;
 
   case 55:
 /* Line 1792 of yacc.c  */
-#line 1162 "cpm.y"
+#line 1187 "cpm.y"
     {
    outputError("expected '('");
    hasErrors = true;
@@ -3105,7 +3130,7 @@ hasErrors = true;
 
   case 56:
 /* Line 1792 of yacc.c  */
-#line 1169 "cpm.y"
+#line 1194 "cpm.y"
     {
    outputError("Expected a boolean expression");
    hasErrors = true;
@@ -3116,7 +3141,7 @@ hasErrors = true;
 
   case 57:
 /* Line 1792 of yacc.c  */
-#line 1176 "cpm.y"
+#line 1201 "cpm.y"
     {   
    outputError("expected ')'");
    hasErrors = true;
@@ -3127,7 +3152,7 @@ hasErrors = true;
 
   case 58:
 /* Line 1792 of yacc.c  */
-#line 1183 "cpm.y"
+#line 1208 "cpm.y"
     {//1
    printf("CONTROL_STMT --> switch\n");
    (yyval.code).head = strdup((yyvsp[(1) - (1)].decl).codeHead);
@@ -3137,7 +3162,7 @@ hasErrors = true;
 
   case 59:
 /* Line 1792 of yacc.c  */
-#line 1191 "cpm.y"
+#line 1216 "cpm.y"
     {//0        1      2      3
    printf("STMT_BLOCK --> '{' STMTLIST '}'\n");
    (yyval.code).head = strdup((yyvsp[(2) - (3)].code).head);
@@ -3147,7 +3172,7 @@ hasErrors = true;
 
   case 60:
 /* Line 1792 of yacc.c  */
-#line 1197 "cpm.y"
+#line 1222 "cpm.y"
     { //error handling
    outputError("expected '{'");
    hasErrors = true;
@@ -3158,7 +3183,7 @@ hasErrors = true;
 
   case 61:
 /* Line 1792 of yacc.c  */
-#line 1204 "cpm.y"
+#line 1229 "cpm.y"
     {
    outputError("expected '}'");
    hasErrors = true;
@@ -3169,7 +3194,7 @@ hasErrors = true;
 
   case 62:
 /* Line 1792 of yacc.c  */
-#line 1213 "cpm.y"
+#line 1238 "cpm.y"
     {//0      1    2     3      4   5   6     7
    printf("switch --> SWITCH '(' CHOICE ')' '{' CASES '}'\n");
    (yyval.decl).codeBody = strConcat((yyvsp[(3) - (7)].decl).codeBody,(yyvsp[(6) - (7)].decl).codeBody);
@@ -3179,7 +3204,7 @@ hasErrors = true;
 
   case 63:
 /* Line 1792 of yacc.c  */
-#line 1219 "cpm.y"
+#line 1244 "cpm.y"
     { 
    outputError("expected '('");
    hasErrors = true;
@@ -3190,7 +3215,7 @@ hasErrors = true;
 
   case 64:
 /* Line 1792 of yacc.c  */
-#line 1226 "cpm.y"
+#line 1251 "cpm.y"
     { 
    outputError("expected a CHOICE");
    hasErrors = true;
@@ -3201,7 +3226,7 @@ hasErrors = true;
 
   case 65:
 /* Line 1792 of yacc.c  */
-#line 1233 "cpm.y"
+#line 1258 "cpm.y"
     {
    outputError("expected ')'");
    hasErrors = true;
@@ -3212,7 +3237,7 @@ hasErrors = true;
 
   case 66:
 /* Line 1792 of yacc.c  */
-#line 1240 "cpm.y"
+#line 1265 "cpm.y"
     {
    outputError("expected '{'");
    hasErrors = true;
@@ -3223,7 +3248,7 @@ hasErrors = true;
 
   case 67:
 /* Line 1792 of yacc.c  */
-#line 1247 "cpm.y"
+#line 1272 "cpm.y"
     {
    outputError("expected '}'");
    hasErrors = true;
@@ -3234,7 +3259,7 @@ hasErrors = true;
 
   case 68:
 /* Line 1792 of yacc.c  */
-#line 1256 "cpm.y"
+#line 1281 "cpm.y"
     {//0     1
    printf("CHOICE --> ID\n");
    char* codeBodyStr = (char*)calloc(200,sizeof(char));
@@ -3272,7 +3297,7 @@ hasErrors = true;
 
   case 69:
 /* Line 1792 of yacc.c  */
-#line 1290 "cpm.y"
+#line 1315 "cpm.y"
     {//1
    printf("CHOICE --> NUM\n");
    char* codeBodyStr = (char*)calloc(200,sizeof(char));
@@ -3299,7 +3324,7 @@ hasErrors = true;
 
   case 70:
 /* Line 1792 of yacc.c  */
-#line 1315 "cpm.y"
+#line 1340 "cpm.y"
     {//0    1     2     3      4      5    6     7
    printf("CASES --> CASE NUM ':' STMTLIST BREAK ';' CASES\n");
    char* codeBodyStr = (char*)calloc((200 + strlen((yyvsp[(4) - (7)].code).body)),sizeof(char));
@@ -3317,7 +3342,7 @@ hasErrors = true;
 
   case 71:
 /* Line 1792 of yacc.c  */
-#line 1329 "cpm.y"
+#line 1354 "cpm.y"
     {
    outputError("expected ':'");
    hasErrors = true; 
@@ -3328,7 +3353,7 @@ hasErrors = true;
 
   case 72:
 /* Line 1792 of yacc.c  */
-#line 1336 "cpm.y"
+#line 1361 "cpm.y"
     {
    outputError("expected ';'");
    hasErrors = true;
@@ -3339,7 +3364,7 @@ hasErrors = true;
 
   case 73:
 /* Line 1792 of yacc.c  */
-#line 1343 "cpm.y"
+#line 1368 "cpm.y"
     {//1      2   3
    printf("CASES --> DEFAULT ':' STMTLIST\n");
    char* codeBodyStr = (char*)calloc((200 + strlen((yyvsp[(3) - (3)].code).body)),sizeof(char));
@@ -3355,7 +3380,7 @@ hasErrors = true;
 
   case 74:
 /* Line 1792 of yacc.c  */
-#line 1355 "cpm.y"
+#line 1380 "cpm.y"
     {
    outputError("expected ':'");
    hasErrors = true;
@@ -3366,7 +3391,7 @@ hasErrors = true;
 
   case 75:
 /* Line 1792 of yacc.c  */
-#line 1364 "cpm.y"
+#line 1389 "cpm.y"
     {//0   1   2      3   4    5
    printf("STEP : ID ASSIGNOP ID ADDOP NUM\n");
    char* codeBodyStr = (char*)calloc(200,sizeof(char));
@@ -3412,7 +3437,7 @@ hasErrors = true;
 
   case 76:
 /* Line 1792 of yacc.c  */
-#line 1406 "cpm.y"
+#line 1431 "cpm.y"
     {
    outputError("expected an assigment operation");
    hasErrors = true;
@@ -3423,7 +3448,7 @@ hasErrors = true;
 
   case 77:
 /* Line 1792 of yacc.c  */
-#line 1413 "cpm.y"
+#line 1438 "cpm.y"
     {
    outputError("expected an ID");
    hasErrors = true;
@@ -3434,7 +3459,7 @@ hasErrors = true;
 
   case 78:
 /* Line 1792 of yacc.c  */
-#line 1420 "cpm.y"
+#line 1445 "cpm.y"
     {
    outputError("expected an operation");
    hasErrors = true;
@@ -3445,7 +3470,7 @@ hasErrors = true;
 
   case 79:
 /* Line 1792 of yacc.c  */
-#line 1427 "cpm.y"
+#line 1452 "cpm.y"
     {
    outputError("expected a number");
    hasErrors = true;
@@ -3456,7 +3481,7 @@ hasErrors = true;
 
   case 80:
 /* Line 1792 of yacc.c  */
-#line 1434 "cpm.y"
+#line 1459 "cpm.y"
     {//1   2    3     4      5
    printf("STEP : ID ASSIGNOP ID MULOP NUM\n");
    char* codeBodyStr = (char*)calloc(200,sizeof(char));
@@ -3500,7 +3525,7 @@ hasErrors = true;
 
   case 81:
 /* Line 1792 of yacc.c  */
-#line 1474 "cpm.y"
+#line 1499 "cpm.y"
     {
    outputError("expected an ID");
    hasErrors = true;
@@ -3511,7 +3536,7 @@ hasErrors = true;
 
   case 82:
 /* Line 1792 of yacc.c  */
-#line 1481 "cpm.y"
+#line 1506 "cpm.y"
     {
    outputError("expected a number");
    hasErrors = true;
@@ -3522,7 +3547,7 @@ hasErrors = true;
 
   case 83:
 /* Line 1792 of yacc.c  */
-#line 1490 "cpm.y"
+#line 1515 "cpm.y"
     {//0       1       2      3
    printf("BOOLEXPR --> BOOLEXPR OROP BOOLTERM\n");
    char* codeBodyStr = (char*)calloc(200,sizeof(char));
@@ -3544,7 +3569,7 @@ hasErrors = true;
 
   case 84:
 /* Line 1792 of yacc.c  */
-#line 1508 "cpm.y"
+#line 1533 "cpm.y"
     {//1
    printf("BOOLEXPR --> BOOLTERM\n");
    (yyval.decl).reg = strdup((yyvsp[(1) - (1)].decl).reg);
@@ -3555,7 +3580,7 @@ hasErrors = true;
 
   case 85:
 /* Line 1792 of yacc.c  */
-#line 1515 "cpm.y"
+#line 1540 "cpm.y"
     {
    outputError("expected an OROP");
    hasErrors = true;
@@ -3566,7 +3591,7 @@ hasErrors = true;
 
   case 86:
 /* Line 1792 of yacc.c  */
-#line 1524 "cpm.y"
+#line 1549 "cpm.y"
     {//0      1      2      3
    printf("BOOLTERM --> BOOLTERM ANDOP BOOLFACTOR\n");
    char* codeBodyStr = (char*)calloc(200,sizeof(char));
@@ -3587,7 +3612,7 @@ hasErrors = true;
 
   case 87:
 /* Line 1792 of yacc.c  */
-#line 1541 "cpm.y"
+#line 1566 "cpm.y"
     {
    outputError("expected an ANDOP");
    hasErrors = true;
@@ -3598,7 +3623,7 @@ hasErrors = true;
 
   case 88:
 /* Line 1792 of yacc.c  */
-#line 1548 "cpm.y"
+#line 1573 "cpm.y"
     {//1
    printf("BOOLTERM --> BOOLFACTOR\n");
    (yyval.decl).reg = strdup((yyvsp[(1) - (1)].decl).reg);
@@ -3609,7 +3634,7 @@ hasErrors = true;
 
   case 89:
 /* Line 1792 of yacc.c  */
-#line 1557 "cpm.y"
+#line 1582 "cpm.y"
     {//0         1   2   3        4
    /*Meaning not BOOLFACTOR*/
    printf("BOOLFACTOR -->  '!' '(' BOOLFACTOR ')'\n");
@@ -3627,7 +3652,7 @@ hasErrors = true;
 
   case 90:
 /* Line 1792 of yacc.c  */
-#line 1571 "cpm.y"
+#line 1596 "cpm.y"
     {
    outputError("expected an '('");
    hasErrors = true;
@@ -3638,7 +3663,7 @@ hasErrors = true;
 
   case 91:
 /* Line 1792 of yacc.c  */
-#line 1578 "cpm.y"
+#line 1603 "cpm.y"
     {
    outputError("expected a BOOLFACTOR");
    hasErrors = true;
@@ -3649,7 +3674,7 @@ hasErrors = true;
 
   case 92:
 /* Line 1792 of yacc.c  */
-#line 1585 "cpm.y"
+#line 1610 "cpm.y"
     {
    outputError("expected a ')'");
    hasErrors = true;
@@ -3660,7 +3685,7 @@ hasErrors = true;
 
   case 93:
 /* Line 1792 of yacc.c  */
-#line 1592 "cpm.y"
+#line 1617 "cpm.y"
     {//1         2      3
    printf("BOOLFACTOR -->  EXPRESSION  RELOP  EXPRESSION\n");
    char* codeBodyStr = (char*)calloc(200,sizeof(char));
@@ -3722,7 +3747,7 @@ hasErrors = true;
 
   case 94:
 /* Line 1792 of yacc.c  */
-#line 1652 "cpm.y"
+#line 1677 "cpm.y"
     {//0         1         2      3
    printf("EXPRESSION --> EXPRESSION  ADDOP  TERM\n");
    char* codeBodyStr = (char*)calloc(200,sizeof(char));
@@ -3783,7 +3808,7 @@ hasErrors = true;
 
   case 95:
 /* Line 1792 of yacc.c  */
-#line 1709 "cpm.y"
+#line 1734 "cpm.y"
     {//1
    printf("EXPRESSION --> TERM\n");
    (yyval.decl).reg =  strdup((yyvsp[(1) - (1)].decl).reg);
@@ -3795,7 +3820,7 @@ hasErrors = true;
 
   case 96:
 /* Line 1792 of yacc.c  */
-#line 1719 "cpm.y"
+#line 1744 "cpm.y"
     {//0   1   2      3
    printf("TERM --> TERM MULOP FACTOR\n");
    char* codeBodyStr = (char*)calloc(200,sizeof(char));
@@ -3856,7 +3881,7 @@ hasErrors = true;
 
   case 97:
 /* Line 1792 of yacc.c  */
-#line 1776 "cpm.y"
+#line 1801 "cpm.y"
     {
    outputError("expected a MULOP");
    hasErrors = true;
@@ -3867,7 +3892,7 @@ hasErrors = true;
 
   case 98:
 /* Line 1792 of yacc.c  */
-#line 1783 "cpm.y"
+#line 1808 "cpm.y"
     {
    outputError("expected a FACTOR");
    hasErrors = true;
@@ -3878,7 +3903,7 @@ hasErrors = true;
 
   case 99:
 /* Line 1792 of yacc.c  */
-#line 1790 "cpm.y"
+#line 1815 "cpm.y"
     {//1
    printf("TERM --> FACTOR\n");
    (yyval.decl).reg =  strdup((yyvsp[(1) - (1)].decl).reg);
@@ -3890,7 +3915,7 @@ hasErrors = true;
 
   case 100:
 /* Line 1792 of yacc.c  */
-#line 1800 "cpm.y"
+#line 1825 "cpm.y"
     {//0     1      2      3
    printf("FACTOR --> '(' EXPRESSION ')'\n");
    (yyval.decl).reg =  strdup((yyvsp[(2) - (3)].decl).reg);
@@ -3902,7 +3927,7 @@ hasErrors = true;
 
   case 101:
 /* Line 1792 of yacc.c  */
-#line 1808 "cpm.y"
+#line 1833 "cpm.y"
     {
    outputError("expected a ')'");
    hasErrors = true;
@@ -3913,7 +3938,7 @@ hasErrors = true;
 
   case 102:
 /* Line 1792 of yacc.c  */
-#line 1815 "cpm.y"
+#line 1840 "cpm.y"
     {//1
    printf("FACTOR --> ID\n");
    char* codeBodyStr = (char*)calloc(200,sizeof(char));
@@ -3955,7 +3980,7 @@ hasErrors = true;
 
   case 103:
 /* Line 1792 of yacc.c  */
-#line 1853 "cpm.y"
+#line 1878 "cpm.y"
     {//1
    printf("FACTOR --> NUM\n");
    char* codeBodyStr = (char*)calloc(200,sizeof(char));
@@ -3987,7 +4012,7 @@ hasErrors = true;
 
 
 /* Line 1792 of yacc.c  */
-#line 3991 "y.tab.c"
+#line 4016 "y.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -4226,7 +4251,7 @@ yyreturn:
 
 
 /* Line 2055 of yacc.c  */
-#line 1880 "cpm.y"
+#line 1905 "cpm.y"
 
 
 int main (int argc, char **argv)
@@ -4302,7 +4327,8 @@ int main (int argc, char **argv)
 
    fprintf(listFile, STUDENTS_DETAILS);
    printf("Copying input code to listing file\n");
-   do{
+   do
+   {
       fgets(line, 500, yyin);
       fprintf(listFile, "%d: %s", linesCounter++, line);
    }while(!feof(yyin));
@@ -4312,15 +4338,17 @@ int main (int argc, char **argv)
 
 // ########  End of copy to list file section  ########
 
-   fseek(yyin, 0, SEEK_SET); //moving cursor to the beginning for lexical analysis
+   fseek(yyin, 0, SEEK_SET); // moving cursor to the beginning for lexical analysis
    printf("Starting parsing process\n");
    yyparse();
    printf("Parsing process completed\n");
 
-   if (hasErrors == false) //no errors were found during parsing process -> creating MIPS file
+   if (hasErrors == false) // no errors were found during parsing process -> creating MIPS file
    {
       if (strlen(mipsCode) == 0)
+      {
          fprintf(stderr, "Unexpected error occurred. MIPS file can not be created\n");
+      }
       else
       {
          printf("Creating MIPS file\n");
@@ -4341,8 +4369,10 @@ int main (int argc, char **argv)
 
    }
    else
+   {
       fprintf(stderr, "Errors were found. See listing file for details\n");
-   
+   }
+
    fclose (yyin);
    printf("Destroying symbol table\n");
    printf("Compilation process is done\n");

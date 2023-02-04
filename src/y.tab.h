@@ -130,7 +130,7 @@ extern int yydebug;
 typedef union YYSTYPE
 {
 /* Line 2058 of yacc.c  */
-#line 389 "cpm.y"
+#line 412 "cpm.y"
 
    struct nVal
    {
@@ -146,27 +146,29 @@ typedef union YYSTYPE
 
    enum {PLUS, MINUS, MUL, DIV, ASSIGN, OR, AND, EQ, NEQ, LT, GT, GTEQ, LTEQ} op;
 
-   struct declaration{
-                 int ival;
-                float fval;
-                char *idval;
-             char* type;
-                char *IDarray[5];
-                char *reg;
-                char *label;
-                char *codeHead;
-                char *codeBody;
-                 } decl;
+   struct declaration
+   {
+      int ival;
+      float fval;
+      char *idval;
+      char* type;
+      char *IDarray[5];
+      char *reg;
+      char *label;
+      char *codeHead;
+      char *codeBody;
+   }decl;
 
-   struct mipsCode{
-                  char *label;
-                  char *head;
-                  char *body;
-                   } code;
+   struct mipsCode
+   {
+      char *label;
+      char *head;
+      char *body;
+   }code;
 
 
 /* Line 2058 of yacc.c  */
-#line 170 "y.tab.h"
+#line 172 "y.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
