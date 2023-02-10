@@ -82,32 +82,26 @@ extern int yylineno;
 void yyerror (char *s);
 
 // ############### Symbol table definitions ####################
-typedef enum Type 
-{
-   integer, 
-   floating, 
-   string
-}Type;
-
+typedef enum Type {integer, floating, string} Type;
 typedef struct symTblEntry
 {
-   char* name;
-   bool isConst;
-   bool isDeclered;
-   bool isInit;
-   Type type;
-   int occurances;
-   union{
-      int ival;
-      float fval;
-      char* sval;
-   }value;
-   struct  symTblEntry* next;
+	char* name;
+	bool isConst;
+	bool isDeclered;
+	bool isInit;
+	Type type;
+	int occurances;
+	union{
+		int ival;
+		float fval;
+		char* sval;
+	}value;
+	struct  symTblEntry* next;
 }symTblEntry;
 
 typedef struct symTbl
 {
-   symTblEntry* symbolTableHead[SYM_TBL_ROWS_COUNT];
+	symTblEntry* symbolTableHead[SYM_TBL_ROWS_COUNT];
 }symTbl;
 
 
@@ -117,19 +111,17 @@ typedef struct symTbl
 */
 symTbl* initSymTbl()
 {
-   int i;
-   symTbl* symbolTbl = (symTbl*)malloc(sizeof(symTbl));
-   if (symbolTbl == NULL)
-   {
-      fprintf(stderr, "Failed to init a symbol table. Compilation process is terminated\n");
-      exit(1);
-   }
-   
-   for (i = 0; i < SYM_TBL_ROWS_COUNT; i++)
-   {
-      symbolTbl->symbolTableHead[i] = NULL;
-   }
-   return symbolTbl;
+	int i;
+	symTbl* symbolTbl = (symTbl*)malloc(sizeof(symTbl));
+	if (symbolTbl == NULL)
+	{
+		fprintf(stderr, "Failed to init a symbol table. Compilation process is terminated\n");
+		exit(1);
+	}
+	
+	for (i = 0; i < SYM_TBL_ROWS_COUNT; i++)
+		symbolTbl->symbolTableHead[i] = NULL;
+	return symbolTbl;
 }
 
 /*
@@ -137,11 +129,9 @@ symTbl* initSymTbl()
 */
 int getHash(char* lexeme)
 {
-   if (lexeme == NULL || strlen(lexeme) < 1)
-   {
-      return -1;
-   }
-   return strlen(lexeme) % SYM_TBL_ROWS_COUNT;
+	if (lexeme == NULL || strlen(lexeme) < 1)
+		return -1;
+	return strlen(lexeme) % SYM_TBL_ROWS_COUNT;
 }
 
 
@@ -150,30 +140,27 @@ int getHash(char* lexeme)
 */
 symTblEntry* lookup(symTbl* symTbl, char* lexeme)
 {
-   if(symTbl == NULL || lexeme == NULL)
-   {
-      return NULL;
-   }
+	if(symTbl == NULL || lexeme == NULL)
+		return NULL;
 
-   int hashValue = getHash(lexeme);
-   if (hashValue == -1)
-   {
-      fprintf(stderr, "Failed to get hash value\n");
-      return NULL;
-   }
-   if (hashValue > 0 && hashValue < SYM_TBL_ROWS_COUNT)
-   {   
-      symTblEntry* ptr = symTbl->symbolTableHead[hashValue];   // lookup only in the line matched  by the hash
-      while (ptr != NULL)
-      {   
-         if (0 == strcmp(ptr->name, lexeme))
-         {
-            return ptr;
-         }
-         ptr = ptr->next;
-      }
-   }
-   return NULL; //requested symbol is not in table
+	int hashValue = getHash(lexeme);
+	if (hashValue == -1)
+	{
+		fprintf(stderr, "Failed to get hash value\n");
+		return NULL;
+	}
+	if (hashValue > 0 && hashValue < SYM_TBL_ROWS_COUNT)
+	{	
+		symTblEntry* ptr = symTbl->symbolTableHead[hashValue];	// lookup only in the line matched  by the hash
+		while (ptr != NULL)
+		{	
+			if (strcmp(ptr->name, lexeme) == 0)
+				return ptr;
+
+			ptr = ptr->next;
+		}
+	}
+	return NULL; //requested symbol is not in table
 }
 
 
@@ -182,30 +169,30 @@ symTblEntry* lookup(symTbl* symTbl, char* lexeme)
 */
 symTblEntry* createSymTblEntery(symTbl* symTbl, char * lexeme, Type type, bool isConst, int hashValue)
 {
-   if (symTbl == NULL || lexeme == NULL || hashValue < 0 || hashValue >= SYM_TBL_ROWS_COUNT)
-   {
-      fprintf(stderr, "Bad arguments passed to createSymTblEntery\n");
-      return NULL;
-   }
+	if (symTbl == NULL || lexeme == NULL || hashValue < 0 || hashValue >= SYM_TBL_ROWS_COUNT)
+	{
+		fprintf(stderr, "Bad arguments passed to createSymTblEntery\n");
+		return NULL;
+	}
 
-   symTblEntry* newSymTblEntry = NULL;
-   newSymTblEntry = (symTblEntry*)calloc(1, sizeof(newSymTblEntry));
-   if (newSymTblEntry == NULL)
-      {
-         fprintf(stderr, "Failed to allocate memory for a new symbol\n");
-         return NULL;
-      }
+	symTblEntry* newSymTblEntry = NULL;
+	newSymTblEntry = (symTblEntry*)calloc(1, sizeof(newSymTblEntry));
+	if (newSymTblEntry == NULL)
+		{
+			fprintf(stderr, "Failed to allocate memory for a new symbol\n");
+			return NULL;
+		}
 
-   char* temp;
-   temp = strdup(lexeme);
-   newSymTblEntry->name = temp;
-   newSymTblEntry->isConst = isConst;
-   newSymTblEntry->isDeclered = true;
-   newSymTblEntry->isInit = false;
-   newSymTblEntry->type = type;
-   newSymTblEntry->occurances = 1;
-   newSymTblEntry->next = NULL;
-   return newSymTblEntry;
+	char* temp;
+	temp = strdup(lexeme);
+	newSymTblEntry->name = temp;
+	newSymTblEntry->isConst = isConst;
+	newSymTblEntry->isDeclered = true;
+	newSymTblEntry->isInit = false;
+	newSymTblEntry->type = type;
+	newSymTblEntry->occurances = 1;
+	newSymTblEntry->next = NULL;
+	return newSymTblEntry;
 }
 
 
@@ -214,22 +201,22 @@ symTblEntry* createSymTblEntery(symTbl* symTbl, char * lexeme, Type type, bool i
 */
 void insertEntry(symTbl* symTbl, symTblEntry* newEntry, int hashValue)
 {
-   if (symTbl == NULL || newEntry == NULL || hashValue < 0 || hashValue >= SYM_TBL_ROWS_COUNT)
-   {
-      fprintf(stderr, "Bad arguments passed to insertEntry\n");
-      return;
-   }
+	if (symTbl == NULL || newEntry == NULL || hashValue < 0 || hashValue >= SYM_TBL_ROWS_COUNT)
+	{
+		fprintf(stderr, "Bad arguments passed to insertEntry\n");
+		return;
+	}
 
-   symTblEntry* oldHead = NULL;
-   if (symTbl->symbolTableHead[hashValue] == NULL) // the symbol table row is empty
-      symTbl->symbolTableHead[hashValue] = newEntry;
-      
-   else   //otherwise, add newEntry to the Head of the appropriate list
-   {
-      oldHead = symTbl->symbolTableHead[hashValue];      
-      newEntry->next = oldHead;
-      symTbl->symbolTableHead[hashValue] = newEntry;
-   }
+	symTblEntry* oldHead = NULL;
+	if (symTbl->symbolTableHead[hashValue] == NULL) // the symbol table row is empty
+		symTbl->symbolTableHead[hashValue] = newEntry;
+		
+	else	//otherwise, add newEntry to the Head of the appropriate list
+	{
+		oldHead = symTbl->symbolTableHead[hashValue];		
+		newEntry->next = oldHead;
+		symTbl->symbolTableHead[hashValue] = newEntry;
+	}
 }
 
 
@@ -238,25 +225,20 @@ void insertEntry(symTbl* symTbl, symTblEntry* newEntry, int hashValue)
 */
 Type charType2EnumType(char* type)
 {
-   Type newType;      // enum Type {integer, floating, string}
-   if (type == NULL)   // for argument protection only
-   {
-      newType = integer;
-   }
-   else if (0 == strcmp(type, "int")) 
-   {
-      newType = integer;
-   }
-   else if (0 == strcmp(type, "float")) 
-   {
-      newType = floating;
-   }
-   else if (0 == strcmp(type, "string")) 
-   {
-      newType = string;
-   }
+	Type newType;		//enum Type {integer, floating, string}
+	if(type == NULL)	// for argument protection only
+		newType = integer;
+	else 
+		if(strcmp(type, "int") == 0)
+			newType = integer;
+	else 
+		if (strcmp(type, "float") == 0)
+			newType = floating;
+	else 
+		if (strcmp(type, "string") == 0)
+			newType = string;
 
-   return newType;
+	return newType;
 }
 
 
@@ -265,12 +247,18 @@ Type charType2EnumType(char* type)
 */
 char* EnumType2charType(Type type)
 {
-   char* newType = NULL;      // enum Type {integer, floating, string}
+	char* newType;		//enum Type {integer, floating, string}
 
-   if (type == integer) newType = strdup("int");
-   else if (type == floating) newType = strdup("float");
-   else if (type == string) newType = strdup("string");
-   return newType;
+	if(type == integer)
+		newType = strdup("int");
+	else
+		if(type == floating)
+			newType = strdup("float");
+	else 
+		if (type == string)
+			newType = strdup("string");
+
+	return newType;
 }
 
 /*
@@ -278,33 +266,32 @@ char* EnumType2charType(Type type)
 */
 void addSymbol(symTbl* symTbl, char* lexeme, char* type, bool isConst)
 {
-   if (symTbl == NULL || lexeme == NULL || type == NULL)
-   {
-      fprintf(stderr, "Bad arguments passed to addSymbol\n");
-      return;
-   }
+	if (symTbl == NULL || lexeme == NULL || type == NULL)
+	{
+		fprintf(stderr, "Bad arguments passed to addSymbol\n");
+		return;
+	}
 
-   int hashValue = getHash(lexeme);
-   if (hashValue == -1)
-   {
-      fprintf(stderr, "Bad hash value returned\n");
-      return;
-   }
+	int hashValue = getHash(lexeme);
+	if (hashValue == -1)
+	{
+		fprintf(stderr, "Bad hash value returned\n");
+		return;
+	}
 
-   if (lookup(symTbl, lexeme) != NULL) // enetry already in symbol table
-   {
-      fprintf(stderr, "%s is already in symbol table\n", lexeme);
-      return;
-   }
+	if (lookup(symTbl, lexeme) != NULL) // enetry already in symbol table
+	{
+		fprintf(stderr, "%s is already in symbol table\n", lexeme);
+		return;
+	}
 
-   Type newType = charType2EnumType(type);      // Converting char* type to Enum Type
-   symTblEntry* newSymbol = createSymTblEntery(symTbl, lexeme, newType, isConst, hashValue);
+	Type newType = charType2EnumType(type);		// Convrting char* type to Enum Type
+	symTblEntry* newSymbol = createSymTblEntery(symTbl, lexeme, newType, isConst, hashValue);
 
-   if (newSymbol == NULL)
-   {
-      return;
-   }
-   insertEntry(symTbl, newSymbol, hashValue);
+	if (newSymbol == NULL)
+		return;
+	
+	insertEntry(symTbl, newSymbol, hashValue);
 }
 
 
@@ -316,21 +303,21 @@ void addSymbol(symTbl* symTbl, char* lexeme, char* type, bool isConst)
 */
 void destroyEntry(symTblEntry* entry)
 {
-   int x;
-   if (entry == NULL)
-   {
-      fprintf(stderr, "Entry to be destroyed is NULL!!\n");
-      return;
-   }
-   if(entry->type == string)
-   {
-      free(entry->value.sval);
-      entry->value.sval = NULL;
-   }
-   free(entry->name);
-   entry->name = NULL;
-   entry->next = NULL;
-   free(entry);
+	int x;
+	if (entry == NULL)
+	{
+		fprintf(stderr, "Entry to be destroyed is NULL!!\n");
+		return;
+	}
+	if(entry->type == string)
+	{
+		free(entry->value.sval);
+		entry->value.sval = NULL;
+	}
+	free(entry->name);
+	entry->name = NULL;
+	entry->next = NULL;
+	free(entry);
 }
 
 
@@ -341,30 +328,29 @@ void destroyEntry(symTblEntry* entry)
 */
 void destroySymTable(symTbl* symTbl)
 {
-   symTblEntry* symbol = NULL;
-   symTblEntry* nextSymbol = NULL;
-   int i;
-   for (i = 0; i < SYM_TBL_ROWS_COUNT; i++)
-   {
-      symbol = symTbl->symbolTableHead[i];
-      if (symbol != NULL)	// not an empty row
-      {
-	while (symbol != NULL)
+	symTblEntry* symbol = NULL;
+	symTblEntry* nextSymbol = NULL;
+	int i;
+	for (i = 0; i < SYM_TBL_ROWS_COUNT; i++)
 	{
-		nextSymbol = symbol->next;
-		destroyEntry(symbol);
-		symbol = nextSymbol;
+		symbol = symTbl->symbolTableHead[i];
+		if (symbol != NULL)	// not an empty row
+		{
+			while (symbol != NULL)
+			{
+				nextSymbol = symbol->next;
+				destroyEntry(symbol);
+				symbol = nextSymbol;
+			}
 		}
-      }
-   }
-   free(symTbl);
+	}
+	free(symTbl);
 }
-
-
 // ############### End of symbol table related functions ####################
 
 // ############### Global variables ####################
 
+//symTbl* symbolTable = initSymTbl();
 symTbl** ptr2symbolTable = NULL;
 char* mipsCode;
 bool hasErrors = false;
@@ -384,16 +370,13 @@ int idxF=0;
 */
 void outputError(char* s){
      FILE* listFile;
-     listFile = fopen("listing.lst","a+");
-     hasErrors = true;
+	 listFile = fopen("listing.lst","a+");
      if (listFile == NULL)
-     {
-       return;
-     }
+     	return;
      else
      {
-       fprintf(listFile,"ERROR in line: %d, %s\n", yylineno, s);
-       fclose(listFile);
+		 fprintf(listFile,"ERROR in line: %d, %s\n", yylineno, s);
+		 fclose(listFile);
      }
 }
 
@@ -403,11 +386,11 @@ void outputError(char* s){
 */
 char* strConcat(char* str1, char* str2)
 {
-   char* newString =(char*)malloc(sizeof(char) * (strlen(str1) + strlen(str2) + 1));
-   newString[0] = '\0';
-   strcat(newString, str1);
-   strcat(newString, str2);
-   return newString;
+	char* newString =(char*)malloc(sizeof(char) * (strlen(str1) + strlen(str2) + 1));
+	newString[0] = '\0';
+	strcat(newString, str1);
+	strcat(newString, str2);
+	return newString;
 }
 
 
@@ -416,9 +399,9 @@ char* strConcat(char* str1, char* str2)
 */
 char* getRegisterT()
 {
-   char* res = registerT[idxT];
-   idxT++;
-   return res;
+	char* res = registerT[idxT];
+	idxT++;
+	return res;
 }
 
 
@@ -428,8 +411,8 @@ char* getRegisterT()
 */
 void freeRegisterT(char* reg)
 {
-   idxT--;
-   registerT[idxT] = reg;
+	idxT--;
+	registerT[idxT] = reg;
 }
 
 
@@ -438,9 +421,9 @@ void freeRegisterT(char* reg)
 */
 char* getRegisterF()
 {
-   char* res = registerF[idxF];
-   idxF++;
-   return res;
+	char* res = registerF[idxF];
+	idxF++;
+	return res;
 }
 
 
@@ -449,8 +432,8 @@ char* getRegisterF()
 */
 void freeRegisterF(char* reg)
 {
-   idxF--;
-   registerF[idxF] = reg;
+	idxF--;
+	registerF[idxF] = reg;
 }
 
 
@@ -459,9 +442,9 @@ void freeRegisterF(char* reg)
 */
 char* getLabel()
 {
-   char str[100];
-   sprintf(str,"Label%d",nextLabelNum++);
-   return strdup(str);
+	char str[100];
+	sprintf(str,"Label%d",nextLabelNum++);
+	return strdup(str);
 }
 
 
@@ -469,7 +452,7 @@ char* getLabel()
 // ############### BISON related definitions ##################
 
 /* Line 371 of yacc.c  */
-#line 473 "y.tab.c"
+#line 456 "y.tab.c"
 
 # ifndef YY_NULL
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -589,45 +572,43 @@ extern int yydebug;
 typedef union YYSTYPE
 {
 /* Line 387 of yacc.c  */
-#line 407 "cpm.y"
+#line 390 "cpm.y"
 
-   struct nVal
-   {
-      enum {I, F} type;
-      union
-      {
-         float fval;
-         int   ival;
-      }val;
-   }nVal;
+	struct nVal
+	{
+		enum {I, F} type;
+		union
+		{
+			float fval;
+			int   ival;
+		}val;
+	}nVal;
 
-   char* sval;
+	char* sval;
 
-   enum {PLUS, MINUS, MUL, DIV, ASSIGN, OR, AND, EQ, NEQ, LT, GT, GTEQ, LTEQ} op;
+	enum {PLUS, MINUS, MUL, DIV, ASSIGN, OR, AND, EQ, NEQ, LT, GT, GTEQ, LTEQ} op;
 
-   struct declaration
-   {
-      int ival;
-      float fval;
-      char *idval;
-      char* type;
-      char *IDarray[5];
-      char *reg;
-      char *label;
-      char *codeHead;
-      char *codeBody;
-   }decl;
+	struct declaration{
+                 int ival;
+	             float fval;
+	             char *idval;
+				 char* type;
+	             char *IDarray[5];
+	             char *reg;
+	             char *label;
+	             char *codeHead;
+	             char *codeBody;
+                 } decl;
 
-   struct mipsCode
-   {
-      char *label;
-      char *head;
-      char *body;
-   }code;
+	struct mipsCode{
+	               char *label;
+	               char *head;
+	               char *body;
+                   } code;
 
 
 /* Line 387 of yacc.c  */
-#line 631 "y.tab.c"
+#line 612 "y.tab.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -668,7 +649,7 @@ int yyparse ();
 /* Copy the second part of user declarations.  */
 
 /* Line 390 of yacc.c  */
-#line 672 "y.tab.c"
+#line 653 "y.tab.c"
 
 #ifdef short
 # undef short
@@ -1016,17 +997,17 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   459,   459,   471,   478,   485,   490,   497,   535,   543,
-     565,   578,   579,   586,   591,   596,   603,   631,   639,   646,
-     652,   658,   664,   719,   725,   730,   736,   742,   751,   766,
-     773,   781,   788,   803,   810,   818,   827,   869,   875,   881,
-     889,   949,   958,   973,   980,   987,  1005,  1012,  1019,  1026,
-    1133,  1140,  1147,  1154,  1161,  1179,  1186,  1193,  1200,  1208,
-    1214,  1221,  1230,  1236,  1243,  1250,  1257,  1264,  1273,  1307,
-    1332,  1346,  1353,  1360,  1372,  1381,  1423,  1430,  1437,  1444,
-    1451,  1491,  1498,  1507,  1525,  1532,  1541,  1558,  1565,  1574,
-    1588,  1595,  1602,  1609,  1669,  1726,  1736,  1793,  1800,  1807,
-    1817,  1825,  1832,  1870
+       0,   440,   440,   454,   461,   468,   473,   480,   518,   526,
+     548,   561,   562,   569,   574,   579,   586,   614,   622,   629,
+     635,   641,   647,   702,   708,   713,   719,   725,   734,   749,
+     756,   764,   771,   786,   793,   801,   810,   852,   858,   864,
+     872,   932,   941,   956,   963,   970,   988,   995,  1002,  1009,
+    1116,  1123,  1130,  1137,  1144,  1162,  1169,  1176,  1183,  1191,
+    1197,  1204,  1213,  1219,  1226,  1233,  1240,  1247,  1256,  1290,
+    1315,  1329,  1336,  1343,  1355,  1364,  1406,  1413,  1420,  1427,
+    1434,  1474,  1481,  1490,  1508,  1515,  1524,  1541,  1548,  1557,
+    1571,  1578,  1585,  1592,  1652,  1709,  1719,  1776,  1783,  1790,
+    1800,  1808,  1815,  1853
 };
 #endif
 
@@ -2206,13 +2187,15 @@ yyreduce:
     {
         case 2:
 /* Line 1792 of yacc.c  */
-#line 460 "cpm.y"
-    {// 0      1     2     3     4         5      6
+#line 441 "cpm.y"
+    {// 0		1	  2	  3     4			5		6
 	printf("PROGRAM --> PROGRAM ID START DECLARATIONS STMTLIST END\n");
 	char* str = (char*)calloc(1000, sizeof(char));
-   
-	if((yyvsp[(5) - (6)].code).head == NULL) (yyvsp[(5) - (6)].code).head = "";
-	if((yyvsp[(4) - (6)].decl).codeBody == NULL) (yyvsp[(4) - (6)].decl).codeBody = "";
+	
+	if((yyvsp[(5) - (6)].code).head == NULL)
+	(yyvsp[(5) - (6)].code).head = "";
+	if((yyvsp[(4) - (6)].decl).codeBody == NULL)
+	(yyvsp[(4) - (6)].decl).codeBody = "";
 	sprintf(str,".data\n%s\n%s\nstrBuff: .space 200\n.text\nProgram:\n%s\n%s\n", (yyvsp[(4) - (6)].decl).codeHead, (yyvsp[(5) - (6)].code).head, (yyvsp[(4) - (6)].decl).codeBody, (yyvsp[(5) - (6)].code).body);
 	mipsCode = str;
 }
@@ -2220,87 +2203,87 @@ yyreduce:
 
   case 3:
 /* Line 1792 of yacc.c  */
-#line 472 "cpm.y"
-    {//0         1      2      3
-   printf("DECLARATIONS --> DCL DECLARLIST CDECL\n");
-   (yyval.decl).codeHead = strdup(strcat((yyvsp[(2) - (3)].decl).codeHead, (yyvsp[(3) - (3)].decl).codeHead));
-   (yyval.decl).codeBody = strdup((yyvsp[(3) - (3)].decl).codeBody);
+#line 455 "cpm.y"
+    {//0			1		2		3
+	printf("DECLARATIONS --> DCL DECLARLIST CDECL\n");
+	(yyval.decl).codeHead = strdup(strcat((yyvsp[(2) - (3)].decl).codeHead, (yyvsp[(3) - (3)].decl).codeHead));
+	(yyval.decl).codeBody = strdup((yyvsp[(3) - (3)].decl).codeBody);
 }
     break;
 
   case 4:
 /* Line 1792 of yacc.c  */
-#line 478 "cpm.y"
+#line 461 "cpm.y"
     {
-   printf("DECLARATIONS --> epsilon\n");
-   (yyval.decl).codeHead = strdup("");
-   (yyval.decl).codeBody = strdup("");
+	printf("DECLARATIONS --> epsilon\n");
+	(yyval.decl).codeHead = strdup("");
+	(yyval.decl).codeBody = strdup("");
 }
     break;
 
   case 5:
 /* Line 1792 of yacc.c  */
-#line 486 "cpm.y"
+#line 469 "cpm.y"
     {
-   printf("DECLARLIST --> DECLARLIST DECL\n");
-   (yyval.decl).codeHead = strConcat((yyvsp[(1) - (2)].decl).codeHead, (yyvsp[(2) - (2)].decl).codeHead);
+	printf("DECLARLIST --> DECLARLIST DECL\n");
+	(yyval.decl).codeHead = strConcat((yyvsp[(1) - (2)].decl).codeHead, (yyvsp[(2) - (2)].decl).codeHead);
 }
     break;
 
   case 6:
 /* Line 1792 of yacc.c  */
-#line 491 "cpm.y"
+#line 474 "cpm.y"
     {
-   printf("DECLARLIST --> DECL\n");
-   (yyval.decl).codeHead = strdup((yyvsp[(1) - (1)].decl).codeHead);
+	printf("DECLARLIST --> DECL\n");
+	(yyval.decl).codeHead = strdup((yyvsp[(1) - (1)].decl).codeHead);
 }
     break;
 
   case 7:
 /* Line 1792 of yacc.c  */
-#line 498 "cpm.y"
-    {//0   1     2      3
-   printf("DECL -->  TYPE ':' LIST\n");
-   char* tempCodeHeadStr = (char*)calloc(200, sizeof(char));
-   char* codeHeadStr = (char*)calloc(200, sizeof(char));
-   char errorMessage[ERROR_STRING_LEN]; 
-   int i;
-   
-   for(i = 0 ; i < 5 ; i++)
-   {
-      if((yyvsp[(3) - (3)].decl).IDarray[i] != NULL)
-      {
-         if(lookup(*ptr2symbolTable, (yyvsp[(3) - (3)].decl).IDarray[i]) == NULL)
-         {
-            addSymbol(*ptr2symbolTable, (yyvsp[(3) - (3)].decl).IDarray[i], (yyvsp[(1) - (3)].decl).type, false);
-            if(strcmp((yyvsp[(1) - (3)].decl).type,"string") == 0)
-            {
-               sprintf(tempCodeHeadStr,"%s: .space 200\n",(yyvsp[(3) - (3)].decl).IDarray[i]);
-               strcat(codeHeadStr,tempCodeHeadStr);
-            }
-            else
-            {
-               sprintf(tempCodeHeadStr,"%s: .space 8\n",(yyvsp[(3) - (3)].decl).IDarray[i]);
-               strcat(codeHeadStr,tempCodeHeadStr);
-            }
-         }
-         else 
-         {   sprintf(errorMessage, "Duplicted declaration. %s already declared\n", (yyvsp[(3) - (3)].decl).IDarray[i]);
-            outputError(errorMessage);
-            sprintf(codeHeadStr,"");
-            hasErrors = true;
-         }
-      }
-   }
-   (yyval.decl).codeHead = strdup(codeHeadStr);
-   free(codeHeadStr);
-   free(tempCodeHeadStr);
+#line 481 "cpm.y"
+    {//0	1	  2		3
+	printf("DECL -->  TYPE ':' LIST\n");
+	char* tempCodeHeadStr = (char*)calloc(200, sizeof(char));
+	char* codeHeadStr = (char*)calloc(200, sizeof(char));
+	char errorMessage[ERROR_STRING_LEN]; 
+	int i;
+	
+	for(i = 0 ; i < 5 ; i++)
+	{
+		if((yyvsp[(3) - (3)].decl).IDarray[i] != NULL)
+		{
+			if(lookup(*ptr2symbolTable, (yyvsp[(3) - (3)].decl).IDarray[i]) == NULL)
+			{
+				addSymbol(*ptr2symbolTable, (yyvsp[(3) - (3)].decl).IDarray[i], (yyvsp[(1) - (3)].decl).type, false);
+				if(strcmp((yyvsp[(1) - (3)].decl).type,"string") == 0)
+				{
+					sprintf(tempCodeHeadStr,"%s: .space 200\n",(yyvsp[(3) - (3)].decl).IDarray[i]);
+					strcat(codeHeadStr,tempCodeHeadStr);
+				}
+				else
+				{
+					sprintf(tempCodeHeadStr,"%s: .space 8\n",(yyvsp[(3) - (3)].decl).IDarray[i]);
+					strcat(codeHeadStr,tempCodeHeadStr);
+				}
+			}
+			else 
+			{	sprintf(errorMessage, "Duplicted declaration. %s already declared\n", (yyvsp[(3) - (3)].decl).IDarray[i]);
+				outputError(errorMessage);
+				sprintf(codeHeadStr,"");
+				hasErrors = true;
+			}
+		}
+	}
+	(yyval.decl).codeHead = strdup(codeHeadStr);
+	free(codeHeadStr);
+	free(tempCodeHeadStr);
 }
     break;
 
   case 8:
 /* Line 1792 of yacc.c  */
-#line 536 "cpm.y"
+#line 519 "cpm.y"
     {
 outputError("Expected ':' ");
 hasErrors = true;
@@ -2310,1702 +2293,1702 @@ hasErrors = true;
 
   case 9:
 /* Line 1792 of yacc.c  */
-#line 544 "cpm.y"
-    {//0   1  2   3
-   printf("LIST --> ID ',' LIST\n");
-   int i, j;
-   for(i = 0 ; i < 5 ; i++)   //Assuming up to 5 Ids in a chained declaration
-   {
-      if((yyval.decl).IDarray[i] == NULL)
-      {
-         (yyval.decl).IDarray[i] = (yyvsp[(1) - (3)].sval);
-            for(j = 0 ; j < 5 ; j++)
-            {
-               if((yyvsp[(3) - (3)].decl).IDarray[i] != NULL)
-               {
-                  (yyval.decl).IDarray[i+1] = (yyvsp[(3) - (3)].decl).IDarray[j];
-                  i++;
-               }
-            }
-         break;
-      }
-   }
+#line 527 "cpm.y"
+    {//0	1  2	3
+	printf("LIST --> ID ',' LIST\n");
+	int i, j;
+	for(i = 0 ; i < 5 ; i++)	//Assuming up to 5 Ids in a chained declaration
+	{
+		if((yyval.decl).IDarray[i] == NULL)
+		{
+			(yyval.decl).IDarray[i] = (yyvsp[(1) - (3)].sval);
+				for(j = 0 ; j < 5 ; j++)
+				{
+					if((yyvsp[(3) - (3)].decl).IDarray[i] != NULL)
+					{
+						(yyval.decl).IDarray[i+1] = (yyvsp[(3) - (3)].decl).IDarray[j];
+						i++;
+					}
+				}
+			break;
+		}
+	}
 }
     break;
 
   case 10:
 /* Line 1792 of yacc.c  */
-#line 566 "cpm.y"
+#line 549 "cpm.y"
     {//1
-   printf("LIST --> ID ';'\n");
-   int i;
-   for(i = 0 ; i < 5 ; i++)   //Assuming up to 5 Ids in a chained declaration
-   {
-      if((yyval.decl).IDarray[i] == NULL)
-      {
-         (yyval.decl).IDarray[i] = (yyvsp[(1) - (2)].sval);
-         break;
-      }
-   }
+	printf("LIST --> ID ';'\n");
+	int i;
+	for(i = 0 ; i < 5 ; i++)	//Assuming up to 5 Ids in a chained declaration
+	{
+		if((yyval.decl).IDarray[i] == NULL)
+		{
+			(yyval.decl).IDarray[i] = (yyvsp[(1) - (2)].sval);
+			break;
+		}
+	}
 }
     break;
 
   case 11:
 /* Line 1792 of yacc.c  */
-#line 578 "cpm.y"
+#line 561 "cpm.y"
     { outputError("Expected ';' "); hasErrors = true; }
     break;
 
   case 12:
 /* Line 1792 of yacc.c  */
-#line 580 "cpm.y"
+#line 563 "cpm.y"
     {
-   outputError("Expected ',' ");
-   hasErrors = true;
+	outputError("Expected ',' ");
+	hasErrors = true;
 }
     break;
 
   case 13:
 /* Line 1792 of yacc.c  */
-#line 587 "cpm.y"
+#line 570 "cpm.y"
     {//0    1
-   printf("TYPE --> INT\n");
-   (yyval.decl).type = strdup("int");
+	printf("TYPE --> INT\n");
+	(yyval.decl).type = strdup("int");
 }
     break;
 
   case 14:
 /* Line 1792 of yacc.c  */
-#line 592 "cpm.y"
+#line 575 "cpm.y"
     {//1
-   printf("TYPE --> REAL\n");
-   (yyval.decl).type = strdup("float");
+	printf("TYPE --> REAL\n");
+	(yyval.decl).type = strdup("float");
 }
     break;
 
   case 15:
 /* Line 1792 of yacc.c  */
-#line 597 "cpm.y"
+#line 580 "cpm.y"
     {//1
-   printf("TYPE --> STRING\n");
-   (yyval.decl).type = strdup("string");
+	printf("TYPE --> STRING\n");
+	(yyval.decl).type = strdup("string");
 }
     break;
 
   case 16:
 /* Line 1792 of yacc.c  */
-#line 604 "cpm.y"
-    {//0   1      2   3   4      5  6   7
-   printf("CDECL --> FINAL TYPE ID ASSIGNOP NUM ';' CDECL\n");
-   char* codeBodyStr = (char*)calloc(200, sizeof(char));
-   char* codeHeadStr = (char*)calloc(200, sizeof(char));
-   char errorMessage[ERROR_STRING_LEN];
-   if(lookup(*ptr2symbolTable, (yyvsp[(3) - (7)].sval)) == NULL) //id not in symbol table
-   {
-      addSymbol(*ptr2symbolTable, (yyvsp[(3) - (7)].sval), (yyvsp[(2) - (7)].decl).type, true);
-      if(strcmp((yyvsp[(2) - (7)].decl).type,"string")==0)
-         sprintf(codeHeadStr,"%s: .space 200\n",(yyvsp[(3) - (7)].sval));
-      else
-      {
-         sprintf(codeHeadStr,"%s: .space 8\n",(yyvsp[(3) - (7)].sval));
-         if(strcmp((yyvsp[(2) - (7)].decl).type,"int")==0)
-            sprintf(codeBodyStr,"li $t0,%d\nsw $t0, %s\n",(yyvsp[(5) - (7)].nVal).val,(yyvsp[(3) - (7)].sval));
-      }
-   }
-   else
-   {
-      sprintf(errorMessage, "Duplicted declaration. %s already declared\n", (yyvsp[(3) - (7)].sval));
-      outputError(errorMessage);
-      sprintf(codeHeadStr,"");
-      hasErrors = true;
-   }
-   (yyval.decl).codeHead = strConcat(codeHeadStr, (yyvsp[(7) - (7)].decl).codeHead);
-   (yyval.decl).codeBody = strConcat(codeBodyStr, (yyvsp[(7) - (7)].decl).codeBody);
+#line 587 "cpm.y"
+    {//0	1		2	3	4		5  6	7
+	printf("CDECL --> FINAL TYPE ID ASSIGNOP NUM ';' CDECL\n");
+	char* codeBodyStr = (char*)calloc(200, sizeof(char));
+	char* codeHeadStr = (char*)calloc(200, sizeof(char));
+	char errorMessage[ERROR_STRING_LEN];
+	if(lookup(*ptr2symbolTable, (yyvsp[(3) - (7)].sval)) == NULL) //id not in symbol table
+	{
+		addSymbol(*ptr2symbolTable, (yyvsp[(3) - (7)].sval), (yyvsp[(2) - (7)].decl).type, true);
+		if(strcmp((yyvsp[(2) - (7)].decl).type,"string")==0)
+			sprintf(codeHeadStr,"%s: .space 200\n",(yyvsp[(3) - (7)].sval));
+		else
+		{
+			sprintf(codeHeadStr,"%s: .space 8\n",(yyvsp[(3) - (7)].sval));
+			if(strcmp((yyvsp[(2) - (7)].decl).type,"int")==0)
+				sprintf(codeBodyStr,"li $t0,%d\nsw $t0, %s\n",(yyvsp[(5) - (7)].nVal).val,(yyvsp[(3) - (7)].sval));
+		}
+	}
+	else
+	{
+		sprintf(errorMessage, "Duplicted declaration. %s already declared\n", (yyvsp[(3) - (7)].sval));
+		outputError(errorMessage);
+		sprintf(codeHeadStr,"");
+		hasErrors = true;
+	}
+	(yyval.decl).codeHead = strConcat(codeHeadStr, (yyvsp[(7) - (7)].decl).codeHead);
+	(yyval.decl).codeBody = strConcat(codeBodyStr, (yyvsp[(7) - (7)].decl).codeBody);
 }
     break;
 
   case 17:
 /* Line 1792 of yacc.c  */
-#line 632 "cpm.y"
+#line 615 "cpm.y"
     {
-   outputError("Expected ';' ");
-   hasErrors = true;
-   (yyval.decl).codeHead = strdup("");
-   (yyval.decl).codeBody = strdup("");
+	outputError("Expected ';' ");
+	hasErrors = true;
+	(yyval.decl).codeHead = strdup("");
+	(yyval.decl).codeBody = strdup("");
 }
     break;
 
   case 18:
 /* Line 1792 of yacc.c  */
-#line 639 "cpm.y"
+#line 622 "cpm.y"
     {
-   printf("CDECL --> epsilon\n");
-   (yyval.decl).codeHead = strdup("");
-   (yyval.decl).codeBody = strdup("");
+	printf("CDECL --> epsilon\n");
+	(yyval.decl).codeHead = strdup("");
+	(yyval.decl).codeBody = strdup("");
 }
     break;
 
   case 19:
 /* Line 1792 of yacc.c  */
-#line 647 "cpm.y"
-    {//0      1       2
-   printf("STMTLIST --> STMTLIST STMT\n");
-   (yyval.code).body = strConcat((yyvsp[(1) - (2)].code).body, (yyvsp[(2) - (2)].code).body);
+#line 630 "cpm.y"
+    {//0		1		 2
+	printf("STMTLIST --> STMTLIST STMT\n");
+	(yyval.code).body = strConcat((yyvsp[(1) - (2)].code).body, (yyvsp[(2) - (2)].code).body);
 }
     break;
 
   case 20:
 /* Line 1792 of yacc.c  */
-#line 652 "cpm.y"
+#line 635 "cpm.y"
     {
-   printf("STMTLIST --> epsilon\n");
-   (yyval.code).body = strdup("");
+	printf("STMTLIST --> epsilon\n");
+	(yyval.code).body = strdup("");
 }
     break;
 
   case 21:
 /* Line 1792 of yacc.c  */
-#line 659 "cpm.y"
-    {//0   1
-   printf("STMT --> ASSIGNMENT_STMT\n");
-   (yyval.code).head = strdup((yyvsp[(1) - (1)].code).head);
-   (yyval.code).body = strdup((yyvsp[(1) - (1)].code).body);
+#line 642 "cpm.y"
+    {//0	1
+	printf("STMT --> ASSIGNMENT_STMT\n");
+	(yyval.code).head = strdup((yyvsp[(1) - (1)].code).head);
+	(yyval.code).body = strdup((yyvsp[(1) - (1)].code).body);
 }
     break;
 
   case 22:
 /* Line 1792 of yacc.c  */
-#line 665 "cpm.y"
-    {//1   2      3      4
-   printf("STMT --> ID ASSIGNOP SENTENCE ';'\n");
-   
-   char* codeBodyStr = (char*)calloc(200,sizeof(char));
-   char* codeHeadStr = (char*)calloc(200,sizeof(char));
-   char* temp;
-   char errorMessage[ERROR_STRING_LEN];
+#line 648 "cpm.y"
+    {//1	2		3		4
+	printf("STMT --> ID ASSIGNOP SENTENCE ';'\n");
+	
+	char* codeBodyStr = (char*)calloc(200,sizeof(char));
+	char* codeHeadStr = (char*)calloc(200,sizeof(char));
+	char* temp;
+	char errorMessage[ERROR_STRING_LEN];
 
-   char* reg = getRegisterT();
-   char* label = getLabel();
-   symTblEntry*  symbol = lookup(*ptr2symbolTable, (yyvsp[(1) - (4)].sval));
-   if (symbol != NULL)
-   {   
-      if(symbol->isConst == false)
-      {
-         if(symbol->type == string)
-         {   
-            temp = (char*)calloc(1, sizeof(char) * (strlen((yyvsp[(3) - (4)].sval))+1));
-            temp = strcpy(temp, (yyvsp[(3) - (4)].sval));
-            symbol->value.sval = temp;
-            
-            sprintf(codeHeadStr,"%s: .asciiz %s\n", label, (yyvsp[(3) - (4)].sval));
-            sprintf(codeBodyStr,"lw %s, %s\nsw %s, %s\n", reg, label, reg, (yyvsp[(1) - (4)].sval));
-         }
-         else
-         {
-            sprintf(errorMessage, "Trying to assign sentence to an id which isn't of type string");
-            outputError(errorMessage);
-            sprintf(codeBodyStr,"");
-            hasErrors = true;
-         }
-      }
-      else
-      {
-         sprintf(errorMessage, "Can't assign to a constant variable");
-         outputError(errorMessage);
-         sprintf(codeBodyStr,"");
-         hasErrors = true;
-         }
-   }
-   else
-   {
-      sprintf(errorMessage,"Id isn't declared");
-      outputError(errorMessage);
-      sprintf(codeBodyStr,"");
-      hasErrors = true;
-   }
+	char* reg = getRegisterT();
+	char* label = getLabel();
+	symTblEntry*  symbol = lookup(*ptr2symbolTable, (yyvsp[(1) - (4)].sval));
+	if (symbol != NULL)
+	{	
+		if(symbol->isConst == false)
+		{
+			if(symbol->type == string)
+			{	
+				temp = (char*)calloc(1, sizeof(char) * (strlen((yyvsp[(3) - (4)].sval))+1));
+				temp = strcpy(temp, (yyvsp[(3) - (4)].sval));
+				symbol->value.sval = temp;
+				
+				sprintf(codeHeadStr,"%s: .asciiz %s\n", label, (yyvsp[(3) - (4)].sval));
+				sprintf(codeBodyStr,"lw %s, %s\nsw %s, %s\n", reg, label, reg, (yyvsp[(1) - (4)].sval));
+			}
+			else
+			{
+				sprintf(errorMessage, "Trying to assign sentence to an id which isn't of type string");
+				outputError(errorMessage);
+				sprintf(codeBodyStr,"");
+				hasErrors = true;
+			}
+		}
+		else
+		{
+			sprintf(errorMessage, "Can't assign to a constant variable");
+			outputError(errorMessage);
+			sprintf(codeBodyStr,"");
+			hasErrors = true;
+			}
+	}
+	else
+	{
+		sprintf(errorMessage,"Id isn't declared");
+		outputError(errorMessage);
+		sprintf(codeBodyStr,"");
+		hasErrors = true;
+	}
 
-   freeRegisterT(reg);
-   (yyval.code).head = strdup(codeHeadStr);
-   (yyval.code).body = strdup(codeBodyStr);
-   free(codeHeadStr);
-   free(codeBodyStr);
+	freeRegisterT(reg);
+	(yyval.code).head = strdup(codeHeadStr);
+	(yyval.code).body = strdup(codeBodyStr);
+	free(codeHeadStr);
+	free(codeBodyStr);
 }
     break;
 
   case 23:
 /* Line 1792 of yacc.c  */
-#line 720 "cpm.y"
-    {   //1
-   printf("STMT --> CONTROL_STMT\n");
-   (yyval.code).head = strdup((yyvsp[(1) - (1)].code).head);
-   (yyval.code).body = strdup((yyvsp[(1) - (1)].code).body);
+#line 703 "cpm.y"
+    {	//1
+	printf("STMT --> CONTROL_STMT\n");
+	(yyval.code).head = strdup((yyvsp[(1) - (1)].code).head);
+	(yyval.code).body = strdup((yyvsp[(1) - (1)].code).body);
 }
     break;
 
   case 24:
 /* Line 1792 of yacc.c  */
-#line 726 "cpm.y"
+#line 709 "cpm.y"
     { //1
-   printf("STMT --> READ_STMT\n");
-   (yyval.code).body = strdup((yyvsp[(1) - (1)].code).body);
+	printf("STMT --> READ_STMT\n");
+	(yyval.code).body = strdup((yyvsp[(1) - (1)].code).body);
 }
     break;
 
   case 25:
 /* Line 1792 of yacc.c  */
-#line 731 "cpm.y"
+#line 714 "cpm.y"
     { //1 
-   printf("STMT --> OUT_STMT\n");
-   (yyval.code).head = strdup((yyvsp[(1) - (1)].code).head);
-   (yyval.code).body = strdup((yyvsp[(1) - (1)].code).body);
+	printf("STMT --> OUT_STMT\n");
+	(yyval.code).head = strdup((yyvsp[(1) - (1)].code).head);
+	(yyval.code).body = strdup((yyvsp[(1) - (1)].code).body);
 }
     break;
 
   case 26:
 /* Line 1792 of yacc.c  */
-#line 737 "cpm.y"
+#line 720 "cpm.y"
     { //1
-   printf("STMT --> STMT_BLOCK\n");
-   (yyval.code).head = strdup((yyvsp[(1) - (1)].code).head);
-   (yyval.code).body = strdup((yyvsp[(1) - (1)].code).body);
+	printf("STMT --> STMT_BLOCK\n");
+	(yyval.code).head = strdup((yyvsp[(1) - (1)].code).head);
+	(yyval.code).body = strdup((yyvsp[(1) - (1)].code).body);
 }
     break;
 
   case 27:
 /* Line 1792 of yacc.c  */
-#line 743 "cpm.y"
+#line 726 "cpm.y"
     { 
-   outputError("Expected ';' ");
-   hasErrors = true;
-   (yyval.code).head = strdup("");
-   (yyval.code).body = strdup("");
+	outputError("Expected ';' ");
+	hasErrors = true;
+	(yyval.code).head = strdup("");
+	(yyval.code).body = strdup("");
 }
     break;
 
   case 28:
 /* Line 1792 of yacc.c  */
-#line 752 "cpm.y"
-    {//0      1   2   3         4   5
-   printf("OUT_STMT --> OUT '(' EXPRESSION ')' ';'\n");
-   char* codeBodyStr = (char*)calloc(200,sizeof(char));
-   
-   if(strcmp((yyvsp[(3) - (5)].decl).type, "int") == 0)   //print an int
-      sprintf(codeBodyStr,"li $v0,1\nmove $a0,%s\n syscall\n",(yyvsp[(3) - (5)].decl).reg);
-   
-   if(strcmp((yyvsp[(3) - (5)].decl).type, "float") == 0)   //print a float
-      sprintf(codeBodyStr,"li $v0,2\nmov.s $f12,%s\n syscall\n",(yyvsp[(3) - (5)].decl).reg);
-   
-   (yyval.code).head = (yyvsp[(3) - (5)].decl).codeHead;
-   (yyval.code).body = strConcat((yyvsp[(3) - (5)].decl).codeBody, codeBodyStr);
-   free(codeBodyStr);
+#line 735 "cpm.y"
+    {//0		1	2	3		   4   5
+	printf("OUT_STMT --> OUT '(' EXPRESSION ')' ';'\n");
+	char* codeBodyStr = (char*)calloc(200,sizeof(char));
+	
+	if(strcmp((yyvsp[(3) - (5)].decl).type, "int") == 0)	//print an int
+		sprintf(codeBodyStr,"li $v0,1\nmove $a0,%s\n syscall\n",(yyvsp[(3) - (5)].decl).reg);
+	
+	if(strcmp((yyvsp[(3) - (5)].decl).type, "float") == 0)	//print a float
+		sprintf(codeBodyStr,"li $v0,2\nmov.s $f12,%s\n syscall\n",(yyvsp[(3) - (5)].decl).reg);
+	
+	(yyval.code).head = (yyvsp[(3) - (5)].decl).codeHead;
+	(yyval.code).body = strConcat((yyvsp[(3) - (5)].decl).codeBody, codeBodyStr);
+	free(codeBodyStr);
 }
     break;
 
   case 29:
 /* Line 1792 of yacc.c  */
-#line 767 "cpm.y"
+#line 750 "cpm.y"
     {
-   outputError("Expected '(' ");
-   hasErrors = true;
-   (yyval.code).body = strdup("");
-   (yyval.code).head = strdup("");
+	outputError("Expected '(' ");
+	hasErrors = true;
+	(yyval.code).body = strdup("");
+	(yyval.code).head = strdup("");
 }
     break;
 
   case 30:
 /* Line 1792 of yacc.c  */
-#line 774 "cpm.y"
+#line 757 "cpm.y"
     {
-   outputError("Expected ')'");
-   hasErrors = true;
-   (yyval.code).body = strdup("");
-   (yyval.code).head = strdup("");
+	outputError("Expected ')'");
+	hasErrors = true;
+	(yyval.code).body = strdup("");
+	(yyval.code).head = strdup("");
 }
     break;
 
   case 31:
 /* Line 1792 of yacc.c  */
-#line 782 "cpm.y"
+#line 765 "cpm.y"
     { 
-   outputError("expected ';' ");
-   hasErrors = true;
-   (yyval.code).body = strdup("");
-   (yyval.code).head = strdup("");
+	outputError("expected ';' ");
+	hasErrors = true;
+	(yyval.code).body = strdup("");
+	(yyval.code).head = strdup("");
 }
     break;
 
   case 32:
 /* Line 1792 of yacc.c  */
-#line 789 "cpm.y"
-    {//1   2   3      4   5
-   printf("OUT_STMT --> OUT '(' SENTENCE ')' ';'\n");
-   char* codeBodyStr = (char*)calloc(200,sizeof(char));
-   char* codeHeadStr = (char*)calloc(200,sizeof(char));
-   char* label = getLabel();
-   
-   sprintf(codeHeadStr, "%s: .asciiz %s\n", label, (yyvsp[(3) - (5)].sval));
-   sprintf(codeBodyStr, "la $a0,%s\nli $v0,4\nsyscall\n", label); //print a string
-   
-   (yyval.code).head = strdup(codeHeadStr);
-   (yyval.code).body = strdup(codeBodyStr);
-   free(codeHeadStr);
-   free(codeBodyStr);
+#line 772 "cpm.y"
+    {//1	2	3		4	5
+	printf("OUT_STMT --> OUT '(' SENTENCE ')' ';'\n");
+	char* codeBodyStr = (char*)calloc(200,sizeof(char));
+	char* codeHeadStr = (char*)calloc(200,sizeof(char));
+	char* label = getLabel();
+	
+	sprintf(codeHeadStr, "%s: .asciiz %s\n", label, (yyvsp[(3) - (5)].sval));
+	sprintf(codeBodyStr, "la $a0,%s\nli $v0,4\nsyscall\n", label); //print a string
+	
+	(yyval.code).head = strdup(codeHeadStr);
+	(yyval.code).body = strdup(codeBodyStr);
+	free(codeHeadStr);
+	free(codeBodyStr);
 }
     break;
 
   case 33:
 /* Line 1792 of yacc.c  */
-#line 804 "cpm.y"
+#line 787 "cpm.y"
     {
-   outputError("Expected '('");
-   hasErrors = true;
-   (yyval.code).body = strdup("");
-   (yyval.code).head = strdup("");
+	outputError("Expected '('");
+	hasErrors = true;
+	(yyval.code).body = strdup("");
+	(yyval.code).head = strdup("");
 }
     break;
 
   case 34:
 /* Line 1792 of yacc.c  */
-#line 811 "cpm.y"
+#line 794 "cpm.y"
     {
-   outputError("Expected ')'");
-   hasErrors = true;
-   (yyval.code).body = strdup("");
-   (yyval.code).head = strdup("");
+	outputError("Expected ')'");
+	hasErrors = true;
+	(yyval.code).body = strdup("");
+	(yyval.code).head = strdup("");
 }
     break;
 
   case 35:
 /* Line 1792 of yacc.c  */
-#line 819 "cpm.y"
+#line 802 "cpm.y"
     {
-   outputError("expected ';'");
-   hasErrors = true;
-   (yyval.code).body = strdup("");
-   (yyval.code).head = strdup("");
+	outputError("expected ';'");
+	hasErrors = true;
+	(yyval.code).body = strdup("");
+	(yyval.code).head = strdup("");
 }
     break;
 
   case 36:
 /* Line 1792 of yacc.c  */
-#line 828 "cpm.y"
-    {//0      1     2     3    4    5
-   printf("READ_STMT --> READ '(' ID ')' ';'\n");
-   char* codeBodyStr = (char*)calloc(200,sizeof(char));
-   char errorMessage[ERROR_STRING_LEN];
+#line 811 "cpm.y"
+    {//0		1	  2	  3	 4	 5
+	printf("READ_STMT --> READ '(' ID ')' ';'\n");
+	char* codeBodyStr = (char*)calloc(200,sizeof(char));
+	char errorMessage[ERROR_STRING_LEN];
 
-   symTblEntry*  symbol = lookup(*ptr2symbolTable, (yyvsp[(3) - (5)].sval));
-   if (symbol != NULL)
-   {
-      if(symbol->isConst == false)
-      {
-         if(symbol->type == integer)   //read int
-            sprintf(codeBodyStr,"li $v0,5\nsyscall\nsw $v0, %s\n", symbol->name);
+	symTblEntry*  symbol = lookup(*ptr2symbolTable, (yyvsp[(3) - (5)].sval));
+	if (symbol != NULL)
+	{
+		if(symbol->isConst == false)
+		{
+			if(symbol->type == integer)	//read int
+				sprintf(codeBodyStr,"li $v0,5\nsyscall\nsw $v0, %s\n", symbol->name);
 
-         if(symbol->type == floating) //read float
-            sprintf(codeBodyStr,"li $v0,6\nsyscall\ns.s $f0, %s\n", symbol->name);
+			if(symbol->type == floating) //read float
+				sprintf(codeBodyStr,"li $v0,6\nsyscall\ns.s $f0, %s\n", symbol->name);
 
-         if(symbol->type == string)   //read string
-         {
-            strcat(codeBodyStr,"li $v0,8\nla $a0,");
-            strcat(codeBodyStr,symbol->name);
-            strcat(codeBodyStr,"\nli $a1,200\nsyscall\n");
-         }
-      }
-      else
-      {
-         sprintf(errorMessage,"Can't assign to a constant");
-         outputError(errorMessage);
-         sprintf(codeBodyStr,"");
-         hasErrors = true;
-      }
-   }
-   else
-   {
-      sprintf(errorMessage,"Id isn't declared");
-      outputError(errorMessage);
-      sprintf(codeBodyStr,"");
-      hasErrors = true;
-   }
-   (yyval.code).body = strdup(codeBodyStr);
-   free(codeBodyStr);
+			if(symbol->type == string)	//read string
+			{
+				strcat(codeBodyStr,"li $v0,8\nla $a0,");
+				strcat(codeBodyStr,symbol->name);
+				strcat(codeBodyStr,"\nli $a1,200\nsyscall\n");
+			}
+		}
+		else
+		{
+			sprintf(errorMessage,"Can't assign to a constant");
+			outputError(errorMessage);
+			sprintf(codeBodyStr,"");
+			hasErrors = true;
+		}
+	}
+	else
+	{
+		sprintf(errorMessage,"Id isn't declared");
+		outputError(errorMessage);
+		sprintf(codeBodyStr,"");
+		hasErrors = true;
+	}
+	(yyval.code).body = strdup(codeBodyStr);
+	free(codeBodyStr);
 }
     break;
 
   case 37:
 /* Line 1792 of yacc.c  */
-#line 870 "cpm.y"
+#line 853 "cpm.y"
     {
-   outputError("expected '('");
-   hasErrors = true;
-   (yyval.code).body=strdup("");
+	outputError("expected '('");
+	hasErrors = true;
+	(yyval.code).body=strdup("");
 }
     break;
 
   case 38:
 /* Line 1792 of yacc.c  */
-#line 876 "cpm.y"
+#line 859 "cpm.y"
     {
-   outputError("expected ')'");
-   hasErrors = true;
-   (yyval.code).body=strdup("");
+	outputError("expected ')'");
+	hasErrors = true;
+	(yyval.code).body=strdup("");
 }
     break;
 
   case 39:
 /* Line 1792 of yacc.c  */
-#line 882 "cpm.y"
+#line 865 "cpm.y"
     {
-   outputError("expected ';'");
-   hasErrors = true;
-   (yyval.code).body=strdup("");
+	outputError("expected ';'");
+	hasErrors = true;
+	(yyval.code).body=strdup("");
 }
     break;
 
   case 40:
 /* Line 1792 of yacc.c  */
-#line 890 "cpm.y"
-    {//0           1      2      3       4
-   printf("ASSIGNMENT_STMT --> ID ASSIGNOP EXPRESSION';'\n");
-   char* codeBodyStr = (char*)calloc(200,sizeof(char));
-   char errorMessage[ERROR_STRING_LEN];
-   char* reg;
+#line 873 "cpm.y"
+    {//0			  1		2		3		 4
+	printf("ASSIGNMENT_STMT --> ID ASSIGNOP EXPRESSION';'\n");
+	char* codeBodyStr = (char*)calloc(200,sizeof(char));
+	char errorMessage[ERROR_STRING_LEN];
+	char* reg;
 
-   symTblEntry*  symbol = lookup(*ptr2symbolTable, (yyvsp[(1) - (4)].sval));
-   if (symbol != NULL)
-   {
-      if(symbol->isConst == false)
-      { 
-         if(strcmp((yyvsp[(3) - (4)].decl).type,"int") == 0 && symbol->type == integer) //ints assignment
-         {
-            sprintf(codeBodyStr,"sw %s, %s\n", (yyvsp[(3) - (4)].decl).reg, (yyvsp[(1) - (4)].sval));
-            freeRegisterT((yyvsp[(3) - (4)].decl).reg);
-         }   
-         else if(strcmp((yyvsp[(3) - (4)].decl).type,"float") == 0 && symbol->type == floating) //floats assignment
-         {
-            sprintf(codeBodyStr,"s.s %s, %s\n", (yyvsp[(3) - (4)].decl).reg, (yyvsp[(1) - (4)].sval));
-            freeRegisterF((yyvsp[(3) - (4)].decl).reg);
-         }
-            else
-            {
-               if(strcmp((yyvsp[(3) - (4)].decl).type,"int")==0 && symbol->type == floating) //assign an int into a float
-               {
-                  reg = getRegisterF();
-                  sprintf(codeBodyStr,"mtc1 %s, %s\ncvt.s.w %s, %s\ns.s %s, %s\n", (yyvsp[(3) - (4)].decl).reg, reg, reg, reg, reg, (yyvsp[(1) - (4)].sval));
-                  freeRegisterT((yyvsp[(3) - (4)].decl).reg);
-                  freeRegisterF(reg);
-               }
-               else   // attempting to assign a float into an int
-               {
-                  sprintf(errorMessage,"Can't convert from a real number to integer. Illegal assignment");
-                  outputError(errorMessage);
-                  sprintf(codeBodyStr,"");
-                  hasErrors = true;
-               }
-            }
-      }
-      else
-      {
-         sprintf(errorMessage,"Can't assign to a constant");
-         outputError(errorMessage);
-         sprintf(codeBodyStr,"");
-         hasErrors = true;
-      }
-   }
-   else
-   {
-      sprintf(errorMessage,"Id isn't declared");
-      outputError(errorMessage);
-      sprintf(codeBodyStr,"");
-      hasErrors = true;
-   }
+	symTblEntry*  symbol = lookup(*ptr2symbolTable, (yyvsp[(1) - (4)].sval));
+	if (symbol != NULL)
+	{
+		if(symbol->isConst == false)
+		{ 
+			if(strcmp((yyvsp[(3) - (4)].decl).type,"int") == 0 && symbol->type == integer) //ints assignment
+			{
+				sprintf(codeBodyStr,"sw %s, %s\n", (yyvsp[(3) - (4)].decl).reg, (yyvsp[(1) - (4)].sval));
+				freeRegisterT((yyvsp[(3) - (4)].decl).reg);
+			}	
+			else if(strcmp((yyvsp[(3) - (4)].decl).type,"float") == 0 && symbol->type == floating) //floats assignment
+			{
+				sprintf(codeBodyStr,"s.s %s, %s\n", (yyvsp[(3) - (4)].decl).reg, (yyvsp[(1) - (4)].sval));
+				freeRegisterF((yyvsp[(3) - (4)].decl).reg);
+			}
+				else
+				{
+					if(strcmp((yyvsp[(3) - (4)].decl).type,"int")==0 && symbol->type == floating) //assign an int into a float
+					{
+						reg = getRegisterF();
+						sprintf(codeBodyStr,"mtc1 %s, %s\ncvt.s.w %s, %s\ns.s %s, %s\n", (yyvsp[(3) - (4)].decl).reg, reg, reg, reg, reg, (yyvsp[(1) - (4)].sval));
+						freeRegisterT((yyvsp[(3) - (4)].decl).reg);
+						freeRegisterF(reg);
+					}
+					else	// attempting to assign a float into an int
+					{
+						sprintf(errorMessage,"Can't convert from a real number to integer. Illegal assignment");
+						outputError(errorMessage);
+						sprintf(codeBodyStr,"");
+						hasErrors = true;
+					}
+				}
+		}
+		else
+		{
+			sprintf(errorMessage,"Can't assign to a constant");
+			outputError(errorMessage);
+			sprintf(codeBodyStr,"");
+			hasErrors = true;
+		}
+	}
+	else
+	{
+		sprintf(errorMessage,"Id isn't declared");
+		outputError(errorMessage);
+		sprintf(codeBodyStr,"");
+		hasErrors = true;
+	}
 
-   (yyval.code).head = strdup((yyvsp[(3) - (4)].decl).codeHead);
-   (yyval.code).body = strConcat((yyvsp[(3) - (4)].decl).codeBody, codeBodyStr);
-   free(codeBodyStr);
+	(yyval.code).head = strdup((yyvsp[(3) - (4)].decl).codeHead);
+	(yyval.code).body = strConcat((yyvsp[(3) - (4)].decl).codeBody, codeBodyStr);
+	free(codeBodyStr);
 }
     break;
 
   case 41:
 /* Line 1792 of yacc.c  */
-#line 950 "cpm.y"
+#line 933 "cpm.y"
     {
-   outputError("expected ';'");
-   hasErrors = true;
-   (yyval.code).head = strdup("");
-   (yyval.code).body = strdup("");
+	outputError("expected ';'");
+	hasErrors = true;
+	(yyval.code).head = strdup("");
+	(yyval.code).body = strdup("");
 }
     break;
 
   case 42:
 /* Line 1792 of yacc.c  */
-#line 959 "cpm.y"
-    {//0         1   2   3      4   5    6     7
-   printf("CONTROL_STMT --> IF '(' BOOLEXPR ')' STMT ELSE STMT\n");
-   char* codeBodyStr = (char*)calloc((200 + strlen((yyvsp[(5) - (7)].code).body)+ strlen((yyvsp[(7) - (7)].code).body)),sizeof(char));
-   char* label = getLabel();
-   char* str;
-   
-   sprintf(codeBodyStr,"beq %s,$0,Else%s\n%s\nj End%s\nElse%s:\n%s\nEnd%s:\n", (yyvsp[(3) - (7)].decl).reg, label, (yyvsp[(5) - (7)].code).body, label, label ,(yyvsp[(7) - (7)].code).body, label);   
-   str = strConcat((yyvsp[(5) - (7)].code).head, (yyvsp[(7) - (7)].code).head);
-   (yyval.code).head = strConcat((yyvsp[(3) - (7)].decl).codeHead, str);
-   (yyval.code).body = strConcat((yyvsp[(3) - (7)].decl).codeBody, codeBodyStr);
-   freeRegisterT((yyvsp[(3) - (7)].decl).reg);
-   free(str);
-   free(codeBodyStr);
+#line 942 "cpm.y"
+    {//0			1	2	3		4	5	 6	  7
+	printf("CONTROL_STMT --> IF '(' BOOLEXPR ')' STMT ELSE STMT\n");
+	char* codeBodyStr = (char*)calloc((200 + strlen((yyvsp[(5) - (7)].code).body)+ strlen((yyvsp[(7) - (7)].code).body)),sizeof(char));
+	char* label = getLabel();
+	char* str;
+	
+	sprintf(codeBodyStr,"beq %s,$0,Else%s\n%s\nj End%s\nElse%s:\n%s\nEnd%s:\n", (yyvsp[(3) - (7)].decl).reg, label, (yyvsp[(5) - (7)].code).body, label, label ,(yyvsp[(7) - (7)].code).body, label);	
+	str = strConcat((yyvsp[(5) - (7)].code).head, (yyvsp[(7) - (7)].code).head);
+	(yyval.code).head = strConcat((yyvsp[(3) - (7)].decl).codeHead, str);
+	(yyval.code).body = strConcat((yyvsp[(3) - (7)].decl).codeBody, codeBodyStr);
+	freeRegisterT((yyvsp[(3) - (7)].decl).reg);
+	free(str);
+	free(codeBodyStr);
 }
     break;
 
   case 43:
 /* Line 1792 of yacc.c  */
-#line 974 "cpm.y"
+#line 957 "cpm.y"
     {
-   outputError("expected '('");
-   hasErrors = true;
-   (yyval.code).body=strdup("");
-   (yyval.code).head=strdup("");
+	outputError("expected '('");
+	hasErrors = true;
+	(yyval.code).body=strdup("");
+	(yyval.code).head=strdup("");
 }
     break;
 
   case 44:
 /* Line 1792 of yacc.c  */
-#line 981 "cpm.y"
+#line 964 "cpm.y"
     {
-   outputError("Expected a boolean expression");
-   hasErrors = true;
-   (yyval.code).body=strdup("");
-   (yyval.code).head=strdup("");
+	outputError("Expected a boolean expression");
+	hasErrors = true;
+	(yyval.code).body=strdup("");
+	(yyval.code).head=strdup("");
 }
     break;
 
   case 45:
 /* Line 1792 of yacc.c  */
-#line 988 "cpm.y"
-    {//1    2      3     4      5
-   printf("CONTROL_STMT --> WHILE '(' BOOLEXPR ')' STMT_BLOCK\n");
-   char* codeBodyStr = (char*)calloc((200 + strlen((yyvsp[(5) - (5)].code).body)),sizeof(char));
-   char* label = getLabel();
-   char* str = (char*)calloc((200 + strlen((yyvsp[(3) - (5)].decl).codeBody)),sizeof(char));
-   codeBodyStr[0] = '\0';
-   
-   sprintf(codeBodyStr,"beq %s, $0, End%s:\n%s\nj Loop%s:\nEnd%s:\n", (yyvsp[(3) - (5)].decl).reg, label, (yyvsp[(5) - (5)].code).body, label, label);
-   sprintf(str,"Loop%s:\n", label);
-   strcat(str, (yyvsp[(3) - (5)].decl).codeBody);
+#line 971 "cpm.y"
+    {//1	 2		3	  4		5
+	printf("CONTROL_STMT --> WHILE '(' BOOLEXPR ')' STMT_BLOCK\n");
+	char* codeBodyStr = (char*)calloc((200 + strlen((yyvsp[(5) - (5)].code).body)),sizeof(char));
+	char* label = getLabel();
+	char* str = (char*)calloc((200 + strlen((yyvsp[(3) - (5)].decl).codeBody)),sizeof(char));
+	codeBodyStr[0] = '\0';
+	
+	sprintf(codeBodyStr,"beq %s, $0, End%s:\n%s\nj Loop%s:\nEnd%s:\n", (yyvsp[(3) - (5)].decl).reg, label, (yyvsp[(5) - (5)].code).body, label, label);
+	sprintf(str,"Loop%s:\n", label);
+	strcat(str, (yyvsp[(3) - (5)].decl).codeBody);
 
-   (yyval.code).head = strConcat((yyvsp[(3) - (5)].decl).codeHead, (yyvsp[(5) - (5)].code).head);
-   (yyval.code).body = strConcat(str, codeBodyStr);
-   freeRegisterT((yyvsp[(3) - (5)].decl).reg);
-   free(str);
-   free(codeBodyStr);
+	(yyval.code).head = strConcat((yyvsp[(3) - (5)].decl).codeHead, (yyvsp[(5) - (5)].code).head);
+	(yyval.code).body = strConcat(str, codeBodyStr);
+	freeRegisterT((yyvsp[(3) - (5)].decl).reg);
+	free(str);
+	free(codeBodyStr);
 }
     break;
 
   case 46:
 /* Line 1792 of yacc.c  */
-#line 1006 "cpm.y"
+#line 989 "cpm.y"
     {
-   outputError("expected '('");
-   hasErrors = true;
-   (yyval.code).body = strdup("");
-   (yyval.code).head = strdup("");   
+	outputError("expected '('");
+	hasErrors = true;
+	(yyval.code).body = strdup("");
+	(yyval.code).head = strdup("");	
 }
     break;
 
   case 47:
 /* Line 1792 of yacc.c  */
-#line 1013 "cpm.y"
+#line 996 "cpm.y"
     {
-   outputError("Expected a boolean expression");
-   hasErrors = true; 
-   (yyval.code).body = strdup("");
-   (yyval.code).head = strdup("");
+	outputError("Expected a boolean expression");
+	hasErrors = true; 
+	(yyval.code).body = strdup("");
+	(yyval.code).head = strdup("");
 }
     break;
 
   case 48:
 /* Line 1792 of yacc.c  */
-#line 1020 "cpm.y"
+#line 1003 "cpm.y"
     {
-   outputError("expected ')'");
-   hasErrors = true; 
-   (yyval.code).body = strdup("");
-   (yyval.code).head = strdup("");
+	outputError("expected ')'");
+	hasErrors = true; 
+	(yyval.code).body = strdup("");
+	(yyval.code).head = strdup("");
 }
     break;
 
   case 49:
 /* Line 1792 of yacc.c  */
-#line 1027 "cpm.y"
-    {//1     2      3      4  5   6   7    8    9
-   printf("CONTROL_STMT --> FOREACH ID ASSIGNOP NUM ':' NUM WITH STEP STMT\n");
-   char* codeBodyStr = (char*)calloc((200 + strlen((yyvsp[(8) - (9)].code).body) + strlen((yyvsp[(9) - (9)].code).body)),sizeof(char));
-   char* str = (char*)calloc((200 + strlen((yyvsp[(8) - (9)].code).body) + strlen((yyvsp[(9) - (9)].code).body)),sizeof(char));
-   char errorMessage[ERROR_STRING_LEN];
-   char* label = getLabel();
-   char* reg;
-   char* reg1;
-   char* reg2;
-   char* reg3;
-   bool assignDone = false;
-   
-   symTblEntry*  symbol = lookup(*ptr2symbolTable, (yyvsp[(2) - (9)].sval));
-   if (symbol != NULL)
-   {
-      if(symbol->isConst == false)
-      { 
-         if((yyvsp[(4) - (9)].nVal).type == I && symbol->type == integer  && (yyvsp[(6) - (9)].nVal).type == I) //ints assignment
-         {
-            reg1 = getRegisterT();
-            reg2 = getRegisterT();
-            sprintf(codeBodyStr,"la %s,$s\naddi $s,$0,$d\nsw %s,0(%s)\n", reg1, (yyvsp[(2) - (9)].sval), reg2, (yyvsp[(4) - (9)].nVal).val.ival,reg2, reg1);
-            freeRegisterT(reg1);
-            freeRegisterT(reg2);
-            assignDone = true;
-         }   
-         else
-         {
-            if((yyvsp[(4) - (9)].nVal).type == F && symbol->type == floating && (yyvsp[(6) - (9)].nVal).type == F) //floats assignment
-            {
-               reg1 = getRegisterF();
-               reg2 = getRegisterF();
-               sprintf(codeBodyStr,"la %s,$s\naddi $s,$0,$f\ns.s %s, %s\n", reg1, (yyvsp[(2) - (9)].sval), reg2, (yyvsp[(4) - (9)].nVal).val.fval, reg2, reg1);
-               freeRegisterF(reg1);
-               freeRegisterF(reg2);
-               assignDone = true;
-            }
-            else
-            {
-               if((yyvsp[(4) - (9)].nVal).type == I && symbol->type == floating && (yyvsp[(6) - (9)].nVal).type == I) //assign an int into a float
-               {
-                  reg1 = getRegisterT();
-                  reg2 = getRegisterT();
-                  reg3 = getRegisterF();
-                  sprintf(codeBodyStr,"la %s,$s\naddi $s,$0,$d\nmtc1 %s, %s\ncvt.s.w %s, %s\ns.s %s, %s\n", reg1, (yyvsp[(2) - (9)].sval), reg2, (yyvsp[(4) - (9)].nVal).val.ival, reg2, reg3, reg3 ,reg3,reg3,reg1);
-                  freeRegisterT(reg1);
-                  freeRegisterT(reg2);
-                  freeRegisterF(reg3);
-                  assignDone = true;
-               }
-               else   // attempting to assign a float into an int
-               {
-                  sprintf(errorMessage,"Can't convert from a real number to integer");
-                  outputError(errorMessage);
-                  sprintf(codeBodyStr,"");
-                  hasErrors = true;
-               }
-            }
-         }
-      }
-      else
-      {
-         sprintf(errorMessage,"Can't assign to a constant");
-         outputError(errorMessage);
-         sprintf(codeBodyStr,"");
-         hasErrors = true;
-      }
-   }
-   else
-   {
-      sprintf(errorMessage,"Id isn't declared");
-      outputError(errorMessage);
-      sprintf(codeBodyStr,"");
-      hasErrors = true;
-   }
+#line 1010 "cpm.y"
+    {//1	  2		3		4  5   6   7    8    9
+	printf("CONTROL_STMT --> FOREACH ID ASSIGNOP NUM ':' NUM WITH STEP STMT\n");
+	char* codeBodyStr = (char*)calloc((200 + strlen((yyvsp[(8) - (9)].code).body) + strlen((yyvsp[(9) - (9)].code).body)),sizeof(char));
+	char* str = (char*)calloc((200 + strlen((yyvsp[(8) - (9)].code).body) + strlen((yyvsp[(9) - (9)].code).body)),sizeof(char));
+	char errorMessage[ERROR_STRING_LEN];
+	char* label = getLabel();
+	char* reg;
+	char* reg1;
+	char* reg2;
+	char* reg3;
+	bool assignDone = false;
+	
+	symTblEntry*  symbol = lookup(*ptr2symbolTable, (yyvsp[(2) - (9)].sval));
+	if (symbol != NULL)
+	{
+		if(symbol->isConst == false)
+		{ 
+			if((yyvsp[(4) - (9)].nVal).type == I && symbol->type == integer  && (yyvsp[(6) - (9)].nVal).type == I) //ints assignment
+			{
+				reg1 = getRegisterT();
+				reg2 = getRegisterT();
+				sprintf(codeBodyStr,"la %s,$s\naddi $s,$0,$d\nsw %s,0(%s)\n", reg1, (yyvsp[(2) - (9)].sval), reg2, (yyvsp[(4) - (9)].nVal).val.ival,reg2, reg1);
+				freeRegisterT(reg1);
+				freeRegisterT(reg2);
+				assignDone = true;
+			}	
+			else
+			{
+				if((yyvsp[(4) - (9)].nVal).type == F && symbol->type == floating && (yyvsp[(6) - (9)].nVal).type == F) //floats assignment
+				{
+					reg1 = getRegisterF();
+					reg2 = getRegisterF();
+					sprintf(codeBodyStr,"la %s,$s\naddi $s,$0,$f\ns.s %s, %s\n", reg1, (yyvsp[(2) - (9)].sval), reg2, (yyvsp[(4) - (9)].nVal).val.fval, reg2, reg1);
+					freeRegisterF(reg1);
+					freeRegisterF(reg2);
+					assignDone = true;
+				}
+				else
+				{
+					if((yyvsp[(4) - (9)].nVal).type == I && symbol->type == floating && (yyvsp[(6) - (9)].nVal).type == I) //assign an int into a float
+					{
+						reg1 = getRegisterT();
+						reg2 = getRegisterT();
+						reg3 = getRegisterF();
+						sprintf(codeBodyStr,"la %s,$s\naddi $s,$0,$d\nmtc1 %s, %s\ncvt.s.w %s, %s\ns.s %s, %s\n", reg1, (yyvsp[(2) - (9)].sval), reg2, (yyvsp[(4) - (9)].nVal).val.ival, reg2, reg3, reg3 ,reg3,reg3,reg1);
+						freeRegisterT(reg1);
+						freeRegisterT(reg2);
+						freeRegisterF(reg3);
+						assignDone = true;
+					}
+					else	// attempting to assign a float into an int
+					{
+						sprintf(errorMessage,"Can't convert from a real number to integer");
+						outputError(errorMessage);
+						sprintf(codeBodyStr,"");
+						hasErrors = true;
+					}
+				}
+			}
+		}
+		else
+		{
+			sprintf(errorMessage,"Can't assign to a constant");
+			outputError(errorMessage);
+			sprintf(codeBodyStr,"");
+			hasErrors = true;
+		}
+	}
+	else
+	{
+		sprintf(errorMessage,"Id isn't declared");
+		outputError(errorMessage);
+		sprintf(codeBodyStr,"");
+		hasErrors = true;
+	}
 
-   if (assignDone == true)
-   {
-      // assignment completed correctly
-      if ((yyvsp[(6) - (9)].nVal).type == I)   //iterator must be int
-      {   
-         reg1 = getRegisterT();
-         reg2 = getRegisterT();
-         reg3 = getRegisterT();
-              //   reg2 $2     reg1,reg2      reg3,$6.val.ival   reg2,reg3,reg1         $9.body                 label
-      sprintf(str,"la %s,%s\nlw %s,0(%s)\nli $s,%d\nLOOP%s:\nnslt %s,%s,%s\nbnez $s,End%s\n$s\naddi $s,%s,%s\nj LOOP%s\nEnd%s:", reg2, (yyvsp[(2) - (9)].sval), reg1, reg2, reg3, (yyvsp[(6) - (9)].nVal).val.ival, label, reg2, reg3, reg1, reg2, label, (yyvsp[(9) - (9)].code).body, reg2, reg2, (yyvsp[(8) - (9)].code).body, label, label);
-                                          //label                reg2,label          reg2,reg2,$8.body      label
-      (yyval.code).body = strConcat("codeBodyStr",str);
-      (yyval.code).head = strConcat((yyvsp[(8) - (9)].code).head,(yyvsp[(9) - (9)].code).head);
-      }
-      else
-      {   //error - iterator must be of type int !!!
-         sprintf(errorMessage,"Iterator must be of type int");
-         outputError(errorMessage);
-         hasErrors = true;
-         (yyval.code).body = strdup("");
-         (yyval.code).head = strdup("");
-      }
+	if (assignDone == true)
+	{
+		// assignment completed correctly
+		if ((yyvsp[(6) - (9)].nVal).type == I)	//iterator must be int
+		{	
+			reg1 = getRegisterT();
+			reg2 = getRegisterT();
+			reg3 = getRegisterT();
+				  //	reg2 $2	  reg1,reg2		reg3,$6.val.ival	reg2,reg3,reg1			$9.body					  label
+		sprintf(str,"la %s,%s\nlw %s,0(%s)\nli $s,%d\nLOOP%s:\nnslt %s,%s,%s\nbnez $s,End%s\n$s\naddi $s,%s,%s\nj LOOP%s\nEnd%s:", reg2, (yyvsp[(2) - (9)].sval), reg1, reg2, reg3, (yyvsp[(6) - (9)].nVal).val.ival, label, reg2, reg3, reg1, reg2, label, (yyvsp[(9) - (9)].code).body, reg2, reg2, (yyvsp[(8) - (9)].code).body, label, label);
+														//label		 			reg2,label			 reg2,reg2,$8.body		label
+		(yyval.code).body = strConcat("codeBodyStr",str);
+		(yyval.code).head = strConcat((yyvsp[(8) - (9)].code).head,(yyvsp[(9) - (9)].code).head);
+		}
+		else
+		{	//error - iterator must be of type int !!!
+			sprintf(errorMessage,"Iterator must be of type int");
+			outputError(errorMessage);
+			hasErrors = true;
+			(yyval.code).body = strdup("");
+			(yyval.code).head = strdup("");
+		}
 
-      freeRegisterT(reg1);
-      freeRegisterT(reg2);
-      freeRegisterT(reg3);
-   }
-   free(str);
-   free(codeBodyStr);
+		freeRegisterT(reg1);
+		freeRegisterT(reg2);
+		freeRegisterT(reg3);
+	}
+	free(str);
+	free(codeBodyStr);
 }
     break;
 
   case 50:
 /* Line 1792 of yacc.c  */
-#line 1134 "cpm.y"
-    { //1      2   3      4  5  6   7      8   9 // @@@
-   printf("CONTROL_STMT --> FOREACH ID ASSIGNOP NUM':'ID WITH STEP STMT\n");
-   (yyval.code).body = strdup("");
-   (yyval.code).head = strdup("");
+#line 1117 "cpm.y"
+    { //1	   2	3		4  5  6   7		8	9 // @@@
+	printf("CONTROL_STMT --> FOREACH ID ASSIGNOP NUM':'ID WITH STEP STMT\n");
+	(yyval.code).body = strdup("");
+	(yyval.code).head = strdup("");
 
 }
     break;
 
   case 51:
 /* Line 1792 of yacc.c  */
-#line 1141 "cpm.y"
+#line 1124 "cpm.y"
     {
-   outputError("expected an assignment operation");
-   hasErrors = true;
-   (yyval.code).body = strdup("");
-   (yyval.code).head = strdup("");
+	outputError("expected an assignment operation");
+	hasErrors = true;
+	(yyval.code).body = strdup("");
+	(yyval.code).head = strdup("");
 }
     break;
 
   case 52:
 /* Line 1792 of yacc.c  */
-#line 1148 "cpm.y"
+#line 1131 "cpm.y"
     {
-   outputError("expected ':'");
-   hasErrors = true;
-   (yyval.code).body = strdup("");
-   (yyval.code).head = strdup("");
+	outputError("expected ':'");
+	hasErrors = true;
+	(yyval.code).body = strdup("");
+	(yyval.code).head = strdup("");
 }
     break;
 
   case 53:
 /* Line 1792 of yacc.c  */
-#line 1155 "cpm.y"
+#line 1138 "cpm.y"
     {
-   outputError("expected ':'");
-   hasErrors = true;
-   (yyval.code).body = strdup("");
-   (yyval.code).head = strdup("");
+	outputError("expected ':'");
+	hasErrors = true;
+	(yyval.code).body = strdup("");
+	(yyval.code).head = strdup("");
 }
     break;
 
   case 54:
 /* Line 1792 of yacc.c  */
-#line 1162 "cpm.y"
-    {//1   2      3     4      5      6
+#line 1145 "cpm.y"
+    {//1	2		3	  4		5		6
 /*do the block until BOOLEXPR is true*/
-   printf("CONTROL_STMT --> DO STMT_BLOCK TILL '(' BOOLEXPR ')'\n");
-   char* codeBodyStr = (char*)calloc((200 + strlen((yyvsp[(2) - (6)].code).body)),sizeof(char));
-   char* label = getLabel();
-   char* str = (char*)calloc((200 + strlen((yyvsp[(5) - (6)].decl).codeBody)),sizeof(char));
+	printf("CONTROL_STMT --> DO STMT_BLOCK TILL '(' BOOLEXPR ')'\n");
+	char* codeBodyStr = (char*)calloc((200 + strlen((yyvsp[(2) - (6)].code).body)),sizeof(char));
+	char* label = getLabel();
+	char* str = (char*)calloc((200 + strlen((yyvsp[(5) - (6)].decl).codeBody)),sizeof(char));
 
-   //sprintf(codeBodyStr,"beq %s, $0, End%s\n%s\nj Loop%s\nEnd%s:\n", $5.reg, label, $2.body, label, label);
-   sprintf(codeBodyStr,"bneq %s, $0, End%s\n%s\nj Loop%s\nEnd%s:\n", (yyvsp[(5) - (6)].decl).reg, label, (yyvsp[(2) - (6)].code).body, label, label);
-   sprintf(str,"Loop%s:\n",label);
-   strcat(str,(yyvsp[(5) - (6)].decl).codeBody);
-   (yyval.code).head = strConcat((yyvsp[(5) - (6)].decl).codeHead,(yyvsp[(2) - (6)].code).head);
-   (yyval.code).body = strConcat(str,codeBodyStr);
-   freeRegisterT((yyvsp[(5) - (6)].decl).reg);
-   free(str);
-   free(codeBodyStr);
+	//sprintf(codeBodyStr,"beq %s, $0, End%s\n%s\nj Loop%s\nEnd%s:\n", $5.reg, label, $2.body, label, label);
+	sprintf(codeBodyStr,"bneq %s, $0, End%s\n%s\nj Loop%s\nEnd%s:\n", (yyvsp[(5) - (6)].decl).reg, label, (yyvsp[(2) - (6)].code).body, label, label);
+	sprintf(str,"Loop%s:\n",label);
+	strcat(str,(yyvsp[(5) - (6)].decl).codeBody);
+	(yyval.code).head = strConcat((yyvsp[(5) - (6)].decl).codeHead,(yyvsp[(2) - (6)].code).head);
+	(yyval.code).body = strConcat(str,codeBodyStr);
+	freeRegisterT((yyvsp[(5) - (6)].decl).reg);
+	free(str);
+	free(codeBodyStr);
 }
     break;
 
   case 55:
 /* Line 1792 of yacc.c  */
-#line 1180 "cpm.y"
+#line 1163 "cpm.y"
     {
-   outputError("expected '('");
-   hasErrors = true;
-   (yyval.code).body = strdup("");
-   (yyval.code).head = strdup("");   
+	outputError("expected '('");
+	hasErrors = true;
+	(yyval.code).body = strdup("");
+	(yyval.code).head = strdup("");	
 }
     break;
 
   case 56:
 /* Line 1792 of yacc.c  */
-#line 1187 "cpm.y"
+#line 1170 "cpm.y"
     {
-   outputError("Expected a boolean expression");
-   hasErrors = true;
-   (yyval.code).body = strdup("");
-   (yyval.code).head = strdup("");
+	outputError("Expected a boolean expression");
+	hasErrors = true;
+	(yyval.code).body = strdup("");
+	(yyval.code).head = strdup("");
 }
     break;
 
   case 57:
 /* Line 1792 of yacc.c  */
-#line 1194 "cpm.y"
-    {   
-   outputError("expected ')'");
-   hasErrors = true;
-   (yyval.code).body = strdup("");
-   (yyval.code).head = strdup("");   
+#line 1177 "cpm.y"
+    {	
+	outputError("expected ')'");
+	hasErrors = true;
+	(yyval.code).body = strdup("");
+	(yyval.code).head = strdup("");	
 }
     break;
 
   case 58:
 /* Line 1792 of yacc.c  */
-#line 1201 "cpm.y"
+#line 1184 "cpm.y"
     {//1
-   printf("CONTROL_STMT --> switch\n");
-   (yyval.code).head = strdup((yyvsp[(1) - (1)].decl).codeHead);
-   (yyval.code).body = strdup((yyvsp[(1) - (1)].decl).codeBody);
+	printf("CONTROL_STMT --> switch\n");
+	(yyval.code).head = strdup((yyvsp[(1) - (1)].decl).codeHead);
+	(yyval.code).body = strdup((yyvsp[(1) - (1)].decl).codeBody);
 }
     break;
 
   case 59:
 /* Line 1792 of yacc.c  */
-#line 1209 "cpm.y"
-    {//0        1      2      3
-   printf("STMT_BLOCK --> '{' STMTLIST '}'\n");
-   (yyval.code).head = strdup((yyvsp[(2) - (3)].code).head);
-   (yyval.code).body = strdup((yyvsp[(2) - (3)].code).body);
+#line 1192 "cpm.y"
+    {//0		  1		2	   3
+	printf("STMT_BLOCK --> '{' STMTLIST '}'\n");
+	(yyval.code).head = strdup((yyvsp[(2) - (3)].code).head);
+	(yyval.code).body = strdup((yyvsp[(2) - (3)].code).body);
 }
     break;
 
   case 60:
 /* Line 1792 of yacc.c  */
-#line 1215 "cpm.y"
+#line 1198 "cpm.y"
     { //error handling
-   outputError("expected '{'");
-   hasErrors = true;
-   (yyval.code).body = strdup("");
-   (yyval.code).head = strdup("");   
+	outputError("expected '{'");
+	hasErrors = true;
+	(yyval.code).body = strdup("");
+	(yyval.code).head = strdup("");	
 }
     break;
 
   case 61:
 /* Line 1792 of yacc.c  */
-#line 1222 "cpm.y"
+#line 1205 "cpm.y"
     {
-   outputError("expected '}'");
-   hasErrors = true;
-   (yyval.code).body = strdup("");
-   (yyval.code).head = strdup("");   
+	outputError("expected '}'");
+	hasErrors = true;
+	(yyval.code).body = strdup("");
+	(yyval.code).head = strdup("");	
 }
     break;
 
   case 62:
 /* Line 1792 of yacc.c  */
-#line 1231 "cpm.y"
-    {//0      1    2     3      4   5   6     7
-   printf("switch --> SWITCH '(' CHOICE ')' '{' CASES '}'\n");
-   (yyval.decl).codeBody = strConcat((yyvsp[(3) - (7)].decl).codeBody,(yyvsp[(6) - (7)].decl).codeBody);
-   (yyval.decl).codeHead = strConcat((yyvsp[(3) - (7)].decl).codeHead,(yyvsp[(6) - (7)].decl).codeHead);
+#line 1214 "cpm.y"
+    {//0		1	 2	  3		4	5	6	  7
+	printf("switch --> SWITCH '(' CHOICE ')' '{' CASES '}'\n");
+	(yyval.decl).codeBody = strConcat((yyvsp[(3) - (7)].decl).codeBody,(yyvsp[(6) - (7)].decl).codeBody);
+	(yyval.decl).codeHead = strConcat((yyvsp[(3) - (7)].decl).codeHead,(yyvsp[(6) - (7)].decl).codeHead);
 }
     break;
 
   case 63:
 /* Line 1792 of yacc.c  */
-#line 1237 "cpm.y"
+#line 1220 "cpm.y"
     { 
-   outputError("expected '('");
-   hasErrors = true;
-   (yyval.decl).codeBody = strdup("");
-   (yyval.decl).codeHead = strdup("");
+	outputError("expected '('");
+	hasErrors = true;
+	(yyval.decl).codeBody = strdup("");
+	(yyval.decl).codeHead = strdup("");
 }
     break;
 
   case 64:
 /* Line 1792 of yacc.c  */
-#line 1244 "cpm.y"
+#line 1227 "cpm.y"
     { 
-   outputError("expected a CHOICE");
-   hasErrors = true;
-   (yyval.decl).codeBody = strdup("");
-   (yyval.decl).codeHead = strdup("");
+	outputError("expected a CHOICE");
+	hasErrors = true;
+	(yyval.decl).codeBody = strdup("");
+	(yyval.decl).codeHead = strdup("");
 }
     break;
 
   case 65:
 /* Line 1792 of yacc.c  */
-#line 1251 "cpm.y"
+#line 1234 "cpm.y"
     {
-   outputError("expected ')'");
-   hasErrors = true;
-   (yyval.decl).codeBody = strdup("");
-   (yyval.decl).codeHead = strdup("");
+	outputError("expected ')'");
+	hasErrors = true;
+	(yyval.decl).codeBody = strdup("");
+	(yyval.decl).codeHead = strdup("");
 }
     break;
 
   case 66:
 /* Line 1792 of yacc.c  */
-#line 1258 "cpm.y"
+#line 1241 "cpm.y"
     {
-   outputError("expected '{'");
-   hasErrors = true;
-   (yyval.decl).codeBody = strdup("");
-   (yyval.decl).codeHead = strdup("");
+	outputError("expected '{'");
+	hasErrors = true;
+	(yyval.decl).codeBody = strdup("");
+	(yyval.decl).codeHead = strdup("");
 }
     break;
 
   case 67:
 /* Line 1792 of yacc.c  */
-#line 1265 "cpm.y"
+#line 1248 "cpm.y"
     {
-   outputError("expected '}'");
-   hasErrors = true;
-   (yyval.decl).codeBody = strdup("");
-   (yyval.decl).codeHead = strdup("");
+	outputError("expected '}'");
+	hasErrors = true;
+	(yyval.decl).codeBody = strdup("");
+	(yyval.decl).codeHead = strdup("");
 }
     break;
 
   case 68:
 /* Line 1792 of yacc.c  */
-#line 1274 "cpm.y"
-    {//0     1
-   printf("CHOICE --> ID\n");
-   char* codeBodyStr = (char*)calloc(200,sizeof(char));
-   char* reg;
-   symTblEntry*  symbol = lookup(*ptr2symbolTable, (yyvsp[(1) - (1)].sval));
+#line 1257 "cpm.y"
+    {//0	  1
+	printf("CHOICE --> ID\n");
+	char* codeBodyStr = (char*)calloc(200,sizeof(char));
+	char* reg;
+	symTblEntry*  symbol = lookup(*ptr2symbolTable, (yyvsp[(1) - (1)].sval));
 
-   if (symbol != NULL)
-   {
-      if(symbol->type == integer)
-      {
-         sprintf(codeBodyStr,"lw $s1,%s\n", (yyvsp[(1) - (1)].sval));
-      }
-      else
-      {
-         if(symbol->type == floating)
-         {
-            reg = getRegisterF();
-            sprintf(codeBodyStr,"l.s %s,%s\n", reg, (yyvsp[(1) - (1)].sval));
-            freeRegisterF(reg);
-         }
-      }
-      (yyval.decl).codeBody = strdup(codeBodyStr);
-   }
-   else
-   {
-      outputError("Id not declared");
-      hasErrors = true;
-      (yyval.decl).codeBody = strdup("");
-   }
-   
-   (yyval.decl).codeHead = strdup("");
-   free(codeBodyStr);
+	if (symbol != NULL)
+	{
+		if(symbol->type == integer)
+		{
+			sprintf(codeBodyStr,"lw $s1,%s\n", (yyvsp[(1) - (1)].sval));
+		}
+		else
+		{
+			if(symbol->type == floating)
+			{
+				reg = getRegisterF();
+				sprintf(codeBodyStr,"l.s %s,%s\n", reg, (yyvsp[(1) - (1)].sval));
+				freeRegisterF(reg);
+			}
+		}
+		(yyval.decl).codeBody = strdup(codeBodyStr);
+	}
+	else
+	{
+		outputError("Id not declared");
+		hasErrors = true;
+		(yyval.decl).codeBody = strdup("");
+	}
+	
+	(yyval.decl).codeHead = strdup("");
+	free(codeBodyStr);
 }
     break;
 
   case 69:
 /* Line 1792 of yacc.c  */
-#line 1308 "cpm.y"
+#line 1291 "cpm.y"
     {//1
-   printf("CHOICE --> NUM\n");
-   char* codeBodyStr = (char*)calloc(200,sizeof(char));
-   char* codeHeadStr = (char*)calloc(200,sizeof(char));
-   char* reg;
-   
-   if((yyvsp[(1) - (1)].nVal).type == I)
-   {
-      sprintf(codeBodyStr, "li $s1,%d\n", (yyvsp[(1) - (1)].nVal).val.ival);
-   }
-   else
-   {
-      reg = getRegisterF();
-      char* label = getLabel();
-      sprintf(codeHeadStr,"%s: .float %f\n", label, (yyvsp[(1) - (1)].nVal).val.fval);
-      sprintf(codeBodyStr,"l.s %s,%s\n", reg, label);
-   }
-   (yyval.decl).codeHead = strdup(codeHeadStr);
-   (yyval.decl).codeBody = strdup(codeBodyStr);
-   free(codeBodyStr);
-   free(codeHeadStr);
+	printf("CHOICE --> NUM\n");
+	char* codeBodyStr = (char*)calloc(200,sizeof(char));
+	char* codeHeadStr = (char*)calloc(200,sizeof(char));
+	char* reg;
+	
+	if((yyvsp[(1) - (1)].nVal).type == I)
+	{
+		sprintf(codeBodyStr, "li $s1,%d\n", (yyvsp[(1) - (1)].nVal).val.ival);
+	}
+	else
+	{
+		reg = getRegisterF();
+		char* label = getLabel();
+		sprintf(codeHeadStr,"%s: .float %f\n", label, (yyvsp[(1) - (1)].nVal).val.fval);
+		sprintf(codeBodyStr,"l.s %s,%s\n", reg, label);
+	}
+	(yyval.decl).codeHead = strdup(codeHeadStr);
+	(yyval.decl).codeBody = strdup(codeBodyStr);
+	free(codeBodyStr);
+	free(codeHeadStr);
 }
     break;
 
   case 70:
 /* Line 1792 of yacc.c  */
-#line 1333 "cpm.y"
-    {//0    1     2     3      4      5    6     7
-   printf("CASES --> CASE NUM ':' STMTLIST BREAK ';' CASES\n");
-   char* codeBodyStr = (char*)calloc((200 + strlen((yyvsp[(4) - (7)].code).body)),sizeof(char));
-   char* label = getLabel();
-   char* reg =  getRegisterT();
+#line 1316 "cpm.y"
+    {//0	 1	  2	  3		4		5	 6	  7
+	printf("CASES --> CASE NUM ':' STMTLIST BREAK ';' CASES\n");
+	char* codeBodyStr = (char*)calloc((200 + strlen((yyvsp[(4) - (7)].code).body)),sizeof(char));
+	char* label = getLabel();
+	char* reg =  getRegisterT();
 
-   sprintf(codeBodyStr,"li %s, %d\nbne %s, $s1 ,next%s\n%s\nj end%s\nnext%s:\n", reg, (yyvsp[(2) - (7)].nVal).val.ival, reg, label, (yyvsp[(4) - (7)].code).body, (yyvsp[(7) - (7)].decl).label, label);   
-   (yyval.decl).label = (yyvsp[(7) - (7)].decl).label;
-   (yyval.decl).codeHead = strConcat((yyvsp[(4) - (7)].code).head, (yyvsp[(7) - (7)].decl).codeHead);
-   (yyval.decl).codeBody = strConcat(codeBodyStr, (yyvsp[(7) - (7)].decl).codeBody);
-   freeRegisterT(reg);
-   free(codeBodyStr);
+	sprintf(codeBodyStr,"li %s, %d\nbne %s, $s1 ,next%s\n%s\nj end%s\nnext%s:\n", reg, (yyvsp[(2) - (7)].nVal).val.ival, reg, label, (yyvsp[(4) - (7)].code).body, (yyvsp[(7) - (7)].decl).label, label);	
+	(yyval.decl).label = (yyvsp[(7) - (7)].decl).label;
+	(yyval.decl).codeHead = strConcat((yyvsp[(4) - (7)].code).head, (yyvsp[(7) - (7)].decl).codeHead);
+	(yyval.decl).codeBody = strConcat(codeBodyStr, (yyvsp[(7) - (7)].decl).codeBody);
+	freeRegisterT(reg);
+	free(codeBodyStr);
 }
     break;
 
   case 71:
 /* Line 1792 of yacc.c  */
-#line 1347 "cpm.y"
+#line 1330 "cpm.y"
     {
-   outputError("expected ':'");
-   hasErrors = true; 
-   (yyval.decl).codeBody = strdup("");
-   (yyval.decl).codeHead = strdup("");
+	outputError("expected ':'");
+	hasErrors = true; 
+	(yyval.decl).codeBody = strdup("");
+	(yyval.decl).codeHead = strdup("");
 }
     break;
 
   case 72:
 /* Line 1792 of yacc.c  */
-#line 1354 "cpm.y"
+#line 1337 "cpm.y"
     {
-   outputError("expected ';'");
-   hasErrors = true;
-   (yyval.decl).codeBody = strdup("");
-   (yyval.decl).codeHead = strdup("");
+	outputError("expected ';'");
+	hasErrors = true;
+	(yyval.decl).codeBody = strdup("");
+	(yyval.decl).codeHead = strdup("");
 }
     break;
 
   case 73:
 /* Line 1792 of yacc.c  */
-#line 1361 "cpm.y"
-    {//1      2   3
-   printf("CASES --> DEFAULT ':' STMTLIST\n");
-   char* codeBodyStr = (char*)calloc((200 + strlen((yyvsp[(3) - (3)].code).body)),sizeof(char));
-   char* label = getLabel();
+#line 1344 "cpm.y"
+    {//1	   2	3
+	printf("CASES --> DEFAULT ':' STMTLIST\n");
+	char* codeBodyStr = (char*)calloc((200 + strlen((yyvsp[(3) - (3)].code).body)),sizeof(char));
+	char* label = getLabel();
 
-   sprintf(codeBodyStr,"default%s:\n%s\nEnd%s:", label, (yyvsp[(3) - (3)].code).body, label);
-   (yyval.decl).label = strdup(label);
-   (yyval.decl).codeHead = strdup((yyvsp[(3) - (3)].code).head);
-   (yyval.decl).codeBody = strdup(codeBodyStr);
-   free(codeBodyStr);
+	sprintf(codeBodyStr,"default%s:\n%s\nEnd%s:", label, (yyvsp[(3) - (3)].code).body, label);
+	(yyval.decl).label = strdup(label);
+	(yyval.decl).codeHead = strdup((yyvsp[(3) - (3)].code).head);
+	(yyval.decl).codeBody = strdup(codeBodyStr);
+	free(codeBodyStr);
 }
     break;
 
   case 74:
 /* Line 1792 of yacc.c  */
-#line 1373 "cpm.y"
+#line 1356 "cpm.y"
     {
-   outputError("expected ':'");
-   hasErrors = true;
-   (yyval.decl).codeBody = strdup("");
-   (yyval.decl).codeHead = strdup("");
+	outputError("expected ':'");
+	hasErrors = true;
+	(yyval.decl).codeBody = strdup("");
+	(yyval.decl).codeHead = strdup("");
 }
     break;
 
   case 75:
 /* Line 1792 of yacc.c  */
-#line 1382 "cpm.y"
-    {//0   1   2      3   4    5
-   printf("STEP : ID ASSIGNOP ID ADDOP NUM\n");
-   char* codeBodyStr = (char*)calloc(200,sizeof(char));
-   char errorMessage[ERROR_STRING_LEN];
-   symTblEntry*  symbol1 = lookup(*ptr2symbolTable, (yyvsp[(1) - (5)].sval));
-   symTblEntry*  symbol2 = lookup(*ptr2symbolTable, (yyvsp[(3) - (5)].sval));
+#line 1365 "cpm.y"
+    {//0	1	2		3	4	 5
+	printf("STEP : ID ASSIGNOP ID ADDOP NUM\n");
+	char* codeBodyStr = (char*)calloc(200,sizeof(char));
+	char errorMessage[ERROR_STRING_LEN];
+	symTblEntry*  symbol1 = lookup(*ptr2symbolTable, (yyvsp[(1) - (5)].sval));
+	symTblEntry*  symbol2 = lookup(*ptr2symbolTable, (yyvsp[(3) - (5)].sval));
 
-   if (symbol1 == NULL || symbol2 == NULL)
-   {
-      outputError("Id not declared");
-      hasErrors = true;
-      (yyval.code).head = strdup("");
-      (yyval.code).body = strdup("");
-      free(codeBodyStr);
-   }
-   else
-   {
-      if(symbol1->type == integer && symbol2->type == integer && (yyvsp[(5) - (5)].nVal).type == I) // all ints assignment
-      {
-         char* reg = getRegisterT();
-         if((yyvsp[(4) - (5)].op) == PLUS)
-            sprintf(codeBodyStr,"lw, %s, %s\naddi %s, %s ,%d\nsw %s, %s\n", reg, (yyvsp[(3) - (5)].sval), reg, reg, (yyvsp[(5) - (5)].nVal).val.ival, reg, (yyvsp[(1) - (5)].sval));
-         else
-            sprintf(codeBodyStr,"lw, %s, %s\nsubi %s, %s ,%d\nsw %s, %s\n", reg, (yyvsp[(3) - (5)].sval), reg, reg, (yyvsp[(5) - (5)].nVal).val.ival, reg, (yyvsp[(1) - (5)].sval));
-         freeRegisterT(reg);
-      }
-      if(symbol1->type == floating && symbol2->type == floating && (yyvsp[(5) - (5)].nVal).type == F)   // all floats assignment
-      {
-         char* reg = getRegisterF();
-         if((yyvsp[(4) - (5)].op) == PLUS)
-         sprintf(codeBodyStr,"l.s, %s, %s\nadd.s %s, %s ,%d\ns.s %s, %s\n", reg, (yyvsp[(3) - (5)].sval), reg, reg, (yyvsp[(5) - (5)].nVal).val.fval, reg, (yyvsp[(1) - (5)].sval));
-         else
-         sprintf(codeBodyStr,"l.s, %s, %s\nsub.s %s, %s ,%d\ns.s %s, %s\n", reg, (yyvsp[(3) - (5)].sval), reg, reg, (yyvsp[(5) - (5)].nVal).val.fval, reg, (yyvsp[(1) - (5)].sval));
-         freeRegisterF(reg);                                                    
-      }
-   }
-      
-   (yyval.code).head = strdup("");
-   (yyval.code).body = strdup(codeBodyStr);
-   free(codeBodyStr);
+	if (symbol1 == NULL || symbol2 == NULL)
+	{
+		outputError("Id not declared");
+		hasErrors = true;
+		(yyval.code).head = strdup("");
+		(yyval.code).body = strdup("");
+		free(codeBodyStr);
+	}
+	else
+	{
+		if(symbol1->type == integer && symbol2->type == integer && (yyvsp[(5) - (5)].nVal).type == I) // all ints assignment
+		{
+			char* reg = getRegisterT();
+			if((yyvsp[(4) - (5)].op) == PLUS)
+				sprintf(codeBodyStr,"lw, %s, %s\naddi %s, %s ,%d\nsw %s, %s\n", reg, (yyvsp[(3) - (5)].sval), reg, reg, (yyvsp[(5) - (5)].nVal).val.ival, reg, (yyvsp[(1) - (5)].sval));
+			else
+				sprintf(codeBodyStr,"lw, %s, %s\nsubi %s, %s ,%d\nsw %s, %s\n", reg, (yyvsp[(3) - (5)].sval), reg, reg, (yyvsp[(5) - (5)].nVal).val.ival, reg, (yyvsp[(1) - (5)].sval));
+			freeRegisterT(reg);
+		}
+		if(symbol1->type == floating && symbol2->type == floating && (yyvsp[(5) - (5)].nVal).type == F)	// all floats assignment
+		{
+			char* reg = getRegisterF();
+			if((yyvsp[(4) - (5)].op) == PLUS)
+			sprintf(codeBodyStr,"l.s, %s, %s\nadd.s %s, %s ,%d\ns.s %s, %s\n", reg, (yyvsp[(3) - (5)].sval), reg, reg, (yyvsp[(5) - (5)].nVal).val.fval, reg, (yyvsp[(1) - (5)].sval));
+			else
+			sprintf(codeBodyStr,"l.s, %s, %s\nsub.s %s, %s ,%d\ns.s %s, %s\n", reg, (yyvsp[(3) - (5)].sval), reg, reg, (yyvsp[(5) - (5)].nVal).val.fval, reg, (yyvsp[(1) - (5)].sval));
+			freeRegisterF(reg);																	 
+		}
+	}
+		
+	(yyval.code).head = strdup("");
+	(yyval.code).body = strdup(codeBodyStr);
+	free(codeBodyStr);
 }
     break;
 
   case 76:
 /* Line 1792 of yacc.c  */
-#line 1424 "cpm.y"
+#line 1407 "cpm.y"
     {
-   outputError("expected an assigment operation");
-   hasErrors = true;
-   (yyval.code).body = strdup("");
-   (yyval.code).head = strdup("");
+	outputError("expected an assigment operation");
+	hasErrors = true;
+	(yyval.code).body = strdup("");
+	(yyval.code).head = strdup("");
 }
     break;
 
   case 77:
 /* Line 1792 of yacc.c  */
-#line 1431 "cpm.y"
+#line 1414 "cpm.y"
     {
-   outputError("expected an ID");
-   hasErrors = true;
-   (yyval.code).body = strdup("");
-   (yyval.code).head = strdup("");
+	outputError("expected an ID");
+	hasErrors = true;
+	(yyval.code).body = strdup("");
+	(yyval.code).head = strdup("");
 }
     break;
 
   case 78:
 /* Line 1792 of yacc.c  */
-#line 1438 "cpm.y"
+#line 1421 "cpm.y"
     {
-   outputError("expected an operation");
-   hasErrors = true;
-   (yyval.code).body = strdup("");
-   (yyval.code).head = strdup("");
+	outputError("expected an operation");
+	hasErrors = true;
+	(yyval.code).body = strdup("");
+	(yyval.code).head = strdup("");
 }
     break;
 
   case 79:
 /* Line 1792 of yacc.c  */
-#line 1445 "cpm.y"
+#line 1428 "cpm.y"
     {
-   outputError("expected a number");
-   hasErrors = true;
-   (yyval.code).body = strdup("");
-   (yyval.code).head = strdup("");
+	outputError("expected a number");
+	hasErrors = true;
+	(yyval.code).body = strdup("");
+	(yyval.code).head = strdup("");
 }
     break;
 
   case 80:
 /* Line 1792 of yacc.c  */
-#line 1452 "cpm.y"
-    {//1   2    3     4      5
-   printf("STEP : ID ASSIGNOP ID MULOP NUM\n");
-   char* codeBodyStr = (char*)calloc(200,sizeof(char));
-   symTblEntry*  symbol1 = lookup(*ptr2symbolTable, (yyvsp[(1) - (5)].sval));
-   symTblEntry*  symbol2 = lookup(*ptr2symbolTable, (yyvsp[(3) - (5)].sval));
+#line 1435 "cpm.y"
+    {//1	2	 3	  4	   5
+	printf("STEP : ID ASSIGNOP ID MULOP NUM\n");
+	char* codeBodyStr = (char*)calloc(200,sizeof(char));
+	symTblEntry*  symbol1 = lookup(*ptr2symbolTable, (yyvsp[(1) - (5)].sval));
+	symTblEntry*  symbol2 = lookup(*ptr2symbolTable, (yyvsp[(3) - (5)].sval));
 
-   if (symbol1 == NULL || symbol2 == NULL)
-   {
-      outputError("Id not declared");
-      hasErrors = true;
-      (yyval.code).head = strdup("");
-      (yyval.code).body = strdup("");
-      free(codeBodyStr);
-   }
-   else
-   {
-      if(symbol1->type == integer && symbol2->type == integer && (yyvsp[(5) - (5)].nVal).type == I)   // all ints assignment
-      {
-         char* reg = getRegisterT();
-         if((yyvsp[(4) - (5)].op) == MUL)
-            sprintf(codeBodyStr,"la ,%s, %s\nmul %s, %s ,%d\nsw %s, %s\n", reg, (yyvsp[(3) - (5)].sval), reg, reg, (yyvsp[(5) - (5)].nVal).val.ival, reg, (yyvsp[(1) - (5)].sval));
-         else
-            sprintf(codeBodyStr,"la ,%s, %s\ndiv %s, %s ,%d\nsw %s, %s\n",reg, (yyvsp[(3) - (5)].sval), reg, reg, (yyvsp[(5) - (5)].nVal).val.ival, reg, (yyvsp[(1) - (5)].sval));
-         freeRegisterT(reg);
-      }
-      if(symbol1->type == floating && symbol2->type == floating && (yyvsp[(5) - (5)].nVal).type == F)   // all floats assignment
-      {
-         char* reg = getRegisterF();
-         if((yyvsp[(4) - (5)].op) == MUL)
-            sprintf(codeBodyStr,"l.s, %s, %s\nmul.s %s, %s ,%d\ns.s %s, %s\n", reg ,(yyvsp[(3) - (5)].sval), reg, reg, (yyvsp[(5) - (5)].nVal).val.fval, reg, (yyvsp[(1) - (5)].sval));
-         else
-            sprintf(codeBodyStr,"l.s, %s, %s\ndiv.s %s, %s ,%d\ns.s %s, %s\n", reg, (yyvsp[(3) - (5)].sval), reg, reg, (yyvsp[(5) - (5)].nVal).val.fval, reg, (yyvsp[(1) - (5)].sval));
-         freeRegisterF(reg);                                                    
-      }
-   }
-   (yyval.code).head = strdup("");
-   (yyval.code).body = strdup(codeBodyStr);
-   free(codeBodyStr);
+	if (symbol1 == NULL || symbol2 == NULL)
+	{
+		outputError("Id not declared");
+		hasErrors = true;
+		(yyval.code).head = strdup("");
+		(yyval.code).body = strdup("");
+		free(codeBodyStr);
+	}
+	else
+	{
+		if(symbol1->type == integer && symbol2->type == integer && (yyvsp[(5) - (5)].nVal).type == I)	// all ints assignment
+		{
+			char* reg = getRegisterT();
+			if((yyvsp[(4) - (5)].op) == MUL)
+				sprintf(codeBodyStr,"la ,%s, %s\nmul %s, %s ,%d\nsw %s, %s\n", reg, (yyvsp[(3) - (5)].sval), reg, reg, (yyvsp[(5) - (5)].nVal).val.ival, reg, (yyvsp[(1) - (5)].sval));
+			else
+				sprintf(codeBodyStr,"la ,%s, %s\ndiv %s, %s ,%d\nsw %s, %s\n",reg, (yyvsp[(3) - (5)].sval), reg, reg, (yyvsp[(5) - (5)].nVal).val.ival, reg, (yyvsp[(1) - (5)].sval));
+			freeRegisterT(reg);
+		}
+		if(symbol1->type == floating && symbol2->type == floating && (yyvsp[(5) - (5)].nVal).type == F)	// all floats assignment
+		{
+			char* reg = getRegisterF();
+			if((yyvsp[(4) - (5)].op) == MUL)
+				sprintf(codeBodyStr,"l.s, %s, %s\nmul.s %s, %s ,%d\ns.s %s, %s\n", reg ,(yyvsp[(3) - (5)].sval), reg, reg, (yyvsp[(5) - (5)].nVal).val.fval, reg, (yyvsp[(1) - (5)].sval));
+			else
+				sprintf(codeBodyStr,"l.s, %s, %s\ndiv.s %s, %s ,%d\ns.s %s, %s\n", reg, (yyvsp[(3) - (5)].sval), reg, reg, (yyvsp[(5) - (5)].nVal).val.fval, reg, (yyvsp[(1) - (5)].sval));
+			freeRegisterF(reg);																	 
+		}
+	}
+	(yyval.code).head = strdup("");
+	(yyval.code).body = strdup(codeBodyStr);
+	free(codeBodyStr);
 }
     break;
 
   case 81:
 /* Line 1792 of yacc.c  */
-#line 1492 "cpm.y"
+#line 1475 "cpm.y"
     {
-   outputError("expected an ID");
-   hasErrors = true;
-   (yyval.code).body = strdup("");
-   (yyval.code).head = strdup("");
+	outputError("expected an ID");
+	hasErrors = true;
+	(yyval.code).body = strdup("");
+	(yyval.code).head = strdup("");
 }
     break;
 
   case 82:
 /* Line 1792 of yacc.c  */
-#line 1499 "cpm.y"
+#line 1482 "cpm.y"
     {
-   outputError("expected a number");
-   hasErrors = true;
-   (yyval.code).body = strdup("");
-   (yyval.code).head = strdup("");
+	outputError("expected a number");
+	hasErrors = true;
+	(yyval.code).body = strdup("");
+	(yyval.code).head = strdup("");
 }
     break;
 
   case 83:
 /* Line 1792 of yacc.c  */
-#line 1508 "cpm.y"
-    {//0       1       2      3
-   printf("BOOLEXPR --> BOOLEXPR OROP BOOLTERM\n");
-   char* codeBodyStr = (char*)calloc(200,sizeof(char));
-   char* tmp;
-   char* reg = getRegisterT();
-   char* label = getLabel();
+#line 1491 "cpm.y"
+    {//0		 1		 2		3
+	printf("BOOLEXPR --> BOOLEXPR OROP BOOLTERM\n");
+	char* codeBodyStr = (char*)calloc(200,sizeof(char));
+	char* tmp;
+	char* reg = getRegisterT();
+	char* label = getLabel();
 
-   sprintf(codeBodyStr,"bne %s, %s, else%s\nadd %s, $0, %s\nj end%s\nelse%s: addi %s, $0, 1\nend%s", (yyvsp[(1) - (3)].decl).reg ,(yyvsp[(3) - (3)].decl).reg, label, reg, (yyvsp[(1) - (3)].decl).reg, label, label, reg, label);
-   (yyval.decl).reg = strdup(reg);
-   tmp = strConcat((yyvsp[(1) - (3)].decl).codeBody, (yyvsp[(3) - (3)].decl).codeBody);
-   (yyval.decl).codeBody = strConcat(tmp, codeBodyStr);
-   (yyval.decl).codeHead = strConcat((yyvsp[(1) - (3)].decl).codeHead, (yyvsp[(3) - (3)].decl).codeHead);
-   freeRegisterT((yyvsp[(1) - (3)].decl).reg);
-   freeRegisterT((yyvsp[(3) - (3)].decl).reg);
-   free(tmp);
-   free(codeBodyStr);
+	sprintf(codeBodyStr,"bne %s, %s, else%s\nadd %s, $0, %s\nj end%s\nelse%s: addi %s, $0, 1\nend%s", (yyvsp[(1) - (3)].decl).reg ,(yyvsp[(3) - (3)].decl).reg, label, reg, (yyvsp[(1) - (3)].decl).reg, label, label, reg, label);
+	(yyval.decl).reg = strdup(reg);
+	tmp = strConcat((yyvsp[(1) - (3)].decl).codeBody, (yyvsp[(3) - (3)].decl).codeBody);
+	(yyval.decl).codeBody = strConcat(tmp, codeBodyStr);
+	(yyval.decl).codeHead = strConcat((yyvsp[(1) - (3)].decl).codeHead, (yyvsp[(3) - (3)].decl).codeHead);
+	freeRegisterT((yyvsp[(1) - (3)].decl).reg);
+	freeRegisterT((yyvsp[(3) - (3)].decl).reg);
+	free(tmp);
+	free(codeBodyStr);
 }
     break;
 
   case 84:
 /* Line 1792 of yacc.c  */
-#line 1526 "cpm.y"
+#line 1509 "cpm.y"
     {//1
-   printf("BOOLEXPR --> BOOLTERM\n");
-   (yyval.decl).reg = strdup((yyvsp[(1) - (1)].decl).reg);
-   (yyval.decl).codeBody = strdup((yyvsp[(1) - (1)].decl).codeBody);
-   (yyval.decl).codeHead = strdup((yyvsp[(1) - (1)].decl).codeHead);
+	printf("BOOLEXPR --> BOOLTERM\n");
+	(yyval.decl).reg = strdup((yyvsp[(1) - (1)].decl).reg);
+	(yyval.decl).codeBody = strdup((yyvsp[(1) - (1)].decl).codeBody);
+	(yyval.decl).codeHead = strdup((yyvsp[(1) - (1)].decl).codeHead);
 }
     break;
 
   case 85:
 /* Line 1792 of yacc.c  */
-#line 1533 "cpm.y"
+#line 1516 "cpm.y"
     {
-   outputError("expected an OROP");
-   hasErrors = true;
-   (yyval.decl).codeBody = strdup("");
-   (yyval.decl).codeHead = strdup("");
+	outputError("expected an OROP");
+	hasErrors = true;
+	(yyval.decl).codeBody = strdup("");
+	(yyval.decl).codeHead = strdup("");
 }
     break;
 
   case 86:
 /* Line 1792 of yacc.c  */
-#line 1542 "cpm.y"
-    {//0      1      2      3
-   printf("BOOLTERM --> BOOLTERM ANDOP BOOLFACTOR\n");
-   char* codeBodyStr = (char*)calloc(200,sizeof(char));
-   char* tmp;
-   char* reg = getRegisterT();
-   
-   sprintf(codeBodyStr,"mul %s, %s, %s\n", reg, (yyvsp[(1) - (3)].decl).reg ,(yyvsp[(3) - (3)].decl).reg);
-   (yyval.decl).reg = strdup(reg);
-   tmp = strConcat((yyvsp[(1) - (3)].decl).codeBody, (yyvsp[(3) - (3)].decl).codeBody);
-   (yyval.decl).codeBody = strConcat(tmp, codeBodyStr);
-   (yyval.decl).codeHead = strConcat((yyvsp[(1) - (3)].decl).codeHead,(yyvsp[(3) - (3)].decl).codeHead);
-   freeRegisterT((yyvsp[(1) - (3)].decl).reg);
-   freeRegisterT((yyvsp[(3) - (3)].decl).reg);
-   free(tmp);
-   free(codeBodyStr);
+#line 1525 "cpm.y"
+    {//0		1		2		3
+	printf("BOOLTERM --> BOOLTERM ANDOP BOOLFACTOR\n");
+	char* codeBodyStr = (char*)calloc(200,sizeof(char));
+	char* tmp;
+	char* reg = getRegisterT();
+	
+	sprintf(codeBodyStr,"mul %s, %s, %s\n", reg, (yyvsp[(1) - (3)].decl).reg ,(yyvsp[(3) - (3)].decl).reg);
+	(yyval.decl).reg = strdup(reg);
+	tmp = strConcat((yyvsp[(1) - (3)].decl).codeBody, (yyvsp[(3) - (3)].decl).codeBody);
+	(yyval.decl).codeBody = strConcat(tmp, codeBodyStr);
+	(yyval.decl).codeHead = strConcat((yyvsp[(1) - (3)].decl).codeHead,(yyvsp[(3) - (3)].decl).codeHead);
+	freeRegisterT((yyvsp[(1) - (3)].decl).reg);
+	freeRegisterT((yyvsp[(3) - (3)].decl).reg);
+	free(tmp);
+	free(codeBodyStr);
 }
     break;
 
   case 87:
 /* Line 1792 of yacc.c  */
-#line 1559 "cpm.y"
+#line 1542 "cpm.y"
     {
-   outputError("expected an ANDOP");
-   hasErrors = true;
-   (yyval.decl).codeBody = strdup("");
-   (yyval.decl).codeHead = strdup("");
+	outputError("expected an ANDOP");
+	hasErrors = true;
+	(yyval.decl).codeBody = strdup("");
+	(yyval.decl).codeHead = strdup("");
 }
     break;
 
   case 88:
 /* Line 1792 of yacc.c  */
-#line 1566 "cpm.y"
+#line 1549 "cpm.y"
     {//1
-   printf("BOOLTERM --> BOOLFACTOR\n");
-   (yyval.decl).reg = strdup((yyvsp[(1) - (1)].decl).reg);
-   (yyval.decl).codeBody = strdup((yyvsp[(1) - (1)].decl).codeBody);
-   (yyval.decl).codeHead = strdup((yyvsp[(1) - (1)].decl).codeHead);
+	printf("BOOLTERM --> BOOLFACTOR\n");
+	(yyval.decl).reg = strdup((yyvsp[(1) - (1)].decl).reg);
+	(yyval.decl).codeBody = strdup((yyvsp[(1) - (1)].decl).codeBody);
+	(yyval.decl).codeHead = strdup((yyvsp[(1) - (1)].decl).codeHead);
 }
     break;
 
   case 89:
 /* Line 1792 of yacc.c  */
-#line 1575 "cpm.y"
-    {//0         1   2   3        4
-   /*Meaning not BOOLFACTOR*/
-   printf("BOOLFACTOR -->  '!' '(' BOOLFACTOR ')'\n");
-   char* codeBodyStr = (char*)calloc(200,sizeof(char));
-   char* reg = getRegisterT();
-   
-   sprintf(codeBodyStr,"li %s ,1\nsub %s, %s, %s\n", reg, (yyvsp[(3) - (4)].decl).reg, reg, (yyvsp[(3) - (4)].decl).reg);
-   (yyval.decl).reg= (yyvsp[(3) - (4)].decl).reg;
-   (yyval.decl).codeBody = strConcat((yyvsp[(3) - (4)].decl).codeBody, codeBodyStr);
-   (yyval.decl).codeHead = (yyvsp[(3) - (4)].decl).codeHead;
-   freeRegisterT(reg);
-   free(codeBodyStr);
+#line 1558 "cpm.y"
+    {//0		   1   2	3		  4
+	/*Meaning not BOOLFACTOR*/
+	printf("BOOLFACTOR -->  '!' '(' BOOLFACTOR ')'\n");
+	char* codeBodyStr = (char*)calloc(200,sizeof(char));
+	char* reg = getRegisterT();
+	
+	sprintf(codeBodyStr,"li %s ,1\nsub %s, %s, %s\n", reg, (yyvsp[(3) - (4)].decl).reg, reg, (yyvsp[(3) - (4)].decl).reg);
+	(yyval.decl).reg= (yyvsp[(3) - (4)].decl).reg;
+	(yyval.decl).codeBody = strConcat((yyvsp[(3) - (4)].decl).codeBody, codeBodyStr);
+	(yyval.decl).codeHead = (yyvsp[(3) - (4)].decl).codeHead;
+	freeRegisterT(reg);
+	free(codeBodyStr);
 }
     break;
 
   case 90:
 /* Line 1792 of yacc.c  */
-#line 1589 "cpm.y"
+#line 1572 "cpm.y"
     {
-   outputError("expected an '('");
-   hasErrors = true;
-   (yyval.decl).codeBody = strdup("");
-   (yyval.decl).codeHead = strdup("");
+	outputError("expected an '('");
+	hasErrors = true;
+	(yyval.decl).codeBody = strdup("");
+	(yyval.decl).codeHead = strdup("");
 }
     break;
 
   case 91:
 /* Line 1792 of yacc.c  */
-#line 1596 "cpm.y"
+#line 1579 "cpm.y"
     {
-   outputError("expected a BOOLFACTOR");
-   hasErrors = true;
-   (yyval.decl).codeBody = strdup("");
-   (yyval.decl).codeHead = strdup("");
+	outputError("expected a BOOLFACTOR");
+	hasErrors = true;
+	(yyval.decl).codeBody = strdup("");
+	(yyval.decl).codeHead = strdup("");
 }
     break;
 
   case 92:
 /* Line 1792 of yacc.c  */
-#line 1603 "cpm.y"
+#line 1586 "cpm.y"
     {
-   outputError("expected a ')'");
-   hasErrors = true;
-   (yyval.decl).codeBody = strdup("");
-   (yyval.decl).codeHead = strdup("");
+	outputError("expected a ')'");
+	hasErrors = true;
+	(yyval.decl).codeBody = strdup("");
+	(yyval.decl).codeHead = strdup("");
 }
     break;
 
   case 93:
 /* Line 1792 of yacc.c  */
-#line 1610 "cpm.y"
-    {//1         2      3
-   printf("BOOLFACTOR -->  EXPRESSION  RELOP  EXPRESSION\n");
-   char* codeBodyStr = (char*)calloc(200,sizeof(char));
-   char* tmpBody = (char*)calloc(200,sizeof(char));
-   char* tmpHead = (char*)calloc(200,sizeof(char));
-   char* reg = getRegisterT();
+#line 1593 "cpm.y"
+    {//1			2		3
+	printf("BOOLFACTOR -->  EXPRESSION  RELOP  EXPRESSION\n");
+	char* codeBodyStr = (char*)calloc(200,sizeof(char));
+	char* tmpBody = (char*)calloc(200,sizeof(char));
+	char* tmpHead = (char*)calloc(200,sizeof(char));
+	char* reg = getRegisterT();
 
-   if(strcmp((yyvsp[(1) - (3)].decl).type,"int") == 0 && strcmp((yyvsp[(3) - (3)].decl).type,"int") == 0) //RELOP between ints
-   {
-      if((yyvsp[(2) - (3)].op) == EQ)
-         sprintf(codeBodyStr,"seq %s, %s, %s\n", reg, (yyvsp[(1) - (3)].decl).reg, (yyvsp[(3) - (3)].decl).reg);
-      if((yyvsp[(2) - (3)].op) == NEQ)
-         sprintf(codeBodyStr,"sne %s, %s, %s\n", reg, (yyvsp[(1) - (3)].decl).reg, (yyvsp[(3) - (3)].decl).reg);
-      if((yyvsp[(2) - (3)].op) == LT)
-         sprintf(codeBodyStr,"slt %s, %s, %s\n", reg, (yyvsp[(1) - (3)].decl).reg, (yyvsp[(3) - (3)].decl).reg);
-      if((yyvsp[(2) - (3)].op) == GT)
-         sprintf(codeBodyStr,"sgt %s, %s, %s\n", reg, (yyvsp[(1) - (3)].decl).reg, (yyvsp[(3) - (3)].decl).reg);
-      if((yyvsp[(2) - (3)].op) == LTEQ)
-         sprintf(codeBodyStr,"sle %s, %s, %s\n", reg, (yyvsp[(1) - (3)].decl).reg, (yyvsp[(3) - (3)].decl).reg);
-      if((yyvsp[(2) - (3)].op) == GTEQ)
-         sprintf(codeBodyStr,"sge %s, %s, %s\n", reg, (yyvsp[(1) - (3)].decl).reg, (yyvsp[(3) - (3)].decl).reg);
+	if(strcmp((yyvsp[(1) - (3)].decl).type,"int") == 0 && strcmp((yyvsp[(3) - (3)].decl).type,"int") == 0) //RELOP between ints
+	{
+		if((yyvsp[(2) - (3)].op) == EQ)
+			sprintf(codeBodyStr,"seq %s, %s, %s\n", reg, (yyvsp[(1) - (3)].decl).reg, (yyvsp[(3) - (3)].decl).reg);
+		if((yyvsp[(2) - (3)].op) == NEQ)
+			sprintf(codeBodyStr,"sne %s, %s, %s\n", reg, (yyvsp[(1) - (3)].decl).reg, (yyvsp[(3) - (3)].decl).reg);
+		if((yyvsp[(2) - (3)].op) == LT)
+			sprintf(codeBodyStr,"slt %s, %s, %s\n", reg, (yyvsp[(1) - (3)].decl).reg, (yyvsp[(3) - (3)].decl).reg);
+		if((yyvsp[(2) - (3)].op) == GT)
+			sprintf(codeBodyStr,"sgt %s, %s, %s\n", reg, (yyvsp[(1) - (3)].decl).reg, (yyvsp[(3) - (3)].decl).reg);
+		if((yyvsp[(2) - (3)].op) == LTEQ)
+			sprintf(codeBodyStr,"sle %s, %s, %s\n", reg, (yyvsp[(1) - (3)].decl).reg, (yyvsp[(3) - (3)].decl).reg);
+		if((yyvsp[(2) - (3)].op) == GTEQ)
+			sprintf(codeBodyStr,"sge %s, %s, %s\n", reg, (yyvsp[(1) - (3)].decl).reg, (yyvsp[(3) - (3)].decl).reg);
 
-      freeRegisterT((yyvsp[(1) - (3)].decl).reg);
-      freeRegisterT((yyvsp[(3) - (3)].decl).reg);         
-   }
-   if(strcmp((yyvsp[(1) - (3)].decl).type,"float") == 0 && strcmp((yyvsp[(3) - (3)].decl).type,"float") == 0) //RELOP between floats
-   {
-      char* label = getLabel();
-      if((yyvsp[(2) - (3)].op) == EQ)
-         sprintf(codeBodyStr,"c.eq.s %s, %s\nbc1f else%s\naddi %s,$0,1\nj end%s\nelse%s: move %s,$0\nend%s:\n", (yyvsp[(1) - (3)].decl).reg ,(yyvsp[(3) - (3)].decl).reg, label, reg, label, label, reg, label);
-      if((yyvsp[(2) - (3)].op) == NEQ)
-         sprintf(codeBodyStr,"c.eq.s %s, %s\nbc1t else%s\naddi %s,$0,1\nj end%s\nelse%s: move %s,$0\nend%s:\n", (yyvsp[(1) - (3)].decl).reg, (yyvsp[(3) - (3)].decl).reg, label, reg, label, label, reg, label);
-      if((yyvsp[(2) - (3)].op) == LT)
-         sprintf(codeBodyStr,"c.lt.s %s, %s\nbc1t else%s\naddi %s,$0,1\nj end%s\nelse%s: move %s,$0\nend%s:\n", (yyvsp[(3) - (3)].decl).reg, (yyvsp[(1) - (3)].decl).reg, label, reg, label, label, reg, label);
-      if((yyvsp[(2) - (3)].op) == GT)
-         sprintf(codeBodyStr,"c.lt.s %s, %s\nbc1t else%s\naddi %s,$0,1\nj end%s\nelse%s: move %s,$0\nend%s:\n", (yyvsp[(1) - (3)].decl).reg, (yyvsp[(3) - (3)].decl).reg, label, reg, label, label, reg, label);
-      if((yyvsp[(2) - (3)].op) == LTEQ)
-         sprintf(codeBodyStr,"c.le.s %s, %s\nbc1t else%s\naddi %s,$0,1\nj end%s\nelse%s: move %s,$0\nend%s:\n", (yyvsp[(3) - (3)].decl).reg, (yyvsp[(1) - (3)].decl).reg, label, reg, label, label, reg, label);
-      if((yyvsp[(2) - (3)].op) == GTEQ)
-         sprintf(codeBodyStr,"c.le.s %s, %s\nbc1t else%s\naddi %s,$0,1\nj end%s\nelse%s: move %s,$0\nend%s:\n", (yyvsp[(1) - (3)].decl).reg, (yyvsp[(3) - (3)].decl).reg, label, reg, label, label, reg, label);
+		freeRegisterT((yyvsp[(1) - (3)].decl).reg);
+		freeRegisterT((yyvsp[(3) - (3)].decl).reg);			
+	}
+	if(strcmp((yyvsp[(1) - (3)].decl).type,"float") == 0 && strcmp((yyvsp[(3) - (3)].decl).type,"float") == 0) //RELOP between floats
+	{
+		char* label = getLabel();
+		if((yyvsp[(2) - (3)].op) == EQ)
+			sprintf(codeBodyStr,"c.eq.s %s, %s\nbc1f else%s\naddi %s,$0,1\nj end%s\nelse%s: move %s,$0\nend%s:\n", (yyvsp[(1) - (3)].decl).reg ,(yyvsp[(3) - (3)].decl).reg, label, reg, label, label, reg, label);
+		if((yyvsp[(2) - (3)].op) == NEQ)
+			sprintf(codeBodyStr,"c.eq.s %s, %s\nbc1t else%s\naddi %s,$0,1\nj end%s\nelse%s: move %s,$0\nend%s:\n", (yyvsp[(1) - (3)].decl).reg, (yyvsp[(3) - (3)].decl).reg, label, reg, label, label, reg, label);
+		if((yyvsp[(2) - (3)].op) == LT)
+			sprintf(codeBodyStr,"c.lt.s %s, %s\nbc1t else%s\naddi %s,$0,1\nj end%s\nelse%s: move %s,$0\nend%s:\n", (yyvsp[(3) - (3)].decl).reg, (yyvsp[(1) - (3)].decl).reg, label, reg, label, label, reg, label);
+		if((yyvsp[(2) - (3)].op) == GT)
+			sprintf(codeBodyStr,"c.lt.s %s, %s\nbc1t else%s\naddi %s,$0,1\nj end%s\nelse%s: move %s,$0\nend%s:\n", (yyvsp[(1) - (3)].decl).reg, (yyvsp[(3) - (3)].decl).reg, label, reg, label, label, reg, label);
+		if((yyvsp[(2) - (3)].op) == LTEQ)
+			sprintf(codeBodyStr,"c.le.s %s, %s\nbc1t else%s\naddi %s,$0,1\nj end%s\nelse%s: move %s,$0\nend%s:\n", (yyvsp[(3) - (3)].decl).reg, (yyvsp[(1) - (3)].decl).reg, label, reg, label, label, reg, label);
+		if((yyvsp[(2) - (3)].op) == GTEQ)
+			sprintf(codeBodyStr,"c.le.s %s, %s\nbc1t else%s\naddi %s,$0,1\nj end%s\nelse%s: move %s,$0\nend%s:\n", (yyvsp[(1) - (3)].decl).reg, (yyvsp[(3) - (3)].decl).reg, label, reg, label, label, reg, label);
 
-      freeRegisterF((yyvsp[(1) - (3)].decl).reg);
-      freeRegisterF((yyvsp[(3) - (3)].decl).reg);
-   }
+		freeRegisterF((yyvsp[(1) - (3)].decl).reg);
+		freeRegisterF((yyvsp[(3) - (3)].decl).reg);
+	}
 
-   (yyval.decl).reg = strdup(reg);
-   strcat(tmpBody,(yyvsp[(1) - (3)].decl).codeBody);
-   strcat(tmpBody,(yyvsp[(3) - (3)].decl).codeBody);
-   strcat(tmpBody,codeBodyStr);
-   strcat(tmpHead,(yyvsp[(1) - (3)].decl).codeHead);
-   strcat(tmpHead,(yyvsp[(3) - (3)].decl).codeHead);
-   (yyval.decl).codeBody = strdup(tmpBody);
-   (yyval.decl).codeHead = strdup(tmpHead);
-   free(tmpBody);
-   free(tmpHead);
-   free(codeBodyStr);
+	(yyval.decl).reg = strdup(reg);
+	strcat(tmpBody,(yyvsp[(1) - (3)].decl).codeBody);
+	strcat(tmpBody,(yyvsp[(3) - (3)].decl).codeBody);
+	strcat(tmpBody,codeBodyStr);
+	strcat(tmpHead,(yyvsp[(1) - (3)].decl).codeHead);
+	strcat(tmpHead,(yyvsp[(3) - (3)].decl).codeHead);
+	(yyval.decl).codeBody = strdup(tmpBody);
+	(yyval.decl).codeHead = strdup(tmpHead);
+	free(tmpBody);
+	free(tmpHead);
+	free(codeBodyStr);
 }
     break;
 
   case 94:
 /* Line 1792 of yacc.c  */
-#line 1670 "cpm.y"
-    {//0         1         2      3
-   printf("EXPRESSION --> EXPRESSION  ADDOP  TERM\n");
-   char* codeBodyStr = (char*)calloc(200,sizeof(char));
-   char* tmp;
-   
-   if(strcmp((yyvsp[(1) - (3)].decl).type,"int") == 0 && strcmp((yyvsp[(3) - (3)].decl).type,"int") == 0) //ADDOP between ints
-   {
-      if((yyvsp[(2) - (3)].op) == PLUS)
-         sprintf(codeBodyStr,"add %s, %s ,%s\n", (yyvsp[(3) - (3)].decl).reg, (yyvsp[(3) - (3)].decl).reg, (yyvsp[(1) - (3)].decl).reg);
-      else
-         sprintf(codeBodyStr,"sub %s, %s ,%s\n", (yyvsp[(3) - (3)].decl).reg, (yyvsp[(1) - (3)].decl).reg, (yyvsp[(3) - (3)].decl).reg);
-      freeRegisterT((yyvsp[(1) - (3)].decl).reg);
-      (yyval.decl).type = strdup("int");
-      (yyval.decl).reg = strdup((yyvsp[(3) - (3)].decl).reg);
-   }
-   if(strcmp((yyvsp[(1) - (3)].decl).type,"float") == 0 && strcmp((yyvsp[(3) - (3)].decl).type,"int") == 0)   //ADDOP between a float and an int
-   {
-      char* reg = getRegisterF();
-      if((yyvsp[(2) - (3)].op) == PLUS)
-         sprintf(codeBodyStr,"mtc1 %s, %s\ncvt.s.w %s, %s\nadd.s %s, %s ,%s\n", (yyvsp[(3) - (3)].decl).reg, reg, reg, reg, (yyvsp[(1) - (3)].decl).reg, (yyvsp[(1) - (3)].decl).reg, reg);
-      else
-         sprintf(codeBodyStr,"mtc1 %s, %s\ncvt.s.w %s, %s\nsub.s %s, %s ,%s\n", (yyvsp[(3) - (3)].decl).reg, reg, reg, reg, (yyvsp[(1) - (3)].decl).reg, (yyvsp[(1) - (3)].decl).reg, reg);
-      freeRegisterF(reg);
-      freeRegisterT((yyvsp[(3) - (3)].decl).reg);
-      (yyval.decl).type = strdup("float");
-      (yyval.decl).reg = strdup((yyvsp[(1) - (3)].decl).reg);
-   }
-   if(strcmp((yyvsp[(1) - (3)].decl).type,"int") == 0 && strcmp((yyvsp[(3) - (3)].decl).type,"float") == 0)   //ADDOP between an int and a float
-   {
-      char* reg = getRegisterF();
-      if((yyvsp[(2) - (3)].op) == PLUS)
-         sprintf(codeBodyStr,"mtc1 %s, %s\ncvt.s.w %s, %s\nadd.s %s, %s ,%s\n", (yyvsp[(1) - (3)].decl).reg, reg, reg, reg, (yyvsp[(3) - (3)].decl).reg, (yyvsp[(3) - (3)].decl).reg, reg);
-      else
-         sprintf(codeBodyStr,"mtc1 %s, %s\ncvt.s.w %s, %s\nsub.s %s, %s ,%s\n", (yyvsp[(1) - (3)].decl).reg, reg, reg, reg, (yyvsp[(3) - (3)].decl).reg, reg, (yyvsp[(3) - (3)].decl).reg);
-      freeRegisterF(reg);
-      freeRegisterT((yyvsp[(1) - (3)].decl).reg);
-      (yyval.decl).type = strdup("float");
-      (yyval.decl).reg = strdup((yyvsp[(3) - (3)].decl).reg);
-   }
-   if(strcmp((yyvsp[(1) - (3)].decl).type,"float") == 0 && strcmp((yyvsp[(3) - (3)].decl).type,"float") == 0)   //ADDOP between floats
-   {
-      if((yyvsp[(2) - (3)].op) == PLUS)
-         sprintf(codeBodyStr,"add.s %s, %s ,%s\n", (yyvsp[(3) - (3)].decl).reg, (yyvsp[(1) - (3)].decl).reg, (yyvsp[(3) - (3)].decl).reg);
-      else
-         sprintf(codeBodyStr,"sub.s %s, %s ,%s\n", (yyvsp[(3) - (3)].decl).reg, (yyvsp[(1) - (3)].decl).reg, (yyvsp[(3) - (3)].decl).reg);
-      freeRegisterF((yyvsp[(1) - (3)].decl).reg);
-      (yyval.decl).type = strdup("float");
-      (yyval.decl).reg = strdup((yyvsp[(3) - (3)].decl).reg);
-   }         
-   
-   tmp = strConcat((yyvsp[(1) - (3)].decl).codeBody, (yyvsp[(3) - (3)].decl).codeBody);
-   (yyval.decl).codeBody= strConcat(tmp, codeBodyStr);
-   (yyval.decl).codeHead= strConcat((yyvsp[(1) - (3)].decl).codeHead,(yyvsp[(3) - (3)].decl).codeHead);
-   free(tmp);
-   free(codeBodyStr);
+#line 1653 "cpm.y"
+    {//0			1			2		3
+	printf("EXPRESSION --> EXPRESSION  ADDOP  TERM\n");
+	char* codeBodyStr = (char*)calloc(200,sizeof(char));
+	char* tmp;
+	
+	if(strcmp((yyvsp[(1) - (3)].decl).type,"int") == 0 && strcmp((yyvsp[(3) - (3)].decl).type,"int") == 0) //ADDOP between ints
+	{
+		if((yyvsp[(2) - (3)].op) == PLUS)
+			sprintf(codeBodyStr,"add %s, %s ,%s\n", (yyvsp[(3) - (3)].decl).reg, (yyvsp[(3) - (3)].decl).reg, (yyvsp[(1) - (3)].decl).reg);
+		else
+			sprintf(codeBodyStr,"sub %s, %s ,%s\n", (yyvsp[(3) - (3)].decl).reg, (yyvsp[(1) - (3)].decl).reg, (yyvsp[(3) - (3)].decl).reg);
+		freeRegisterT((yyvsp[(1) - (3)].decl).reg);
+		(yyval.decl).type = strdup("int");
+		(yyval.decl).reg = strdup((yyvsp[(3) - (3)].decl).reg);
+	}
+	if(strcmp((yyvsp[(1) - (3)].decl).type,"float") == 0 && strcmp((yyvsp[(3) - (3)].decl).type,"int") == 0)	//ADDOP between a float and an int
+	{
+		char* reg = getRegisterF();
+		if((yyvsp[(2) - (3)].op) == PLUS)
+			sprintf(codeBodyStr,"mtc1 %s, %s\ncvt.s.w %s, %s\nadd.s %s, %s ,%s\n", (yyvsp[(3) - (3)].decl).reg, reg, reg, reg, (yyvsp[(1) - (3)].decl).reg, (yyvsp[(1) - (3)].decl).reg, reg);
+		else
+			sprintf(codeBodyStr,"mtc1 %s, %s\ncvt.s.w %s, %s\nsub.s %s, %s ,%s\n", (yyvsp[(3) - (3)].decl).reg, reg, reg, reg, (yyvsp[(1) - (3)].decl).reg, (yyvsp[(1) - (3)].decl).reg, reg);
+		freeRegisterF(reg);
+		freeRegisterT((yyvsp[(3) - (3)].decl).reg);
+		(yyval.decl).type = strdup("float");
+		(yyval.decl).reg = strdup((yyvsp[(1) - (3)].decl).reg);
+	}
+	if(strcmp((yyvsp[(1) - (3)].decl).type,"int") == 0 && strcmp((yyvsp[(3) - (3)].decl).type,"float") == 0)	//ADDOP between an int and a float
+	{
+		char* reg = getRegisterF();
+		if((yyvsp[(2) - (3)].op) == PLUS)
+			sprintf(codeBodyStr,"mtc1 %s, %s\ncvt.s.w %s, %s\nadd.s %s, %s ,%s\n", (yyvsp[(1) - (3)].decl).reg, reg, reg, reg, (yyvsp[(3) - (3)].decl).reg, (yyvsp[(3) - (3)].decl).reg, reg);
+		else
+			sprintf(codeBodyStr,"mtc1 %s, %s\ncvt.s.w %s, %s\nsub.s %s, %s ,%s\n", (yyvsp[(1) - (3)].decl).reg, reg, reg, reg, (yyvsp[(3) - (3)].decl).reg, reg, (yyvsp[(3) - (3)].decl).reg);
+		freeRegisterF(reg);
+		freeRegisterT((yyvsp[(1) - (3)].decl).reg);
+		(yyval.decl).type = strdup("float");
+		(yyval.decl).reg = strdup((yyvsp[(3) - (3)].decl).reg);
+	}
+	if(strcmp((yyvsp[(1) - (3)].decl).type,"float") == 0 && strcmp((yyvsp[(3) - (3)].decl).type,"float") == 0)	//ADDOP between floats
+	{
+		if((yyvsp[(2) - (3)].op) == PLUS)
+			sprintf(codeBodyStr,"add.s %s, %s ,%s\n", (yyvsp[(3) - (3)].decl).reg, (yyvsp[(1) - (3)].decl).reg, (yyvsp[(3) - (3)].decl).reg);
+		else
+			sprintf(codeBodyStr,"sub.s %s, %s ,%s\n", (yyvsp[(3) - (3)].decl).reg, (yyvsp[(1) - (3)].decl).reg, (yyvsp[(3) - (3)].decl).reg);
+		freeRegisterF((yyvsp[(1) - (3)].decl).reg);
+		(yyval.decl).type = strdup("float");
+		(yyval.decl).reg = strdup((yyvsp[(3) - (3)].decl).reg);
+	}			
+	
+	tmp = strConcat((yyvsp[(1) - (3)].decl).codeBody, (yyvsp[(3) - (3)].decl).codeBody);
+	(yyval.decl).codeBody= strConcat(tmp, codeBodyStr);
+	(yyval.decl).codeHead= strConcat((yyvsp[(1) - (3)].decl).codeHead,(yyvsp[(3) - (3)].decl).codeHead);
+	free(tmp);
+	free(codeBodyStr);
 }
     break;
 
   case 95:
 /* Line 1792 of yacc.c  */
-#line 1727 "cpm.y"
+#line 1710 "cpm.y"
     {//1
-   printf("EXPRESSION --> TERM\n");
-   (yyval.decl).reg =  strdup((yyvsp[(1) - (1)].decl).reg);
-   (yyval.decl).codeBody = strdup((yyvsp[(1) - (1)].decl).codeBody);
-   (yyval.decl).codeHead = strdup((yyvsp[(1) - (1)].decl).codeHead);
-   (yyval.decl).type = strdup((yyvsp[(1) - (1)].decl).type);
+	printf("EXPRESSION --> TERM\n");
+	(yyval.decl).reg =  strdup((yyvsp[(1) - (1)].decl).reg);
+	(yyval.decl).codeBody = strdup((yyvsp[(1) - (1)].decl).codeBody);
+	(yyval.decl).codeHead = strdup((yyvsp[(1) - (1)].decl).codeHead);
+	(yyval.decl).type = strdup((yyvsp[(1) - (1)].decl).type);
 }
     break;
 
   case 96:
 /* Line 1792 of yacc.c  */
-#line 1737 "cpm.y"
-    {//0   1   2      3
-   printf("TERM --> TERM MULOP FACTOR\n");
-   char* codeBodyStr = (char*)calloc(200,sizeof(char));
-   char* tmp;
-   
-   if(strcmp((yyvsp[(1) - (3)].decl).type,"int") == 0 && strcmp((yyvsp[(3) - (3)].decl).type,"int") == 0)   //MULOP between ints
-   {
-      if((yyvsp[(2) - (3)].op) == MUL) 
-         sprintf(codeBodyStr,"mul %s, %s ,%s\n", (yyvsp[(3) - (3)].decl).reg, (yyvsp[(3) - (3)].decl).reg, (yyvsp[(1) - (3)].decl).reg);
-      else
-         sprintf(codeBodyStr,"div %s, %s ,%s\n", (yyvsp[(3) - (3)].decl).reg, (yyvsp[(3) - (3)].decl).reg, (yyvsp[(1) - (3)].decl).reg);
-      freeRegisterT((yyvsp[(1) - (3)].decl).reg);
-      (yyval.decl).type = strdup("int");
-      (yyval.decl).reg = strdup((yyvsp[(3) - (3)].decl).reg);
-   }
-   if(strcmp((yyvsp[(1) - (3)].decl).type,"float") == 0 && strcmp((yyvsp[(3) - (3)].decl).type,"int") == 0) //MULOP between a float and an int
-   {
-      char* reg = getRegisterF();
-      if((yyvsp[(2) - (3)].op) == MUL) 
-         sprintf(codeBodyStr,"mtc1 %s, %s\ncvt.s.w %s, %s\nmul.s %s, %s ,%s\n", (yyvsp[(3) - (3)].decl).reg, reg, reg, reg, (yyvsp[(1) - (3)].decl).reg, (yyvsp[(1) - (3)].decl).reg, reg);
-      else
-         sprintf(codeBodyStr,"mtc1 %s, %s\ncvt.s.w %s, %s\ndiv.s %s, %s ,%s\n", (yyvsp[(3) - (3)].decl).reg, reg, reg, reg, (yyvsp[(1) - (3)].decl).reg, (yyvsp[(1) - (3)].decl).reg, reg);
-      freeRegisterF(reg);
-      freeRegisterT((yyvsp[(3) - (3)].decl).reg);
-      (yyval.decl).type = strdup("float");
-      (yyval.decl).reg = strdup((yyvsp[(1) - (3)].decl).reg);
-   }
-   if(strcmp((yyvsp[(1) - (3)].decl).type,"int") == 0 && strcmp((yyvsp[(3) - (3)].decl).type,"float") == 0)   //MULOP between an int and a float
-   {
-      char* reg = getRegisterF();
-      if((yyvsp[(2) - (3)].op) == MUL) 
-         sprintf(codeBodyStr,"mtc1 %s, %s\ncvt.s.w %s, %s\nmul.s %s, %s ,%s\n", (yyvsp[(1) - (3)].decl).reg, reg, reg, reg, (yyvsp[(3) - (3)].decl).reg, (yyvsp[(3) - (3)].decl).reg, reg);
-      else
-         sprintf(codeBodyStr,"mtc1 %s, %s\ncvt.s.w %s, %s\ndiv.s %s, %s ,%s\n", (yyvsp[(1) - (3)].decl).reg, reg, reg, reg, (yyvsp[(3) - (3)].decl).reg, (yyvsp[(3) - (3)].decl).reg, reg);
-      freeRegisterF(reg);
-      freeRegisterT((yyvsp[(1) - (3)].decl).reg);
-      (yyval.decl).type = strdup("float");
-      (yyval.decl).reg = strdup((yyvsp[(3) - (3)].decl).reg);
-   }
-   if(strcmp((yyvsp[(1) - (3)].decl).type,"float") == 0 && strcmp((yyvsp[(3) - (3)].decl).type,"float") == 0)   //MULOP between floats
-   {
-      if((yyvsp[(2) - (3)].op) == MUL)
-         sprintf(codeBodyStr,"mul.s %s, %s ,%s\n", (yyvsp[(3) - (3)].decl).reg, (yyvsp[(3) - (3)].decl).reg, (yyvsp[(1) - (3)].decl).reg);
-      else
-         sprintf(codeBodyStr,"div.s %s, %s ,%s\n", (yyvsp[(3) - (3)].decl).reg, (yyvsp[(3) - (3)].decl).reg, (yyvsp[(1) - (3)].decl).reg);
-      freeRegisterF((yyvsp[(1) - (3)].decl).reg);
-      (yyval.decl).type = strdup("float");
-      (yyval.decl).reg = strdup((yyvsp[(3) - (3)].decl).reg);
-   }
-   
-   tmp = strConcat((yyvsp[(1) - (3)].decl).codeBody, (yyvsp[(3) - (3)].decl).codeBody);
-   (yyval.decl).codeBody = strConcat(tmp, codeBodyStr);
-   (yyval.decl).codeHead = strConcat((yyvsp[(1) - (3)].decl).codeHead, (yyvsp[(3) - (3)].decl).codeHead);
-   free(tmp);
-   free(codeBodyStr);
+#line 1720 "cpm.y"
+    {//0	1	2		3
+	printf("TERM --> TERM MULOP FACTOR\n");
+	char* codeBodyStr = (char*)calloc(200,sizeof(char));
+	char* tmp;
+	
+	if(strcmp((yyvsp[(1) - (3)].decl).type,"int") == 0 && strcmp((yyvsp[(3) - (3)].decl).type,"int") == 0)	//MULOP between ints
+	{
+		if((yyvsp[(2) - (3)].op) == MUL) 
+			sprintf(codeBodyStr,"mul %s, %s ,%s\n", (yyvsp[(3) - (3)].decl).reg, (yyvsp[(3) - (3)].decl).reg, (yyvsp[(1) - (3)].decl).reg);
+		else
+			sprintf(codeBodyStr,"div %s, %s ,%s\n", (yyvsp[(3) - (3)].decl).reg, (yyvsp[(3) - (3)].decl).reg, (yyvsp[(1) - (3)].decl).reg);
+		freeRegisterT((yyvsp[(1) - (3)].decl).reg);
+		(yyval.decl).type = strdup("int");
+		(yyval.decl).reg = strdup((yyvsp[(3) - (3)].decl).reg);
+	}
+	if(strcmp((yyvsp[(1) - (3)].decl).type,"float") == 0 && strcmp((yyvsp[(3) - (3)].decl).type,"int") == 0) //MULOP between a float and an int
+	{
+		char* reg = getRegisterF();
+		if((yyvsp[(2) - (3)].op) == MUL) 
+			sprintf(codeBodyStr,"mtc1 %s, %s\ncvt.s.w %s, %s\nmul.s %s, %s ,%s\n", (yyvsp[(3) - (3)].decl).reg, reg, reg, reg, (yyvsp[(1) - (3)].decl).reg, (yyvsp[(1) - (3)].decl).reg, reg);
+		else
+			sprintf(codeBodyStr,"mtc1 %s, %s\ncvt.s.w %s, %s\ndiv.s %s, %s ,%s\n", (yyvsp[(3) - (3)].decl).reg, reg, reg, reg, (yyvsp[(1) - (3)].decl).reg, (yyvsp[(1) - (3)].decl).reg, reg);
+		freeRegisterF(reg);
+		freeRegisterT((yyvsp[(3) - (3)].decl).reg);
+		(yyval.decl).type = strdup("float");
+		(yyval.decl).reg = strdup((yyvsp[(1) - (3)].decl).reg);
+	}
+	if(strcmp((yyvsp[(1) - (3)].decl).type,"int") == 0 && strcmp((yyvsp[(3) - (3)].decl).type,"float") == 0)	//MULOP between an int and a float
+	{
+		char* reg = getRegisterF();
+		if((yyvsp[(2) - (3)].op) == MUL) 
+			sprintf(codeBodyStr,"mtc1 %s, %s\ncvt.s.w %s, %s\nmul.s %s, %s ,%s\n", (yyvsp[(1) - (3)].decl).reg, reg, reg, reg, (yyvsp[(3) - (3)].decl).reg, (yyvsp[(3) - (3)].decl).reg, reg);
+		else
+			sprintf(codeBodyStr,"mtc1 %s, %s\ncvt.s.w %s, %s\ndiv.s %s, %s ,%s\n", (yyvsp[(1) - (3)].decl).reg, reg, reg, reg, (yyvsp[(3) - (3)].decl).reg, (yyvsp[(3) - (3)].decl).reg, reg);
+		freeRegisterF(reg);
+		freeRegisterT((yyvsp[(1) - (3)].decl).reg);
+		(yyval.decl).type = strdup("float");
+		(yyval.decl).reg = strdup((yyvsp[(3) - (3)].decl).reg);
+	}
+	if(strcmp((yyvsp[(1) - (3)].decl).type,"float") == 0 && strcmp((yyvsp[(3) - (3)].decl).type,"float") == 0)	//MULOP between floats
+	{
+		if((yyvsp[(2) - (3)].op) == MUL)
+			sprintf(codeBodyStr,"mul.s %s, %s ,%s\n", (yyvsp[(3) - (3)].decl).reg, (yyvsp[(3) - (3)].decl).reg, (yyvsp[(1) - (3)].decl).reg);
+		else
+			sprintf(codeBodyStr,"div.s %s, %s ,%s\n", (yyvsp[(3) - (3)].decl).reg, (yyvsp[(3) - (3)].decl).reg, (yyvsp[(1) - (3)].decl).reg);
+		freeRegisterF((yyvsp[(1) - (3)].decl).reg);
+		(yyval.decl).type = strdup("float");
+		(yyval.decl).reg = strdup((yyvsp[(3) - (3)].decl).reg);
+	}
+	
+	tmp = strConcat((yyvsp[(1) - (3)].decl).codeBody, (yyvsp[(3) - (3)].decl).codeBody);
+	(yyval.decl).codeBody = strConcat(tmp, codeBodyStr);
+	(yyval.decl).codeHead = strConcat((yyvsp[(1) - (3)].decl).codeHead, (yyvsp[(3) - (3)].decl).codeHead);
+	free(tmp);
+	free(codeBodyStr);
 }
     break;
 
   case 97:
 /* Line 1792 of yacc.c  */
-#line 1794 "cpm.y"
+#line 1777 "cpm.y"
     {
-   outputError("expected a MULOP");
-   hasErrors = true;
-   (yyval.decl).codeBody = strdup("");
-   (yyval.decl).codeHead = strdup("");
+	outputError("expected a MULOP");
+	hasErrors = true;
+	(yyval.decl).codeBody = strdup("");
+	(yyval.decl).codeHead = strdup("");
 }
     break;
 
   case 98:
 /* Line 1792 of yacc.c  */
-#line 1801 "cpm.y"
+#line 1784 "cpm.y"
     {
-   outputError("expected a FACTOR");
-   hasErrors = true;
-   (yyval.decl).codeBody = strdup("");
-   (yyval.decl).codeHead = strdup("");
+	outputError("expected a FACTOR");
+	hasErrors = true;
+	(yyval.decl).codeBody = strdup("");
+	(yyval.decl).codeHead = strdup("");
 }
     break;
 
   case 99:
 /* Line 1792 of yacc.c  */
-#line 1808 "cpm.y"
+#line 1791 "cpm.y"
     {//1
-   printf("TERM --> FACTOR\n");
-   (yyval.decl).reg =  strdup((yyvsp[(1) - (1)].decl).reg);
-   (yyval.decl).codeBody = strdup((yyvsp[(1) - (1)].decl).codeBody);
-   (yyval.decl).codeHead = strdup((yyvsp[(1) - (1)].decl).codeHead);
-   (yyval.decl).type = strdup((yyvsp[(1) - (1)].decl).type);
+	printf("TERM --> FACTOR\n");
+	(yyval.decl).reg =  strdup((yyvsp[(1) - (1)].decl).reg);
+	(yyval.decl).codeBody = strdup((yyvsp[(1) - (1)].decl).codeBody);
+	(yyval.decl).codeHead = strdup((yyvsp[(1) - (1)].decl).codeHead);
+	(yyval.decl).type = strdup((yyvsp[(1) - (1)].decl).type);
 }
     break;
 
   case 100:
 /* Line 1792 of yacc.c  */
-#line 1818 "cpm.y"
-    {//0     1      2      3
-   printf("FACTOR --> '(' EXPRESSION ')'\n");
-   (yyval.decl).reg =  strdup((yyvsp[(2) - (3)].decl).reg);
-   (yyval.decl).codeBody = strdup((yyvsp[(2) - (3)].decl).codeBody);
-   (yyval.decl).codeHead = strdup((yyvsp[(2) - (3)].decl).codeHead);
-   (yyval.decl).type = strdup((yyvsp[(2) - (3)].decl).type);
+#line 1801 "cpm.y"
+    {//0	  1		2		3
+	printf("FACTOR --> '(' EXPRESSION ')'\n");
+	(yyval.decl).reg =  strdup((yyvsp[(2) - (3)].decl).reg);
+	(yyval.decl).codeBody = strdup((yyvsp[(2) - (3)].decl).codeBody);
+	(yyval.decl).codeHead = strdup((yyvsp[(2) - (3)].decl).codeHead);
+	(yyval.decl).type = strdup((yyvsp[(2) - (3)].decl).type);
 }
     break;
 
   case 101:
 /* Line 1792 of yacc.c  */
-#line 1826 "cpm.y"
+#line 1809 "cpm.y"
     {
-   outputError("expected a ')'");
-   hasErrors = true;
-   (yyval.decl).codeBody = strdup("");
-   (yyval.decl).codeHead = strdup("");
+	outputError("expected a ')'");
+	hasErrors = true;
+	(yyval.decl).codeBody = strdup("");
+	(yyval.decl).codeHead = strdup("");
 }
     break;
 
   case 102:
 /* Line 1792 of yacc.c  */
-#line 1833 "cpm.y"
+#line 1816 "cpm.y"
     {//1
-   printf("FACTOR --> ID\n");
-   char* codeBodyStr = (char*)calloc(200,sizeof(char));
-   char* reg;
-   char* label = getLabel();
-   symTblEntry* symbol = lookup(*ptr2symbolTable, (yyvsp[(1) - (1)].sval));
-   
-   if(symbol != NULL)
-   {
-      if(symbol->type == integer)
-      {
-         reg = getRegisterT();
-         sprintf(codeBodyStr,"lw %s, %s\n", reg, (yyvsp[(1) - (1)].sval));
-      }
-      if(symbol->type == floating)
-      {
-         reg = getRegisterF();
-         sprintf(codeBodyStr,"l.s %s, %s\n", reg, (yyvsp[(1) - (1)].sval));
-      }
-      if(symbol->type == string)
-      {
-         reg = (yyvsp[(1) - (1)].sval);
-      }
-      (yyval.decl).reg = strdup(reg);
-      (yyval.decl).type = EnumType2charType(symbol->type);
-      (yyval.decl).codeBody = strdup(codeBodyStr);
-      (yyval.decl).codeHead = strdup("");
-   }
-   else
-   {
-      outputError("Id not declared");
-      hasErrors = true;
-      (yyval.decl).codeBody = strdup("");
-      (yyval.decl).codeHead = strdup("");
-   }
-   free(codeBodyStr);
+	printf("FACTOR --> ID\n");
+	char* codeBodyStr = (char*)calloc(200,sizeof(char));
+	char* reg;
+	char* label = getLabel();
+	symTblEntry* symbol = lookup(*ptr2symbolTable, (yyvsp[(1) - (1)].sval));
+	
+	if(symbol != NULL)
+	{
+		if(symbol->type == integer)
+		{
+			reg = getRegisterT();
+			sprintf(codeBodyStr,"lw %s, %s\n", reg, (yyvsp[(1) - (1)].sval));
+		}
+		if(symbol->type == floating)
+		{
+			reg = getRegisterF();
+			sprintf(codeBodyStr,"l.s %s, %s\n", reg, (yyvsp[(1) - (1)].sval));
+		}
+		if(symbol->type == string)
+		{
+			reg = (yyvsp[(1) - (1)].sval);
+		}
+		(yyval.decl).reg = strdup(reg);
+		(yyval.decl).type = EnumType2charType(symbol->type);
+		(yyval.decl).codeBody = strdup(codeBodyStr);
+		(yyval.decl).codeHead = strdup("");
+	}
+	else
+	{
+		outputError("Id not declared");
+		hasErrors = true;
+		(yyval.decl).codeBody = strdup("");
+		(yyval.decl).codeHead = strdup("");
+	}
+	free(codeBodyStr);
 }
     break;
 
   case 103:
 /* Line 1792 of yacc.c  */
-#line 1871 "cpm.y"
+#line 1854 "cpm.y"
     {//1
-   printf("FACTOR --> NUM\n");
-   char* codeBodyStr = (char*)calloc(200,sizeof(char));
-   char* codeHeadStr = (char*)calloc(200,sizeof(char));
-   char* reg;
-   
-   if((yyvsp[(1) - (1)].nVal).type == I) //int
-   {
-      reg = getRegisterT();
-      sprintf(codeBodyStr,"addi %s, $0, %d\n", reg, (yyvsp[(1) - (1)].nVal).val.ival);
-      (yyval.decl).type = strdup("int");
+	printf("FACTOR --> NUM\n");
+	char* codeBodyStr = (char*)calloc(200,sizeof(char));
+	char* codeHeadStr = (char*)calloc(200,sizeof(char));
+	char* reg;
+	
+	if((yyvsp[(1) - (1)].nVal).type == I) //int
+	{
+		reg = getRegisterT();
+		sprintf(codeBodyStr,"addi %s, $0, %d\n", reg, (yyvsp[(1) - (1)].nVal).val.ival);
+		(yyval.decl).type = strdup("int");
 
-   }
-   else   //$1.type == F
-   {
-      reg = getRegisterF();
-      char* label = getLabel();
-      sprintf(codeHeadStr,"%s: .float %f\n", label, (yyvsp[(1) - (1)].nVal).val.fval);
-      sprintf(codeBodyStr,"l.s %s, %s\n", reg, label);
-      (yyval.decl).type = strdup("float");
-   }
-   (yyval.decl).reg = strdup(reg);
-   (yyval.decl).codeHead = strdup(codeHeadStr);
-   (yyval.decl).codeBody = strdup(codeBodyStr);
-   free(codeHeadStr);
-   free(codeBodyStr);
+	}
+	else	//$1.type == F
+	{
+		reg = getRegisterF();
+		char* label = getLabel();
+		sprintf(codeHeadStr,"%s: .float %f\n", label, (yyvsp[(1) - (1)].nVal).val.fval);
+		sprintf(codeBodyStr,"l.s %s, %s\n", reg, label);
+		(yyval.decl).type = strdup("float");
+	}
+	(yyval.decl).reg = strdup(reg);
+	(yyval.decl).codeHead = strdup(codeHeadStr);
+	(yyval.decl).codeBody = strdup(codeBodyStr);
+	free(codeHeadStr);
+	free(codeBodyStr);
 }
     break;
 
 
 /* Line 1792 of yacc.c  */
-#line 4009 "y.tab.c"
+#line 3992 "y.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -4244,135 +4227,128 @@ yyreturn:
 
 
 /* Line 2055 of yacc.c  */
-#line 1898 "cpm.y"
+#line 1881 "cpm.y"
 
 
 int main (int argc, char **argv)
 {  
-   extern FILE* yyin;
-   FILE* listFile;
-   FILE* mipsFile;
-   char line[500];
-   char* inputFileName;
-   char* inputFileType;
-   int linesCounter = 1;
-   symTbl* symbolTable = NULL;
+	extern FILE* yyin;
+	FILE* listFile;
+	FILE* mipsFile;
+	char line[500];
+	char* inputFileName;
+	char* inputFileType;
+	int linesCounter = 1;
+	symTbl* symbolTable = NULL;
 
-   printf("%s", STUDENTS_DETAILS);
-   printf("Starting compilation process...\n");
-   
-   symbolTable = initSymTbl();
-   if (symbolTable == NULL)
-   {
-      fprintf(stderr, "Symbol table initialization failed. Operation terminated\n");
-      exit(1);
-   }
-   ptr2symbolTable = &symbolTable;
-   
+	printf("%s", STUDENTS_DETAILS);
+	printf("Starting compilation process...\n");
+	
+	symbolTable = initSymTbl();
+	if (symbolTable == NULL)
+	{
+		fprintf(stderr, "Symbol table initialization failed. Operation terminated\n");
+		exit(1);
+	}
+	ptr2symbolTable = &symbolTable;
+	
 // ########  input validation  ########
-   printf("Input validation stage started\n");
-   if (argc >= 2 && argv[1] != NULL)
-   {
-      inputFileName = strdup(argv[1]);
-      inputFileType = strrchr(inputFileName, '.');
-      if (strcmp(inputFileType, ".cpl") != 0 && strcmp(inputFileType, ".CPL") != 0)
-      {
-         fprintf(stderr, "%s files are not supported by this compiler. Operation terminated\n", inputFileType);
-         free(inputFileName);
-         free(inputFileType);
-         destroySymTable(*ptr2symbolTable);
-         exit(1);
-      }
-      free(inputFileName);
-      free(inputFileType);
-      yyin = fopen(argv[1], "r");
-      
-      if (yyin == NULL)
-      {
-         fprintf(stderr, "Failed to open input file. Operation terminated!\n");
-         destroySymTable(*ptr2symbolTable);
-         exit(1);
-      }
+	printf("Input validation stage started\n");
+	if (argc >= 2 && argv[1] != NULL)
+	{
+		inputFileName = strdup(argv[1]);
+		inputFileType = strrchr(inputFileName, '.');
+		if (strcmp(inputFileType, ".cpl") != 0 && strcmp(inputFileType, ".CPL") != 0)
+		{
+			fprintf(stderr, "%s files are not supported by this compiler. Operation terminated\n", inputFileType);
+			free(inputFileName);
+			free(inputFileType);
+			destroySymTable(*ptr2symbolTable);
+			exit(1);
+		}
+		free(inputFileName);
+		free(inputFileType);
+		yyin = fopen(argv[1], "r");
+		
+		if (yyin == NULL)
+		{
+			fprintf(stderr, "Failed to open input file. Operation terminated!\n");
+			destroySymTable(*ptr2symbolTable);
+			exit(1);
+		}
 
-   }
-   else
-   {
-      fprintf(stderr, "No input file given to compiler. Operation terminated!\n");
-      destroySymTable(*ptr2symbolTable);
-      exit(1);
-   }
-   printf("Input validation stage completed\n");
+	}
+	else
+	{
+		fprintf(stderr, "No input file given to compiler. Operation terminated!\n");
+		destroySymTable(*ptr2symbolTable);
+		exit(1);
+	}
+	printf("Input validation stage completed\n");
 
 // ########  End of input validation  ########
-   
+	
 // ########  copy to list file section  ########
-   
+	
 
-   printf("Creating listing file\n");
-   listFile = fopen("listing.lst","w");
-   if (listFile == NULL)
-   {
-      fprintf(stderr, "Failed to open list file. Operation terminated!\n");
-      destroySymTable(*ptr2symbolTable);
-      fclose(yyin);
-      exit(1);
-   }
+	printf("Creating listing file\n");
+	listFile = fopen("listing.lst","w");
+	if (listFile == NULL)
+	{
+		fprintf(stderr, "Failed to open list file. Operation terminated!\n");
+		destroySymTable(*ptr2symbolTable);
+		fclose(yyin);
+		exit(1);
+	}
 
-   fprintf(listFile, STUDENTS_DETAILS);
-   printf("Copying input code to listing file\n");
-   do
-   {
-      fgets(line, 500, yyin);
-      fprintf(listFile, "%d: %s", linesCounter++, line);
-   }while(!feof(yyin));
-   fprintf(listFile, "\n");
-   printf("Copying input code to listing file completed\n");
-   fclose(listFile);
+	fprintf(listFile, STUDENTS_DETAILS);
+	printf("Copying input code to listing file\n");
+	do{
+		fgets(line, 500, yyin);
+		fprintf(listFile, "%d: %s", linesCounter++, line);
+	}while(!feof(yyin));
+	fprintf(listFile, "\n");
+	printf("Copying input code to listing file completed\n");
+	fclose(listFile);
 
 // ########  End of copy to list file section  ########
 
-   fseek(yyin, 0, SEEK_SET); // moving cursor to the beginning for lexical analysis
-   printf("Starting parsing process\n");
-   yyparse();
-   printf("Parsing process completed\n");
+	fseek(yyin, 0, SEEK_SET); //moving cursor to the beginning for lexical analysis
+	printf("Starting parsing process\n");
+	yyparse();
+	printf("Parsing process completed\n");
 
-   printf("%s", mipsCode);
+	if (hasErrors == false) //no errors were found during parsing process -> creating MIPS file
+	{
+		if (strlen(mipsCode) == 0)
+			fprintf(stderr, "Unexpected error occurred. MIPS file can not be created\n");
+		else
+		{
+			printf("Creating MIPS file\n");
+			mipsFile = fopen("MIPS.asm","w+");
+			if (mipsFile == NULL)
+			{
+				fprintf(stderr, "Failed to open mips file. Operation terminated!\n");
+				destroySymTable(*ptr2symbolTable);
+				fclose(yyin);
+				exit(1);
+			}
+			printf("MIPS file has been created\n");
+			fprintf(mipsFile, "#");
+			fprintf(mipsFile, STUDENTS_DETAILS);
+			fprintf(mipsFile, mipsCode);
+			fclose (mipsFile);
+		}
 
-   if (hasErrors == false) // no errors were found during parsing process -> creating MIPS file
-   {
-      if (strlen(mipsCode) == 0)
-      {
-         fprintf(stderr, "Unexpected error occurred. MIPS file can not be created\n");
-      }
-      else
-      {
-         printf("Creating MIPS file\n");
-         mipsFile = fopen("MIPS.asm","w+");
-         if (mipsFile == NULL)
-         {
-            fprintf(stderr, "Failed to open mips file. Operation terminated!\n");
-            destroySymTable(*ptr2symbolTable);
-            fclose(yyin);
-            exit(1);
-         }
-         printf("MIPS file has been created\n");
-         fprintf(mipsFile, "#");
-         fprintf(mipsFile, STUDENTS_DETAILS);
-         fprintf(mipsFile, mipsCode);
-         fclose (mipsFile);
-      }
-
-   }
-   else
-   {
-      fprintf(stderr, "Errors were found. See listing file for details\n");
-   }
-
-   fclose (yyin);
-   printf("Destroying symbol table\n");
-   printf("Compilation process is done\n");
-   destroySymTable(*ptr2symbolTable);
-   return 0;
+	}
+	else
+		fprintf(stderr, "Errors were found. See liting file for details\n");
+	
+	fclose (yyin);
+	printf("Destroying symbol table\n");
+	printf("Compilation process is done\n");
+	destroySymTable(*ptr2symbolTable);
+	return 0;
 }
 
 void yyerror (char *s)

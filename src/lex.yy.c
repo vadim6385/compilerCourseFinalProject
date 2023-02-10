@@ -938,14 +938,13 @@ case 38:
 YY_RULE_SETUP
 #line 61 "cpm.lex"
 { col += yyleng;
-				 fprintf(yyout, "%s", yytext);
 				 yylval.nVal.val.ival = atoi(yytext); 
 				 yylval.nVal.type = I;    
 				 return NUM;}
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 67 "cpm.lex"
+#line 66 "cpm.lex"
 { col += yyleng;
 				 yylval.nVal.val.fval = atof(yytext); 
 				 yylval.nVal.type = F;
@@ -953,7 +952,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 72 "cpm.lex"
+#line 71 "cpm.lex"
 {
 col += yyleng;
 yylval.sval = (char*)malloc(yyleng*sizeof(char) +1);
@@ -962,75 +961,75 @@ return SENTENCE;}
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 78 "cpm.lex"
+#line 77 "cpm.lex"
 { col += yyleng; yylval.op = PLUS; return ADDOP;}
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 79 "cpm.lex"
+#line 78 "cpm.lex"
 { col += yyleng; yylval.op = MINUS; return ADDOP;}
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 80 "cpm.lex"
+#line 79 "cpm.lex"
 { col += yyleng; yylval.op = EQ; return RELOP;}
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 81 "cpm.lex"
+#line 80 "cpm.lex"
 { col += yyleng; yylval.op = NEQ; return RELOP;}
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 82 "cpm.lex"
+#line 81 "cpm.lex"
 { col += yyleng; yylval.op = LT; return RELOP;}
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 83 "cpm.lex"
+#line 82 "cpm.lex"
 { col += yyleng; yylval.op = GT; return RELOP;}
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 84 "cpm.lex"
+#line 83 "cpm.lex"
 { col += yyleng; yylval.op = GTEQ; return RELOP;}
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 85 "cpm.lex"
+#line 84 "cpm.lex"
 { col += yyleng; yylval.op = LTEQ; return RELOP;}
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 86 "cpm.lex"
+#line 85 "cpm.lex"
 { col += yyleng; yylval.op = MUL; return MULOP;}
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 87 "cpm.lex"
+#line 86 "cpm.lex"
 { col += yyleng; yylval.op = DIV; return MULOP;}
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 88 "cpm.lex"
+#line 87 "cpm.lex"
 { col += yyleng; yylval.op = ASSIGN; return ASSIGNOP;}
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 89 "cpm.lex"
+#line 88 "cpm.lex"
 { col += yyleng; yylval.op = OR; return OROP;}
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 90 "cpm.lex"
+#line 89 "cpm.lex"
 { col += yyleng; yylval.op = AND; return ANDOP;}
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 91 "cpm.lex"
+#line 90 "cpm.lex"
 ECHO;
 	YY_BREAK
-#line 1034 "lex.yy.c"
+#line 1033 "lex.yy.c"
 			case YY_STATE_EOF(INITIAL):
 			case YY_STATE_EOF(comment):
 				yyterminate();
@@ -1915,4 +1914,4 @@ int main()
 	return 0;
 	}
 #endif
-#line 91 "cpm.lex"
+#line 90 "cpm.lex"
