@@ -100,7 +100,7 @@ symTblEntry* lookup(symTbl* symTbl, char* lexeme)
       symTblEntry* ptr = symTbl->symbolTableHead[hashValue];   // lookup only in the line matched  by the hash
       while (ptr != NULL)
       {   
-         if (!strcmp(ptr->name, lexeme))
+         if (0 == strcmp(ptr->name, lexeme))
          {
             return ptr;
          }
@@ -177,15 +177,15 @@ Type charType2EnumType(char* type)
    {
       newType = integer;
    }
-   else if (!strcmp(type, "int")) 
+   else if (0 == strcmp(type, "int")) 
    {
       newType = integer;
    }
-   else if (!strcmp(type, "float")) 
+   else if (0 == strcmp(type, "float")) 
    {
       newType = floating;
    }
-   else if (!strcmp(type, "string")) 
+   else if (0 == strcmp(type, "string")) 
    {
       newType = string;
    }
@@ -201,18 +201,9 @@ char* EnumType2charType(Type type)
 {
    char* newType = NULL;      // enum Type {integer, floating, string}
 
-   switch (type)
-   {
-      case integer:
-         newType = strdup("float");
-         break;
-      case floating:
-         newType = strdup("float");
-         break;
-      case string:
-         newType = strdup("string");
-         break;
-   }
+   if (type == integer) newType = strdup("int");
+   else if (type == floating) newType = strdup("float");
+   else if (type == string) newType = strdup("string");
    return newType;
 }
 
@@ -221,14 +212,13 @@ char* EnumType2charType(Type type)
 */
 void addSymbol(symTbl* symTbl, char* lexeme, char* type, bool isConst)
 {
-   int hashValue;
    if (symTbl == NULL || lexeme == NULL || type == NULL)
    {
       fprintf(stderr, "Bad arguments passed to addSymbol\n");
       return;
    }
 
-   hashValue = getHash(lexeme);
+   int hashValue = getHash(lexeme);
    if (hashValue == -1)
    {
       fprintf(stderr, "Bad hash value returned\n");
@@ -260,6 +250,7 @@ void addSymbol(symTbl* symTbl, char* lexeme, char* type, bool isConst)
 */
 void destroyEntry(symTblEntry* entry)
 {
+   int x;
    if (entry == NULL)
    {
       fprintf(stderr, "Entry to be destroyed is NULL!!\n");
@@ -290,11 +281,14 @@ void destroySymTable(symTbl* symTbl)
    for (i = 0; i < SYM_TBL_ROWS_COUNT; i++)
    {
       symbol = symTbl->symbolTableHead[i];
-      while (symbol != NULL)
+      if (symbol != NULL)	// not an empty row
       {
-         nextSymbol = symbol->next;
-         destroyEntry(symbol);
-         symbol = nextSymbol;
+	while (symbol != NULL)
+	{
+		nextSymbol = symbol->next;
+		destroyEntry(symbol);
+		symbol = nextSymbol;
+		}
       }
    }
    free(symTbl);
@@ -309,8 +303,8 @@ symTbl** ptr2symbolTable = NULL;
 char* mipsCode;
 bool hasErrors = false;
 int nextLabelNum = 0;
-char* registerT[8] = {"$t0","$t1","$t2","$t3","$t4","$t5","$t6","$t7"};   // available MIPS T registers
-char* registerF[8] = {"$f0","$f1","$f2","$f3","$f4","$f5","$f6","$f7"};   // available MIPS F registers
+char* registerT[8] = {"$t0","$t1","$t2","$t3","$t4","$t5","$t6","$t7"};	// available MIPS T registers
+char* registerF[8] = {"$f0","$f1","$f2","$f3","$f4","$f5","$f6","$f7"}; // available MIPS F registers
 int idxT=0;
 int idxF=0;
 // ############### End of global variables ####################
@@ -325,6 +319,7 @@ int idxF=0;
 void outputError(char* s){
      FILE* listFile;
      listFile = fopen("listing.lst","a+");
+     hasErrors = true;
      if (listFile == NULL)
      {
        return;
@@ -342,7 +337,7 @@ void outputError(char* s){
 */
 char* strConcat(char* str1, char* str2)
 {
-   char* newString = (char*)calloc(strlen(str1) + strlen(str2) + 1, sizeof(char));
+   char* newString =(char*)malloc(sizeof(char) * (strlen(str1) + strlen(str2) + 1));
    newString[0] = '\0';
    strcat(newString, str1);
    strcat(newString, str2);
@@ -398,9 +393,9 @@ void freeRegisterF(char* reg)
 */
 char* getLabel()
 {
-   char* str = (char*)calloc(100, sizeof(char));
+   char str[100];
    sprintf(str,"Label%d",nextLabelNum++);
-   return str;
+   return strdup(str);
 }
 
 
@@ -463,15 +458,13 @@ char* getLabel()
 %%
 program : PROGRAM ID START DECLARATIONS STMTLIST END
 {// 0      1     2     3     4         5      6
-   printf("PROGRAM --> PROGRAM ID START DECLARATIONS STMTLIST END\n");
-   char* str = (char*)calloc(1000, sizeof(char));
+	printf("PROGRAM --> PROGRAM ID START DECLARATIONS STMTLIST END\n");
+	char* str = (char*)calloc(1000, sizeof(char));
    
-   if($5.head == NULL)
-   $5.head = "";
-   if($4.codeBody == NULL)
-   $4.codeBody = "";
-   sprintf(str,".data\n%s\n%s\nstrBuff: .space 200\n.text\nProgram:\n%s\n%s\n", $4.codeHead, $5.head, $4.codeBody, $5.body);
-   mipsCode = str;
+	if($5.head == NULL) $5.head = "";
+	if($4.codeBody == NULL) $4.codeBody = "";
+	sprintf(str,".data\n%s\n%s\nstrBuff: .space 200\n.text\nProgram:\n%s\n%s\n", $4.codeHead, $5.head, $4.codeBody, $5.body);
+	mipsCode = str;
 }
 
 
@@ -1992,6 +1985,8 @@ int main (int argc, char **argv)
    printf("Starting parsing process\n");
    yyparse();
    printf("Parsing process completed\n");
+
+   printf("%s", mipsCode);
 
    if (hasErrors == false) // no errors were found during parsing process -> creating MIPS file
    {
