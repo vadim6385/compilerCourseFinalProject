@@ -1,0 +1,17 @@
+Vadim Darchuk 316920974 and Yotam Alter 302955679
+
+1: program  Min  /* Finding minimum between two numbers */
+2: start
+3: decl real : a,b;
+4:     string: d;
+5:     
+6:     in(a);
+7:     in(b);
+8:     d="the result is ";
+9:     out(d);
+10:     if (a<b) then out(a);
+11: 	else   out(b);
+12: end
+13: end
+
+ERROR in line: 9, Id not declared

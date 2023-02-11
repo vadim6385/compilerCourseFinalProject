@@ -440,10 +440,10 @@ char* getLabel()
    }code;
 }
 
-%token <nVal>  NUM
+%token <nVal> NUM
 %token <op> ADDOP MULOP ASSIGNOP OROP ANDOP RELOP
 %token <sval> ID SENTENCE 
-%token START BREAK CASE FINAL DEFAULT DO ELSE END FOREACH IF INT DCL OUT REAL IN SWITCH TILL WHILE WITH STRING VAR PROGRAM
+%token START BREAK CASE FINAL DCL DEFAULT ELSE END FOREACH IF IN INT OUT PROGRAM REAL STRING SWITCH THEN TILL WHILE WITH
 
 %type <decl> EXPRESSION TERM FACTOR TYPE LIST DECLARATIONS DECLARLIST DECL CDECL switch CHOICE CASES BOOLEXPR BOOLTERM BOOLFACTOR
 %type <code> STMTLIST STMT ASSIGNMENT_STMT CONTROL_STMT STMT_BLOCK OUT_STMT IN_STMT STEP
@@ -1157,45 +1157,6 @@ CONTROL_STMT : IF'('BOOLEXPR')'STMT ELSE STMT
    hasErrors = true;
    $$.body = strdup("");
    $$.head = strdup("");
-}
-|DO STMT_BLOCK TILL'('BOOLEXPR')' 
-{//1   2      3     4      5      6
-/*do the block until BOOLEXPR is true*/
-   printf("CONTROL_STMT --> DO STMT_BLOCK TILL '(' BOOLEXPR ')'\n");
-   char* codeBodyStr = (char*)calloc((200 + strlen($2.body)),sizeof(char));
-   char* label = getLabel();
-   char* str = (char*)calloc((200 + strlen($5.codeBody)),sizeof(char));
-
-   //sprintf(codeBodyStr,"beq %s, $0, End%s\n%s\nj Loop%s\nEnd%s:\n", $5.reg, label, $2.body, label, label);
-   sprintf(codeBodyStr,"bneq %s, $0, End%s\n%s\nj Loop%s\nEnd%s:\n", $5.reg, label, $2.body, label, label);
-   sprintf(str,"Loop%s:\n",label);
-   strcat(str,$5.codeBody);
-   $$.head = strConcat($5.codeHead,$2.head);
-   $$.body = strConcat(str,codeBodyStr);
-   freeRegisterT($5.reg);
-   free(str);
-   free(codeBodyStr);
-}
-|DO STMT_BLOCK TILL BOOLEXPR')'
-{
-   outputError("expected '('");
-   hasErrors = true;
-   $$.body = strdup("");
-   $$.head = strdup("");   
-}
-|DO STMT_BLOCK TILL'(' ')'
-{
-   outputError("Expected a boolean expression");
-   hasErrors = true;
-   $$.body = strdup("");
-   $$.head = strdup("");
-} 
-|DO STMT_BLOCK TILL'('BOOLEXPR 
-{   
-   outputError("expected ')'");
-   hasErrors = true;
-   $$.body = strdup("");
-   $$.head = strdup("");   
 }
 |switch
 {//1

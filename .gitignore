@@ -54,5 +54,4 @@ dkms.conf
 *.tab
 *.c
 *.h
-*.lst
 *.asm

@@ -23,22 +23,21 @@ LETTER [a-zA-Z]
 "break"		{ col += yyleng; return BREAK;}
 "case"		{ col += yyleng; return CASE;} 
 "final"		{ col += yyleng; return FINAL;}
+"decl"		{ col += yyleng; return DCL;}
 "default"	{ col += yyleng; return DEFAULT;}
-"do"		{ col += yyleng; return DO;}
 "else"		{ col += yyleng; return ELSE;}
 "end"		{ col += yyleng; return END;}
 "foreach"	{ col += yyleng; return FOREACH;}
 "if"		{ col += yyleng; return IF;}
+"in"		{ col += yyleng; return IN;}
 "int"		{ col += yyleng; return INT;}
-"decl"		{ col += yyleng; return DCL;}
 "out"		{ col += yyleng; return OUT;}
 "program"	{ col += yyleng; return PROGRAM;}
 "real"		{ col += yyleng; return REAL;}
-"in"		{ col += yyleng; return IN;}
 "string"	{ col += yyleng; return STRING;}
 "switch"	{ col += yyleng; return SWITCH;}
+"then"		{ col += yyleng; return THEN;}
 "till"		{ col += yyleng; return TILL;}
-"var"		{ col += yyleng; return VAR;}
 "while"		{ col += yyleng; return WHILE;}
 "with"		{ col += yyleng; return WITH;}
 
