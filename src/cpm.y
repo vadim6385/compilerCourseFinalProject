@@ -760,6 +760,10 @@ OUT_STMT : OUT'('EXPRESSION')'';'
    
    if(strcmp($3.type, "real") == 0)   //print a float
       sprintf(codeBodyStr,"li $v0,2\nmov.s $f12,%s\n syscall\n",$3.reg);
+
+   if(strcmp($3.type, "string") == 0)  //print a string
+      // sprintf string here
+      pass;
    
    $$.head = $3.codeHead;
    $$.body = strConcat($3.codeBody, codeBodyStr);
