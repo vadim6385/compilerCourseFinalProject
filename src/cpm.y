@@ -443,10 +443,10 @@ char* getLabel()
 %token <nVal>  NUM
 %token <op> ADDOP MULOP ASSIGNOP OROP ANDOP RELOP
 %token <sval> ID SENTENCE 
-%token START BREAK CASE FINAL DEFAULT DO ELSE END FOREACH IF INT DCL OUT REAL READ SWITCH TILL WHILE WITH STRING VAR PROGRAM
+%token START BREAK CASE FINAL DEFAULT DO ELSE END FOREACH IF INT DCL OUT REAL IN SWITCH TILL WHILE WITH STRING VAR PROGRAM
 
 %type <decl> EXPRESSION TERM FACTOR TYPE LIST DECLARATIONS DECLARLIST DECL CDECL switch CHOICE CASES BOOLEXPR BOOLTERM BOOLFACTOR
-%type <code> STMTLIST STMT ASSIGNMENT_STMT CONTROL_STMT STMT_BLOCK OUT_STMT READ_STMT STEP
+%type <code> STMTLIST STMT ASSIGNMENT_STMT CONTROL_STMT STMT_BLOCK OUT_STMT IN_STMT STEP
 %start program
 
 %left addop
@@ -722,9 +722,9 @@ STMT : ASSIGNMENT_STMT
    $$.head = strdup($1.head);
    $$.body = strdup($1.body);
 }
-|READ_STMT
+|IN_STMT
 { //1
-   printf("STMT --> READ_STMT\n");
+   printf("STMT --> IN_STMT\n");
    $$.body = strdup($1.body);
 }
 |OUT_STMT
@@ -824,9 +824,9 @@ OUT_STMT : OUT'('EXPRESSION')'';'
 };
 
 
-READ_STMT : READ'('ID')'';'
+IN_STMT : IN'('ID')'';'
 {//0      1     2     3    4    5
-   printf("READ_STMT --> READ '(' ID ')' ';'\n");
+   printf("IN_STMT --> IN '(' ID ')' ';'\n");
    char* codeBodyStr = (char*)calloc(200,sizeof(char));
    char errorMessage[ERROR_STRING_LEN];
 
@@ -866,19 +866,19 @@ READ_STMT : READ'('ID')'';'
    $$.body = strdup(codeBodyStr);
    free(codeBodyStr);
 }
-|READ ID')'';'
+|IN ID')'';'
 {
    outputError("expected '('");
    hasErrors = true;
    $$.body=strdup("");
 }
-|READ'('ID ';'
+|IN'('ID ';'
 {
    outputError("expected ')'");
    hasErrors = true;
    $$.body=strdup("");
 }
-|READ'('ID')'
+|IN'('ID')'
 {
    outputError("expected ';'");
    hasErrors = true;

@@ -34,7 +34,7 @@ LETTER [a-zA-Z]
 "out"		{ col += yyleng; return OUT;}
 "program"	{ col += yyleng; return PROGRAM;}
 "real"		{ col += yyleng; return REAL;}
-"read"		{ col += yyleng; return READ;}
+"in"		{ col += yyleng; return IN;}
 "string"	{ col += yyleng; return STRING;}
 "switch"	{ col += yyleng; return SWITCH;}
 "till"		{ col += yyleng; return TILL;}
