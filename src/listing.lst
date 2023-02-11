@@ -3,7 +3,7 @@ Vadim Darchuk 316920974 and Yotam Alter 302955679
 1: program  Min  /* Finding minimum between two numbers */
 2: start
 3: decl real : a,b;
-4:     string: d;
+4: decl string: d;
 5:     
 6:     in(a);
 7:     in(b);
@@ -14,4 +14,3 @@ Vadim Darchuk 316920974 and Yotam Alter 302955679
 12: end
 13: end
 
-ERROR in line: 9, Id not declared

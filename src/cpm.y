@@ -955,29 +955,29 @@ ASSIGNMENT_STMT : ID ASSIGNOP EXPRESSION';'
 };
 
 
-CONTROL_STMT : IF'('BOOLEXPR')'STMT ELSE STMT
-{//0         1   2   3      4   5    6     7
-   printf("CONTROL_STMT --> IF '(' BOOLEXPR ')' STMT ELSE STMT\n");
-   char* codeBodyStr = (char*)calloc((200 + strlen($5.body)+ strlen($7.body)),sizeof(char));
+CONTROL_STMT : IF'('BOOLEXPR')' THEN STMT ELSE STMT
+{//0            1 2   3      4    5    6    7   8
+   printf("CONTROL_STMT --> IF '(' BOOLEXPR ')' THEN  STMT ELSE STMT\n");
+   char* codeBodyStr = (char*)calloc((200 + strlen($6.body)+ strlen($8.body)),sizeof(char));
    char* label = getLabel();
    char* str;
    
-   sprintf(codeBodyStr,"beq %s,$0,Else%s\n%s\nj End%s\nElse%s:\n%s\nEnd%s:\n", $3.reg, label, $5.body, label, label ,$7.body, label);   
-   str = strConcat($5.head, $7.head);
+   sprintf(codeBodyStr,"beq %s,$0,Else%s\n%s\nj End%s\nElse%s:\n%s\nEnd%s:\n", $3.reg, label, $6.body, label, label ,$8.body, label);   
+   str = strConcat($6.head, $8.head);
    $$.head = strConcat($3.codeHead, str);
    $$.body = strConcat($3.codeBody, codeBodyStr);
    freeRegisterT($3.reg);
    free(str);
    free(codeBodyStr);
 }   //error handling
-|IF BOOLEXPR')'STMT ELSE STMT 
+|IF BOOLEXPR')' THEN STMT ELSE STMT 
 {
    outputError("expected '('");
    hasErrors = true;
    $$.body=strdup("");
    $$.head=strdup("");
 }
-|IF'(' ')'STMT ELSE STMT
+|IF'(' ')' THEN STMT ELSE STMT
 {
    outputError("Expected a boolean expression");
    hasErrors = true;
