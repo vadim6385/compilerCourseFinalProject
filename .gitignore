@@ -52,3 +52,7 @@ Mkfile.old
 dkms.conf
 *.bak
 *.tab
+*.c
+*.h
+*.lst
+*.asm
