@@ -1,13 +1,9 @@
 %{
 #define _CRT_SECURE_NO_WARNINGS
-#include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
-#include <malloc.h>
+#include <string.h>
 #include "y.tab.h"
 
-extern int atoi (const char *);
-extern void addError(char*, char*);
 int col = 1;
 int line = 1;
 %}
@@ -27,16 +23,16 @@ LETTER [a-zA-Z]
 "break"		{ col += yyleng; return BREAK;}
 "case"		{ col += yyleng; return CASE;} 
 "final"		{ col += yyleng; return FINAL;}
-"default"   { col += yyleng; return DEFAULT;}
+"default"	{ col += yyleng; return DEFAULT;}
 "do"		{ col += yyleng; return DO;}
 "else"		{ col += yyleng; return ELSE;}
 "end"		{ col += yyleng; return END;}
-"foreach"   { col += yyleng; return FOREACH;}
+"foreach"	{ col += yyleng; return FOREACH;}
 "if"		{ col += yyleng; return IF;}
 "int"		{ col += yyleng; return INT;}
 "decl"		{ col += yyleng; return DCL;}
 "out"		{ col += yyleng; return OUT;}
-"program"   { col += yyleng; return PROGRAM;}
+"program"	{ col += yyleng; return PROGRAM;}
 "real"		{ col += yyleng; return REAL;}
 "read"		{ col += yyleng; return READ;}
 "string"	{ col += yyleng; return STRING;}
@@ -63,6 +59,7 @@ strcpy(yylval.sval, yytext);
 return ID;}
 
 {DIGIT}+			{ col += yyleng;
+				 fprintf(yyout, "%s", yytext);
 				 yylval.nVal.val.ival = atoi(yytext); 
 				 yylval.nVal.type = I;    
 				 return NUM;}
@@ -78,17 +75,17 @@ yylval.sval = (char*)malloc(yyleng*sizeof(char) +1);
 strcpy(yylval.sval, yytext);
 return SENTENCE;}
 
-"+"				{ col += yyleng; yylval.op = PLUS; return ADDOP;}
-"-"				{ col += yyleng; yylval.op = MINUS; return ADDOP;}
+"+"			{ col += yyleng; yylval.op = PLUS; return ADDOP;}
+"-"			{ col += yyleng; yylval.op = MINUS; return ADDOP;}
 "=="			{ col += yyleng; yylval.op = EQ; return RELOP;}
 "<>"			{ col += yyleng; yylval.op = NEQ; return RELOP;}
-"<"				{ col += yyleng; yylval.op = LT; return RELOP;}
-">"				{ col += yyleng; yylval.op = GT; return RELOP;}
+"<"			{ col += yyleng; yylval.op = LT; return RELOP;}
+">"			{ col += yyleng; yylval.op = GT; return RELOP;}
 ">="			{ col += yyleng; yylval.op = GTEQ; return RELOP;}
 "<="			{ col += yyleng; yylval.op = LTEQ; return RELOP;}
-"*"				{ col += yyleng; yylval.op = MUL; return MULOP;}
-"/"				{ col += yyleng; yylval.op = DIV; return MULOP;}
-"="				{ col += yyleng; yylval.op = ASSIGN; return ASSIGNOP;}
+"*"			{ col += yyleng; yylval.op = MUL; return MULOP;}
+"/"			{ col += yyleng; yylval.op = DIV; return MULOP;}
+"="			{ col += yyleng; yylval.op = ASSIGN; return ASSIGNOP;}
 "||"			{ col += yyleng; yylval.op = OR; return OROP;}
 "&&"			{ col += yyleng; yylval.op = AND; return ANDOP;}
 %%
