@@ -662,7 +662,7 @@ STMT : ASSIGNMENT_STMT
    $$.body = strdup($1.body);
 }
 |ID ASSIGNOP SENTENCE';'
-{//1   2      3      4
+{//1   2      3       4
    printf("STMT --> ID ASSIGNOP SENTENCE ';'\n");
    
    char* codeBodyStr = (char*)calloc(200,sizeof(char));
@@ -685,10 +685,12 @@ STMT : ASSIGNMENT_STMT
             
             sprintf(codeHeadStr,"%s: .asciiz %s\n", label, $3);
             sprintf(codeBodyStr,"lw %s, %s\nsw %s, %s\n", reg, label, reg, $1);
+	    printf("%s", codeHeadStr);
+	    printf("%s", codeBodyStr);
          }
          else
          {
-            sprintf(errorMessage, "Trying to assign sentence to an id which isn't of type string");
+            sprintf(errorMessage, "Trying to assign sentence to an id which is not of type string");
             outputError(errorMessage);
             sprintf(codeBodyStr,"");
             hasErrors = true;
@@ -696,7 +698,7 @@ STMT : ASSIGNMENT_STMT
       }
       else
       {
-         sprintf(errorMessage, "Can't assign to a constant variable");
+         sprintf(errorMessage, "Can not assign to a constant variable");
          outputError(errorMessage);
          sprintf(codeBodyStr,"");
          hasErrors = true;
@@ -704,7 +706,7 @@ STMT : ASSIGNMENT_STMT
    }
    else
    {
-      sprintf(errorMessage,"Id isn't declared");
+      sprintf(errorMessage,"string id is not declared");
       outputError(errorMessage);
       sprintf(codeBodyStr,"");
       hasErrors = true;
@@ -756,7 +758,7 @@ OUT_STMT : OUT'('EXPRESSION')'';'
    if(strcmp($3.type, "int") == 0)   //print an int
       sprintf(codeBodyStr,"li $v0,1\nmove $a0,%s\n syscall\n",$3.reg);
    
-   if(strcmp($3.type, "float") == 0)   //print a float
+   if(strcmp($3.type, "real") == 0)   //print a float
       sprintf(codeBodyStr,"li $v0,2\nmov.s $f12,%s\n syscall\n",$3.reg);
    
    $$.head = $3.codeHead;
@@ -786,7 +788,7 @@ OUT_STMT : OUT'('EXPRESSION')'';'
    $$.head = strdup("");
 }
 |OUT'('SENTENCE')'';'
-{//1   2   3      4   5
+{//1 2   3      4  5
    printf("OUT_STMT --> OUT '(' SENTENCE ')' ';'\n");
    char* codeBodyStr = (char*)calloc(200,sizeof(char));
    char* codeHeadStr = (char*)calloc(200,sizeof(char));
@@ -1410,7 +1412,7 @@ STEP : ID ASSIGNOP ID ADDOP NUM
    $$.head = strdup("");
 }
 |ID ASSIGNOP ID MULOP NUM
-{//1   2    3     4      5
+{//1   2     3    4    5
    printf("STEP : ID ASSIGNOP ID MULOP NUM\n");
    char* codeBodyStr = (char*)calloc(200,sizeof(char));
    symTblEntry*  symbol1 = lookup(*ptr2symbolTable, $1);
