@@ -19,7 +19,7 @@ void yyerror (char *s);
 typedef enum Type 
 {
    integer, 
-   floating, 
+   real, 
    string
 }Type;
 
@@ -172,7 +172,7 @@ void insertEntry(symTbl* symTbl, symTblEntry* newEntry, int hashValue)
 */
 Type charType2EnumType(char* type)
 {
-   Type newType;      // enum Type {integer, floating, string}
+   Type newType;      // enum Type {integer, real, string}
    if (type == NULL)   // for argument protection only
    {
       newType = integer;
@@ -181,9 +181,9 @@ Type charType2EnumType(char* type)
    {
       newType = integer;
    }
-   else if (0 == strcmp(type, "float")) 
+   else if (0 == strcmp(type, "real")) 
    {
-      newType = floating;
+      newType = real;
    }
    else if (0 == strcmp(type, "string")) 
    {
@@ -199,10 +199,10 @@ Type charType2EnumType(char* type)
 */
 char* EnumType2charType(Type type)
 {
-   char* newType = NULL;      // enum Type {integer, floating, string}
+   char* newType = NULL;      // enum Type {integer, real, string}
 
    if (type == integer) newType = strdup("int");
-   else if (type == floating) newType = strdup("float");
+   else if (type == real) newType = strdup("float");
    else if (type == string) newType = strdup("string");
    return newType;
 }
@@ -457,19 +457,19 @@ char* getLabel()
 %right assignop
 %%
 program : PROGRAM ID START DECLARATIONS STMTLIST END
-{// 0      1     2     3     4         5      6
-	printf("PROGRAM --> PROGRAM ID START DECLARATIONS STMTLIST END\n");
-	char* str = (char*)calloc(1000, sizeof(char));
+{// 0      1       2   3         4         5      6
+   printf("PROGRAM --> PROGRAM ID START DECLARATIONS STMTLIST END\n");
+   char* str = (char*)calloc(1000, sizeof(char));
    
-	if($5.head == NULL) $5.head = "";
-	if($4.codeBody == NULL) $4.codeBody = "";
-	sprintf(str,".data\n%s\n%s\nstrBuff: .space 200\n.text\nProgram:\n%s\n%s\n", $4.codeHead, $5.head, $4.codeBody, $5.body);
-	mipsCode = str;
+   if($5.head == NULL) $5.head = "";
+   if($4.codeBody == NULL) $4.codeBody = "";
+   sprintf(str,".data\n%s\n%s\nstrBuff: .space 200\n.text\nProgram:\n%s\n%s\n", $4.codeHead, $5.head, $4.codeBody, $5.body);
+   mipsCode = str;
 }
 
 
 DECLARATIONS : DCL DECLARLIST CDECL
-{//0         1      2      3
+{//0            1      2      3
    printf("DECLARATIONS --> DCL DECLARLIST CDECL\n");
    $$.codeHead = strdup(strcat($2.codeHead, $3.codeHead));
    $$.codeBody = strdup($3.codeBody);
@@ -495,7 +495,7 @@ DECLARLIST : DECLARLIST DECL
 
 
 DECL :  TYPE':'LIST
-{//0   1     2      3
+{//0     1   2   3
    printf("DECL -->  TYPE ':' LIST\n");
    char* tempCodeHeadStr = (char*)calloc(200, sizeof(char));
    char* codeHeadStr = (char*)calloc(200, sizeof(char));
@@ -601,7 +601,7 @@ TYPE : INT
 
 
 CDECL : FINAL TYPE ID ASSIGNOP NUM';'CDECL
-{//0   1      2   3   4      5  6   7
+{//0     1      2   3   4       5  6   7
    printf("CDECL --> FINAL TYPE ID ASSIGNOP NUM ';' CDECL\n");
    char* codeBodyStr = (char*)calloc(200, sizeof(char));
    char* codeHeadStr = (char*)calloc(200, sizeof(char));
@@ -749,7 +749,7 @@ STMT : ASSIGNMENT_STMT
 
 
 OUT_STMT : OUT'('EXPRESSION')'';'
-{//0      1   2   3         4   5
+{//0        1  2   3        4  5
    printf("OUT_STMT --> OUT '(' EXPRESSION ')' ';'\n");
    char* codeBodyStr = (char*)calloc(200,sizeof(char));
    
@@ -838,7 +838,7 @@ IN_STMT : IN'('ID')'';'
          if(symbol->type == integer)   //read int
             sprintf(codeBodyStr,"li $v0,5\nsyscall\nsw $v0, %s\n", symbol->name);
 
-         if(symbol->type == floating) //read float
+         if(symbol->type == real) //read float
             sprintf(codeBodyStr,"li $v0,6\nsyscall\ns.s $f0, %s\n", symbol->name);
 
          if(symbol->type == string)   //read string
@@ -903,14 +903,14 @@ ASSIGNMENT_STMT : ID ASSIGNOP EXPRESSION';'
             sprintf(codeBodyStr,"sw %s, %s\n", $3.reg, $1);
             freeRegisterT($3.reg);
          }   
-         else if(strcmp($3.type,"float") == 0 && symbol->type == floating) //floats assignment
+         else if(strcmp($3.type,"float") == 0 && symbol->type == real) //floats assignment
          {
             sprintf(codeBodyStr,"s.s %s, %s\n", $3.reg, $1);
             freeRegisterF($3.reg);
          }
             else
             {
-               if(strcmp($3.type,"int")==0 && symbol->type == floating) //assign an int into a float
+               if(strcmp($3.type,"int")==0 && symbol->type == real) //assign an int into a float
                {
                   reg = getRegisterF();
                   sprintf(codeBodyStr,"mtc1 %s, %s\ncvt.s.w %s, %s\ns.s %s, %s\n", $3.reg, reg, reg, reg, reg, $1);
@@ -955,9 +955,9 @@ ASSIGNMENT_STMT : ID ASSIGNOP EXPRESSION';'
 };
 
 
-CONTROL_STMT : IF'('BOOLEXPR')' THEN STMT ELSE STMT
+CONTROL_STMT : IF'('BOOLEXPR')'THEN STMT ELSE STMT
 {//0            1 2   3      4    5    6    7   8
-   printf("CONTROL_STMT --> IF '(' BOOLEXPR ')' THEN  STMT ELSE STMT\n");
+   printf("CONTROL_STMT --> IF '(' BOOLEXPR ')'THEN  STMT ELSE STMT\n");
    char* codeBodyStr = (char*)calloc((200 + strlen($6.body)+ strlen($8.body)),sizeof(char));
    char* label = getLabel();
    char* str;
@@ -970,14 +970,14 @@ CONTROL_STMT : IF'('BOOLEXPR')' THEN STMT ELSE STMT
    free(str);
    free(codeBodyStr);
 }   //error handling
-|IF BOOLEXPR')' THEN STMT ELSE STMT 
+|IF BOOLEXPR')'THEN STMT ELSE STMT 
 {
    outputError("expected '('");
    hasErrors = true;
    $$.body=strdup("");
    $$.head=strdup("");
 }
-|IF'(' ')' THEN STMT ELSE STMT
+|IF'(' ')'THEN STMT ELSE STMT
 {
    outputError("Expected a boolean expression");
    hasErrors = true;
@@ -1023,9 +1023,9 @@ CONTROL_STMT : IF'('BOOLEXPR')' THEN STMT ELSE STMT
    $$.body = strdup("");
    $$.head = strdup("");
 }
-|FOREACH ID ASSIGNOP NUM':'NUM WITH STEP STMT
-{//1     2      3      4  5   6   7    8    9
-   printf("CONTROL_STMT --> FOREACH ID ASSIGNOP NUM ':' NUM WITH STEP STMT\n");
+|FOREACH ID ASSIGNOP NUM TILL NUM WITH STEP STMT
+{//1     2      3     4    5    6   7    8    9
+   printf("CONTROL_STMT --> FOREACH ID ASSIGNOP NUM TILL NUM WITH STEP STMT\n");
    char* codeBodyStr = (char*)calloc((200 + strlen($8.body) + strlen($9.body)),sizeof(char));
    char* str = (char*)calloc((200 + strlen($8.body) + strlen($9.body)),sizeof(char));
    char errorMessage[ERROR_STRING_LEN];
@@ -1052,7 +1052,7 @@ CONTROL_STMT : IF'('BOOLEXPR')' THEN STMT ELSE STMT
          }   
          else
          {
-            if($4.type == F && symbol->type == floating && $6.type == F) //floats assignment
+            if($4.type == F && symbol->type == real && $6.type == F) //floats assignment
             {
                reg1 = getRegisterF();
                reg2 = getRegisterF();
@@ -1063,7 +1063,7 @@ CONTROL_STMT : IF'('BOOLEXPR')' THEN STMT ELSE STMT
             }
             else
             {
-               if($4.type == I && symbol->type == floating && $6.type == I) //assign an int into a float
+               if($4.type == I && symbol->type == real && $6.type == I) //assign an int into a float
                {
                   reg1 = getRegisterT();
                   reg2 = getRegisterT();
@@ -1130,14 +1130,14 @@ CONTROL_STMT : IF'('BOOLEXPR')' THEN STMT ELSE STMT
    free(str);
    free(codeBodyStr);
 }
-|FOREACH ID ASSIGNOP NUM':'ID WITH STEP STMT
-{ //1      2   3      4  5  6   7      8   9 // @@@
-   printf("CONTROL_STMT --> FOREACH ID ASSIGNOP NUM':'ID WITH STEP STMT\n");
+|FOREACH ID ASSIGNOP NUM TILL ID WITH STEP STMT
+{ //1     2   3      4     5   6   7    8   9 
+   printf("CONTROL_STMT --> FOREACH ID ASSIGNOP NUM TILL ID WITH STEP STMT\n");
    $$.body = strdup("");
    $$.head = strdup("");
 
 }
-|FOREACH ID NUM':'NUM WITH STEP STMT
+|FOREACH ID NUM TILL NUM WITH STEP STMT
 {
    outputError("expected an assignment operation");
    hasErrors = true;
@@ -1146,14 +1146,14 @@ CONTROL_STMT : IF'('BOOLEXPR')' THEN STMT ELSE STMT
 }
 |FOREACH ID ASSIGNOP NUM NUM WITH STEP STMT
 {
-   outputError("expected ':'");
+   outputError("expected '='");
    hasErrors = true;
    $$.body = strdup("");
    $$.head = strdup("");
 }
 |FOREACH ID ASSIGNOP NUM ID WITH STEP STMT
 {
-   outputError("expected ':'");
+   outputError("expected '='");
    hasErrors = true;
    $$.body = strdup("");
    $$.head = strdup("");
@@ -1246,7 +1246,7 @@ CHOICE : ID
       }
       else
       {
-         if(symbol->type == floating)
+         if(symbol->type == real)
          {
             reg = getRegisterF();
             sprintf(codeBodyStr,"l.s %s,%s\n", reg, $1);
@@ -1340,7 +1340,7 @@ CASES : CASE NUM':'STMTLIST BREAK';'CASES
 
 
 STEP : ID ASSIGNOP ID ADDOP NUM
-{//0   1   2      3   4    5
+{//0   1   2       3   4    5
    printf("STEP : ID ASSIGNOP ID ADDOP NUM\n");
    char* codeBodyStr = (char*)calloc(200,sizeof(char));
    char errorMessage[ERROR_STRING_LEN];
@@ -1366,7 +1366,7 @@ STEP : ID ASSIGNOP ID ADDOP NUM
             sprintf(codeBodyStr,"lw, %s, %s\nsubi %s, %s ,%d\nsw %s, %s\n", reg, $3, reg, reg, $5.val.ival, reg, $1);
          freeRegisterT(reg);
       }
-      if(symbol1->type == floating && symbol2->type == floating && $5.type == F)   // all floats assignment
+      if(symbol1->type == real && symbol2->type == real && $5.type == F)   // all floats assignment
       {
          char* reg = getRegisterF();
          if($4 == PLUS)
@@ -1435,7 +1435,7 @@ STEP : ID ASSIGNOP ID ADDOP NUM
             sprintf(codeBodyStr,"la ,%s, %s\ndiv %s, %s ,%d\nsw %s, %s\n",reg, $3, reg, reg, $5.val.ival, reg, $1);
          freeRegisterT(reg);
       }
-      if(symbol1->type == floating && symbol2->type == floating && $5.type == F)   // all floats assignment
+      if(symbol1->type == real && symbol2->type == real && $5.type == F)   // all floats assignment
       {
          char* reg = getRegisterF();
          if($4 == MUL)
@@ -1805,7 +1805,7 @@ FACTOR : '('EXPRESSION')'
          reg = getRegisterT();
          sprintf(codeBodyStr,"lw %s, %s\n", reg, $1);
       }
-      if(symbol->type == floating)
+      if(symbol->type == real)
       {
          reg = getRegisterF();
          sprintf(codeBodyStr,"l.s %s, %s\n", reg, $1);
