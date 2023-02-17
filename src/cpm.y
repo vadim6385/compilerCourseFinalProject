@@ -10,6 +10,7 @@
 #define ERROR_STRING_LEN 100
 #define STUDENTS_DETAILS "Vadim Darchuk 316920974 and Yotam Alter 302955679\n\n"
 #define SYM_TBL_ROWS_COUNT 10
+#define DEBUG_PRINT
 
 extern int yylex();
 extern int yylineno;
@@ -355,7 +356,15 @@ char* getRegisterT()
    return res;
 }
 
-
+/*
+* Debug print function
+*/
+void dbg_print(char* str)
+{
+#ifdef DEBUG_PRINT
+   printf("DEBUG: %s", str);
+#endif
+}
 
 /*
 * Frees a given T register
@@ -464,6 +473,7 @@ program : PROGRAM ID START DECLARATIONS STMTLIST END
    if($5.head == NULL) $5.head = "";
    if($4.codeBody == NULL) $4.codeBody = "";
    sprintf(str,".data\n%s\n%s\nstrBuff: .space 200\n.text\nProgram:\n%s\n%s\n", $4.codeHead, $5.head, $4.codeBody, $5.body);
+   dbg_print(str);
    mipsCode = str;
 }
 
@@ -534,9 +544,9 @@ DECL :  TYPE':'LIST
 }
 |TYPE LIST 
 {
-outputError("Expected ':' ");
-hasErrors = true;
-$$.codeHead = strdup("");
+   outputError("Expected ':' ");
+   hasErrors = true;
+   $$.codeHead = strdup("");
 };
 
 
@@ -685,8 +695,8 @@ STMT : ASSIGNMENT_STMT
             
             sprintf(codeHeadStr,"%s: .asciiz %s\n", label, $3);
             sprintf(codeBodyStr,"lw %s, %s\nsw %s, %s\n", reg, label, reg, $1);
-	    printf("%s", codeHeadStr);
-	    printf("%s", codeBodyStr);
+            dbg_print(codeHeadStr);
+            dbg_print(codeBodyStr);
          }
          else
          {
@@ -758,13 +768,15 @@ OUT_STMT : OUT'('EXPRESSION')'';'
    if(strcmp($3.type, "int") == 0)   //print an int
       sprintf(codeBodyStr,"li $v0,1\nmove $a0,%s\n syscall\n",$3.reg);
    
-   if(strcmp($3.type, "real") == 0)   //print a float
-      sprintf(codeBodyStr,"li $v0,2\nmov.s $f12,%s\n syscall\n",$3.reg);
+   else if(strcmp($3.type, "real") == 0)   //print a float
+         sprintf(codeBodyStr,"li $v0,2\nmov.s $f12,%s\n syscall\n",$3.reg);
 
-   if(strcmp($3.type, "string") == 0)  //print a string
-      // sprintf string here
-      pass;
-   
+   else if(strcmp($3.type, "string") == 0)  //print a string
+   {
+      char* label = getLabel();
+      sprintf(codeBodyStr,"li $v0,4\nla $a0, %s\nsyscall\n", $3.reg);
+   }
+   dbg_print(codeBodyStr);
    $$.head = $3.codeHead;
    $$.body = strConcat($3.codeBody, codeBodyStr);
    free(codeBodyStr);
