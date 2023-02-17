@@ -451,7 +451,7 @@ char* getLabel()
 
 %token <nVal> NUM
 %token <op> ADDOP MULOP ASSIGNOP OROP ANDOP RELOP
-%token <sval> ID SENTENCE 
+%token <sval> ID STRING_LITERAL 
 %token START BREAK CASE FINAL DCL DEFAULT ELSE END FOREACH IF IN INT OUT PROGRAM REAL STRING SWITCH THEN TILL WHILE WITH
 
 %type <decl> EXPRESSION TERM FACTOR TYPE LIST DECLARATIONS DECLARLIST DECL CDECL switch CHOICE CASES BOOLEXPR BOOLTERM BOOLFACTOR
@@ -707,20 +707,18 @@ OUT_STMT : OUT'('EXPRESSION')'';'
    dbg_print($3.type);
    if(strcmp($3.type, "int") == 0)   //print an int
    {
-      sprintf(codeBodyStr,"li $v0,1\nmove $a0,%s\n syscall\n",$3.reg);
+      sprintf(codeBodyStr, "li $v0, 1\nlw $a0, %s\nsyscall\n", $3.reg);
       dbg_print("print int");
    }
    else if(strcmp($3.type, "real") == 0)   //print a float
    {
-         sprintf(codeBodyStr,"li $v0,2\nmov.s $f12,%s\n syscall\n",$3.reg);
-         dbg_print("print float");
+      sprintf(codeBodyStr,"li $v0, 2\nl.s $f12,%s\n syscall\n",$3.reg);
+      dbg_print("print float");
    }
    else if(strcmp($3.type, "string") == 0)  //print a string
    {
       dbg_print("print string");
-      char* label = getLabel();
-      dbg_print(label);
-      sprintf(codeBodyStr,"li $v0,4\nla $a0, %s\nsyscall\n", $3.reg);
+      sprintf(codeBodyStr,"li $v0,4\nlw $a0, %s\nsyscall\n", $3.reg);
    }
    else
    {
@@ -760,9 +758,9 @@ OUT_STMT : OUT'('EXPRESSION')'';'
    $$.body = strdup("");
    $$.head = strdup("");
 }
-|OUT'('SENTENCE')'';'
+|OUT'('STRING_LITERAL')'';'
 {//1 2   3      4  5
-   printf("OUT_STMT --> OUT '(' SENTENCE ')' ';'\n");
+   printf("OUT_STMT --> OUT '(' STRING_LITERAL ')' ';'\n");
    char* codeBodyStr = (char*)calloc(200,sizeof(char));
    char* codeHeadStr = (char*)calloc(200,sizeof(char));
    char* label = getLabel();
@@ -775,14 +773,14 @@ OUT_STMT : OUT'('EXPRESSION')'';'
    free(codeHeadStr);
    free(codeBodyStr);
 }   // error handling
-|OUT SENTENCE')'';'
+|OUT STRING_LITERAL')'';'
 {
    outputError("Expected '('");
    hasErrors = true;
    $$.body = strdup("");
    $$.head = strdup("");
 }
-|OUT'('SENTENCE ';'
+|OUT'('STRING_LITERAL ';'
 {
    outputError("Expected ')'");
    hasErrors = true;
@@ -790,7 +788,7 @@ OUT_STMT : OUT'('EXPRESSION')'';'
    $$.head = strdup("");
 }
 
-|OUT'('SENTENCE')'
+|OUT'('STRING_LITERAL')'
 {
    outputError("expected ';'");
    hasErrors = true;
@@ -928,9 +926,9 @@ ASSIGNMENT_STMT : ID ASSIGNOP EXPRESSION';'
    $$.head = strdup("");
    $$.body = strdup("");
 }
-|ID ASSIGNOP SENTENCE';'
+|ID ASSIGNOP STRING_LITERAL';'
 {//1   2      3       4
-   printf("STMT --> ID ASSIGNOP SENTENCE ';'\n");
+   printf("STMT --> ID ASSIGNOP STRING_LITERAL ';'\n");
    
    char* codeBodyStr = (char*)calloc(200,sizeof(char));
    char* codeHeadStr = (char*)calloc(200,sizeof(char));
@@ -985,7 +983,7 @@ ASSIGNMENT_STMT : ID ASSIGNOP EXPRESSION';'
    free(codeHeadStr);
    free(codeBodyStr);
 }
-|ID ASSIGNOP SENTENCE
+|ID ASSIGNOP STRING_LITERAL
 { 
    outputError("Expected ';' ");
    hasErrors = true;

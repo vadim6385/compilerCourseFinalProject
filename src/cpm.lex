@@ -72,7 +72,7 @@ return ID;}
 col += yyleng;
 yylval.sval = (char*)malloc(yyleng*sizeof(char) +1);
 strcpy(yylval.sval, yytext);
-return SENTENCE;}
+return STRING_LITERAL;}
 
 "+"			{ col += yyleng; yylval.op = PLUS; return ADDOP;}
 "-"			{ col += yyleng; yylval.op = MINUS; return ADDOP;}
