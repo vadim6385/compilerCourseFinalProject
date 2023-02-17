@@ -362,7 +362,7 @@ char* getRegisterT()
 void dbg_print(char* str)
 {
 #ifdef DEBUG_PRINT
-   printf("DEBUG: %s", str);
+   printf("DEBUG: %s\n", str);
 #endif
 }
 
@@ -483,6 +483,8 @@ DECLARATIONS : DCL DECLARLIST CDECL
    printf("DECLARATIONS --> DCL DECLARLIST CDECL\n");
    $$.codeHead = strdup(strcat($2.codeHead, $3.codeHead));
    $$.codeBody = strdup($3.codeBody);
+   dbg_print($$.codeHead);
+   dbg_print($$.codeBody);
 }
 |
 {
@@ -531,7 +533,8 @@ DECL :  TYPE':'LIST
             }
          }
          else 
-         {   sprintf(errorMessage, "Duplicted declaration. %s already declared\n", $3.IDarray[i]);
+         {   
+            sprintf(errorMessage, "Duplicated declaration. %s already declared\n", $3.IDarray[i]);
             outputError(errorMessage);
             sprintf(codeHeadStr,"");
             hasErrors = true;
@@ -671,63 +674,6 @@ STMT : ASSIGNMENT_STMT
    $$.head = strdup($1.head);
    $$.body = strdup($1.body);
 }
-|ID ASSIGNOP SENTENCE';'
-{//1   2      3       4
-   printf("STMT --> ID ASSIGNOP SENTENCE ';'\n");
-   
-   char* codeBodyStr = (char*)calloc(200,sizeof(char));
-   char* codeHeadStr = (char*)calloc(200,sizeof(char));
-   char* temp;
-   char errorMessage[ERROR_STRING_LEN];
-
-   char* reg = getRegisterT();
-   char* label = getLabel();
-   symTblEntry*  symbol = lookup(*ptr2symbolTable, $1);
-   if (symbol != NULL)
-   {   
-      if(symbol->isConst == false)
-      {
-         if(symbol->type == string)
-         {   
-            temp = (char*)calloc(1, sizeof(char) * (strlen($3)+1));
-            temp = strcpy(temp, $3);
-            symbol->value.sval = temp;
-            
-            sprintf(codeHeadStr,"%s: .asciiz %s\n", label, $3);
-            sprintf(codeBodyStr,"lw %s, %s\nsw %s, %s\n", reg, label, reg, $1);
-            dbg_print(codeHeadStr);
-            dbg_print(codeBodyStr);
-         }
-         else
-         {
-            sprintf(errorMessage, "Trying to assign sentence to an id which is not of type string");
-            outputError(errorMessage);
-            sprintf(codeBodyStr,"");
-            hasErrors = true;
-         }
-      }
-      else
-      {
-         sprintf(errorMessage, "Can not assign to a constant variable");
-         outputError(errorMessage);
-         sprintf(codeBodyStr,"");
-         hasErrors = true;
-         }
-   }
-   else
-   {
-      sprintf(errorMessage,"string id is not declared");
-      outputError(errorMessage);
-      sprintf(codeBodyStr,"");
-      hasErrors = true;
-   }
-
-   freeRegisterT(reg);
-   $$.head = strdup(codeHeadStr);
-   $$.body = strdup(codeBodyStr);
-   free(codeHeadStr);
-   free(codeBodyStr);
-}
 |CONTROL_STMT
 {   //1
    printf("STMT --> CONTROL_STMT\n");
@@ -750,13 +696,6 @@ STMT : ASSIGNMENT_STMT
    printf("STMT --> STMT_BLOCK\n");
    $$.head = strdup($1.head);
    $$.body = strdup($1.body);
-}
-|ID ASSIGNOP SENTENCE
-{ 
-   outputError("Expected ';' ");
-   hasErrors = true;
-   $$.head = strdup("");
-   $$.body = strdup("");
 };
 
 
@@ -764,21 +703,39 @@ OUT_STMT : OUT'('EXPRESSION')'';'
 {//0        1  2   3        4  5
    printf("OUT_STMT --> OUT '(' EXPRESSION ')' ';'\n");
    char* codeBodyStr = (char*)calloc(200,sizeof(char));
-   
+   dbg_print("out(d)");
+   dbg_print($3.type);
    if(strcmp($3.type, "int") == 0)   //print an int
+   {
       sprintf(codeBodyStr,"li $v0,1\nmove $a0,%s\n syscall\n",$3.reg);
-   
+      dbg_print("print int");
+   }
    else if(strcmp($3.type, "real") == 0)   //print a float
+   {
          sprintf(codeBodyStr,"li $v0,2\nmov.s $f12,%s\n syscall\n",$3.reg);
-
+         dbg_print("print float");
+   }
    else if(strcmp($3.type, "string") == 0)  //print a string
    {
+      dbg_print("print string");
       char* label = getLabel();
+      dbg_print(label);
       sprintf(codeBodyStr,"li $v0,4\nla $a0, %s\nsyscall\n", $3.reg);
    }
-   dbg_print(codeBodyStr);
+   else
+   {
+      dbg_print("wrong type");
+      outputError("Unknown type");
+      hasErrors = true;
+      $$.body = strdup("");
+      $$.head = strdup("");
+   }
+   
+   // dbg_print(codeBodyStr);
    $$.head = $3.codeHead;
+   dbg_print($$.head);
    $$.body = strConcat($3.codeBody, codeBodyStr);
+   dbg_print($$.body);
    free(codeBodyStr);
 }
 |OUT EXPRESSION')'';'
@@ -905,7 +862,7 @@ IN_STMT : IN'('ID')'';'
 
 
 ASSIGNMENT_STMT : ID ASSIGNOP EXPRESSION';'
-{//0           1      2      3       4
+{//0               1      2      3       4
    printf("ASSIGNMENT_STMT --> ID ASSIGNOP EXPRESSION';'\n");
    char* codeBodyStr = (char*)calloc(200,sizeof(char));
    char errorMessage[ERROR_STRING_LEN];
@@ -970,7 +927,78 @@ ASSIGNMENT_STMT : ID ASSIGNOP EXPRESSION';'
    hasErrors = true;
    $$.head = strdup("");
    $$.body = strdup("");
-};
+}
+|ID ASSIGNOP SENTENCE';'
+{//1   2      3       4
+   printf("STMT --> ID ASSIGNOP SENTENCE ';'\n");
+   
+   char* codeBodyStr = (char*)calloc(200,sizeof(char));
+   char* codeHeadStr = (char*)calloc(200,sizeof(char));
+   char* temp;
+   char errorMessage[ERROR_STRING_LEN];
+
+   char* reg = getRegisterT();
+   char* label = getLabel();
+   symTblEntry*  symbol = lookup(*ptr2symbolTable, $1);
+   if (symbol != NULL)
+   {   
+      if(symbol->isConst == false)
+      {
+         if(symbol->type == string)
+         {   
+            temp = (char*)calloc(1, sizeof(char) * (strlen($3)+1));
+            temp = strcpy(temp, $3);
+	    dbg_print(temp);
+            symbol->value.sval = temp;
+            sprintf(codeHeadStr,"%s: .asciiz %s\n", label, $3);
+            sprintf(codeBodyStr,"lw %s, %s\nsw %s, %s\n", reg, label, reg, $1);
+            dbg_print(codeHeadStr);
+            dbg_print(codeBodyStr);
+         }
+         else
+         {
+            sprintf(errorMessage, "Trying to assign sentence to an id which is not of type string");
+            outputError(errorMessage);
+            sprintf(codeBodyStr,"");
+            hasErrors = true;
+         }
+      }
+      else
+      {
+         sprintf(errorMessage, "Can not assign to a constant variable");
+         outputError(errorMessage);
+         sprintf(codeBodyStr,"");
+         hasErrors = true;
+         }
+   }
+   else
+   {
+      sprintf(errorMessage,"string id is not declared");
+      outputError(errorMessage);
+      sprintf(codeBodyStr,"");
+      hasErrors = true;
+   }
+
+   freeRegisterT(reg);
+   $$.head = strdup(codeHeadStr);
+   $$.body = strdup(codeBodyStr);
+   free(codeHeadStr);
+   free(codeBodyStr);
+}
+|ID ASSIGNOP SENTENCE
+{ 
+   outputError("Expected ';' ");
+   hasErrors = true;
+   $$.head = strdup("");
+   $$.body = strdup("");
+}
+|ID ASSIGNOP
+{
+   outputError("Expected assignment value");
+   hasErrors = true;
+   $$.head = strdup("");
+   $$.body = strdup("");
+ };
 
 
 CONTROL_STMT : IF'('BOOLEXPR')'THEN STMT ELSE STMT
@@ -1709,6 +1737,7 @@ EXPRESSION : EXPRESSION ADDOP TERM
    $$.codeBody = strdup($1.codeBody);
    $$.codeHead = strdup($1.codeHead);
    $$.type = strdup($1.type);
+   dbg_print($$.type);
 };
 
 
@@ -1790,6 +1819,7 @@ TERM : TERM MULOP FACTOR
    $$.codeBody = strdup($1.codeBody);
    $$.codeHead = strdup($1.codeHead);
    $$.type = strdup($1.type);
+   dbg_print($$.type);
 };
 
 
@@ -1800,6 +1830,7 @@ FACTOR : '('EXPRESSION')'
    $$.codeBody = strdup($2.codeBody);
    $$.codeHead = strdup($2.codeHead);
    $$.type = strdup($2.type);
+   dbg_print($$.type);
 }
 |'('EXPRESSION
 {
@@ -1814,6 +1845,7 @@ FACTOR : '('EXPRESSION')'
    char* codeBodyStr = (char*)calloc(200,sizeof(char));
    char* reg;
    char* label = getLabel();
+   dbg_print(label);
    symTblEntry* symbol = lookup(*ptr2symbolTable, $1);
    
    if(symbol != NULL)
@@ -1831,6 +1863,7 @@ FACTOR : '('EXPRESSION')'
       if(symbol->type == string)
       {
          reg = $1;
+	 dbg_print(reg);
       }
       $$.reg = strdup(reg);
       $$.type = EnumType2charType(symbol->type);
