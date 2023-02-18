@@ -9,7 +9,7 @@
 
 #define ERROR_STRING_LEN 100
 #define STUDENTS_DETAILS "Vadim Darchuk 316920974 and Yotam Alter 302955679\n\n"
-#define SYM_TBL_ROWS_COUNT 10
+#define SYM_TBL_ROWS_COUNT 20
 #define DEBUG_PRINT
 
 extern int yylex();
@@ -45,6 +45,16 @@ typedef struct symTbl
    symTblEntry* symbolTableHead[SYM_TBL_ROWS_COUNT];
 }symTbl;
 
+// ############### debug print function #############################
+/*
+* Debug print function
+*/
+void dbg_print(char* str)
+{
+#ifdef DEBUG_PRINT
+   printf("DEBUG: %s\n", str);
+#endif
+}
 
 // ############### Symbol table related functions ####################
 /*
@@ -52,18 +62,14 @@ typedef struct symTbl
 */
 symTbl* initSymTbl()
 {
-   int i;
-   symTbl* symbolTbl = (symTbl*)malloc(sizeof(symTbl));
+   symTbl* symbolTbl = (symTbl*)calloc(1, sizeof(symTbl));
+   
    if (symbolTbl == NULL)
    {
       fprintf(stderr, "Failed to init a symbol table. Compilation process is terminated\n");
       exit(1);
    }
-   
-   for (i = 0; i < SYM_TBL_ROWS_COUNT; i++)
-   {
-      symbolTbl->symbolTableHead[i] = NULL;
-   }
+
    return symbolTbl;
 }
 
@@ -79,35 +85,43 @@ int getHash(char* lexeme)
    return strlen(lexeme) % SYM_TBL_ROWS_COUNT;
 }
 
-
 /*
 * Searches for an entry in a symbol table in an effective hash-based algorithm
 */
 symTblEntry* lookup(symTbl* symTbl, char* lexeme)
 {
+   dbg_print("looking for");
+   dbg_print(lexeme);
    if(symTbl == NULL || lexeme == NULL)
    {
+      dbg_print("symTbl == NULL || lexeme == NULL");
       return NULL;
    }
 
    int hashValue = getHash(lexeme);
    if (hashValue == -1)
    {
+      dbg_print("Failed to get hash value");
       fprintf(stderr, "Failed to get hash value\n");
       return NULL;
    }
    if (hashValue > 0 && hashValue < SYM_TBL_ROWS_COUNT)
-   {   
+   {
+      dbg_print("hashValue > 0 && hashValue < SYM_TBL_ROWS_COUNT");
       symTblEntry* ptr = symTbl->symbolTableHead[hashValue];   // lookup only in the line matched  by the hash
       while (ptr != NULL)
       {   
+         dbg_print("ptr not null");
+         dbg_print(ptr->name);
          if (0 == strcmp(ptr->name, lexeme))
          {
+            dbg_print("found symbol");
             return ptr;
          }
          ptr = ptr->next;
       }
    }
+   dbg_print("symbol not in table");
    return NULL; //requested symbol is not in table
 }
 
@@ -115,11 +129,11 @@ symTblEntry* lookup(symTbl* symTbl, char* lexeme)
 /*
 * Creates a new symbol instance
 */
-symTblEntry* createSymTblEntery(symTbl* symTbl, char * lexeme, Type type, bool isConst, int hashValue)
+symTblEntry* createSymTblEntry(symTbl* symTbl, char * lexeme, Type type, bool isConst, int hashValue)
 {
    if (symTbl == NULL || lexeme == NULL || hashValue < 0 || hashValue >= SYM_TBL_ROWS_COUNT)
    {
-      fprintf(stderr, "Bad arguments passed to createSymTblEntery\n");
+      fprintf(stderr, "Bad arguments passed to createSymTblEntry\n");
       return NULL;
    }
 
@@ -151,16 +165,20 @@ void insertEntry(symTbl* symTbl, symTblEntry* newEntry, int hashValue)
 {
    if (symTbl == NULL || newEntry == NULL || hashValue < 0 || hashValue >= SYM_TBL_ROWS_COUNT)
    {
+      dbg_print("Bad arguments passed to insertEntry");
       fprintf(stderr, "Bad arguments passed to insertEntry\n");
       return;
    }
 
    symTblEntry* oldHead = NULL;
    if (symTbl->symbolTableHead[hashValue] == NULL) // the symbol table row is empty
+   {
+      dbg_print("symbol is null, inserting new symbol");
       symTbl->symbolTableHead[hashValue] = newEntry;
-      
+   }
    else   //otherwise, add newEntry to the Head of the appropriate list
    {
+      dbg_print("add newEntry to the Head of the appropriate list");
       oldHead = symTbl->symbolTableHead[hashValue];      
       newEntry->next = oldHead;
       symTbl->symbolTableHead[hashValue] = newEntry;
@@ -231,12 +249,14 @@ void addSymbol(symTbl* symTbl, char* lexeme, char* type, bool isConst)
       fprintf(stderr, "%s is already in symbol table\n", lexeme);
       return;
    }
-
+   dbg_print(type);
+   dbg_print(lexeme);
    Type newType = charType2EnumType(type);      // Converting char* type to Enum Type
-   symTblEntry* newSymbol = createSymTblEntery(symTbl, lexeme, newType, isConst, hashValue);
+   symTblEntry* newSymbol = createSymTblEntry(symTbl, lexeme, newType, isConst, hashValue);
 
    if (newSymbol == NULL)
    {
+      dbg_print("Null Symbol");
       return;
    }
    insertEntry(symTbl, newSymbol, hashValue);
@@ -356,15 +376,7 @@ char* getRegisterT()
    return res;
 }
 
-/*
-* Debug print function
-*/
-void dbg_print(char* str)
-{
-#ifdef DEBUG_PRINT
-   printf("DEBUG: %s\n", str);
-#endif
-}
+
 
 /*
 * Frees a given T register
