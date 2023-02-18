@@ -159,7 +159,7 @@ symTblEntry* createSymTblEntry(symTbl* symTbl, char * lexeme, Type type, bool is
 
 
 /*
-* Add a symbol to the symbol table. Added symbol is added to the head of the appropriate line of the symbol table
+* Add a symbol to the symbol table. Added symbol is added to the tail of the appropriate line of the symbol table
 */
 void insertEntry(symTbl* symTbl, symTblEntry* newEntry, int hashValue)
 {
@@ -170,18 +170,22 @@ void insertEntry(symTbl* symTbl, symTblEntry* newEntry, int hashValue)
       return;
    }
 
-   symTblEntry* oldHead = NULL;
+   symTblEntry* temp = NULL;
    if (symTbl->symbolTableHead[hashValue] == NULL) // the symbol table row is empty
    {
       dbg_print("symbol is null, inserting new symbol");
       symTbl->symbolTableHead[hashValue] = newEntry;
    }
-   else   //otherwise, add newEntry to the Head of the appropriate list
+   else   //otherwise, add newEntry to the tail of the appropriate list
    {
-      dbg_print("add newEntry to the Head of the appropriate list");
-      oldHead = symTbl->symbolTableHead[hashValue];      
-      newEntry->next = oldHead;
-      symTbl->symbolTableHead[hashValue] = newEntry;
+      dbg_print("add newEntry to the tail of the appropriate list");
+      temp = symTbl->symbolTableHead[hashValue];
+      while (temp->next)
+      {
+         temp = temp->next;
+      }
+      newEntry->next = NULL;
+      temp->next = newEntry;
    }
 }
 
@@ -521,27 +525,26 @@ DECLARLIST : DECLARLIST DECL
 DECL :  TYPE':'LIST
 {//0     1   2   3
    printf("DECL -->  TYPE ':' LIST\n");
-   char* tempCodeHeadStr = (char*)calloc(200, sizeof(char));
    char* codeHeadStr = (char*)calloc(200, sizeof(char));
    char errorMessage[ERROR_STRING_LEN]; 
-   int i;
+   int i = 0;
    
-   for(i = 0 ; i < 5 ; i++)
+   do
    {
-      if($3.IDarray[i] != NULL)
-      {
-         if(lookup(*ptr2symbolTable, $3.IDarray[i]) == NULL)
+      dbg_print("Checking array member:");
+      dbg_print($3.IDarray[i]);
+      if(lookup(*ptr2symbolTable, $3.IDarray[i]) == NULL)
          {
+            dbg_print("Symbol type:");
+            dbg_print($1.type);
             addSymbol(*ptr2symbolTable, $3.IDarray[i], $1.type, false);
             if(strcmp($1.type,"string") == 0)
             {
-               sprintf(tempCodeHeadStr,"%s: .space 200\n",$3.IDarray[i]);
-               strcat(codeHeadStr,tempCodeHeadStr);
+               sprintf(codeHeadStr,"%s: .space 200\n",$3.IDarray[i]);
             }
             else
             {
-               sprintf(tempCodeHeadStr,"%s: .space 8\n",$3.IDarray[i]);
-               strcat(codeHeadStr,tempCodeHeadStr);
+               sprintf(codeHeadStr,"%s: .space 8\n",$3.IDarray[i]);
             }
          }
          else 
@@ -551,11 +554,11 @@ DECL :  TYPE':'LIST
             sprintf(codeHeadStr,"");
             hasErrors = true;
          }
-      }
-   }
+      i++;
+   } while ($3.IDarray[i] != NULL);
+
    $$.codeHead = strdup(codeHeadStr);
    free(codeHeadStr);
-   free(tempCodeHeadStr);
 }
 |TYPE LIST 
 {
@@ -939,7 +942,7 @@ ASSIGNMENT_STMT : ID ASSIGNOP EXPRESSION';'
    $$.body = strdup("");
 }
 |ID ASSIGNOP STRING_LITERAL';'
-{//1   2      3       4
+{//1   2            3       4
    printf("STMT --> ID ASSIGNOP STRING_LITERAL ';'\n");
    
    char* codeBodyStr = (char*)calloc(200,sizeof(char));
@@ -1856,6 +1859,7 @@ FACTOR : '('EXPRESSION')'
    char* reg;
    char* label = getLabel();
    dbg_print(label);
+   dbg_print($1);
    symTblEntry* symbol = lookup(*ptr2symbolTable, $1);
    
    if(symbol != NULL)
