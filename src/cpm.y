@@ -28,10 +28,10 @@ typedef struct symTblEntry
 {
    char* name;
    bool isConst;
-   bool isDeclered;
+   bool isDeclared;
    bool isInit;
    Type type;
-   int occurances;
+   int occurences;
    union{
       int ival;
       float fval;
@@ -151,10 +151,10 @@ symTblEntry* createSymTblEntry(symTbl* symTbl, char * lexeme, Type type, bool is
 
    newSymTblEntry->name = strdup(lexeme);
    newSymTblEntry->isConst = isConst;
-   newSymTblEntry->isDeclered = true;
+   newSymTblEntry->isDeclared = true;
    newSymTblEntry->isInit = false;
    newSymTblEntry->type = type;
-   newSymTblEntry->occurances = 1;
+   newSymTblEntry->occurences = 1;
    newSymTblEntry->next = NULL;
    return newSymTblEntry;
 }

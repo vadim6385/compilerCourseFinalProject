@@ -16,3 +16,5 @@ Vadim Darchuk 316920974 and Yotam Alter 302955679
 14: end
 15: end
 
+ERROR in line: 10, expected ';'
+ERROR in line: 11, Id not declared
