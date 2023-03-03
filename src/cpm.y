@@ -90,15 +90,19 @@ int getHash(char* lexeme)
 */
 symTblEntry* lookup(symTbl* symTbl, char* lexeme)
 {
+   symTblEntry* ptr = NULL;
+   int hashValue;
+
    dbg_print("looking for");
    dbg_print(lexeme);
+
    if(symTbl == NULL || lexeme == NULL)
    {
       dbg_print("symTbl == NULL || lexeme == NULL");
       return NULL;
    }
 
-   int hashValue = getHash(lexeme);
+   hashValue = getHash(lexeme);
    if (hashValue == -1)
    {
       dbg_print("Failed to get hash value");
@@ -108,7 +112,7 @@ symTblEntry* lookup(symTbl* symTbl, char* lexeme)
    if (hashValue > 0 && hashValue < SYM_TBL_ROWS_COUNT)
    {
       dbg_print("hashValue > 0 && hashValue < SYM_TBL_ROWS_COUNT");
-      symTblEntry* ptr = symTbl->symbolTableHead[hashValue];   // lookup only in the line matched  by the hash
+      ptr = symTbl->symbolTableHead[hashValue];   // lookup only in the line matched  by the hash
       while (ptr != NULL)
       {   
          dbg_print("ptr not null");
@@ -145,9 +149,7 @@ symTblEntry* createSymTblEntry(symTbl* symTbl, char * lexeme, Type type, bool is
          return NULL;
       }
 
-   char* temp;
-   temp = strdup(lexeme);
-   newSymTblEntry->name = temp;
+   newSymTblEntry->name = strdup(lexeme);
    newSymTblEntry->isConst = isConst;
    newSymTblEntry->isDeclered = true;
    newSymTblEntry->isInit = false;
@@ -290,6 +292,7 @@ void destroyEntry(symTblEntry* entry)
    entry->name = NULL;
    entry->next = NULL;
    free(entry);
+   entry = NULL;
 }
 
 
@@ -362,8 +365,7 @@ void outputError(char* s){
 */
 char* strConcat(char* str1, char* str2)
 {
-   char* newString =(char*)malloc(sizeof(char) * (strlen(str1) + strlen(str2) + 1));
-   newString[0] = '\0';
+   char* newString =(char*)calloc(sizeof(char) * (strlen(str1) + strlen(str2) + 1), sizeof(char));
    strcat(newString, str1);
    strcat(newString, str2);
    return newString;
@@ -525,7 +527,7 @@ DECLARLIST : DECLARLIST DECL
 DECL :  TYPE':'LIST
 {//0     1   2   3
    printf("DECL -->  TYPE ':' LIST\n");
-   char* codeHeadStr = (char*)calloc(200, sizeof(char));
+   char codeHeadStr[200] = { 0 };
    char errorMessage[ERROR_STRING_LEN]; 
    int i = 0;
    
@@ -558,7 +560,6 @@ DECL :  TYPE':'LIST
    } while ($3.IDarray[i] != NULL);
 
    $$.codeHead = strdup(codeHeadStr);
-   free(codeHeadStr);
 }
 |TYPE LIST 
 {
@@ -603,7 +604,11 @@ LIST : ID','LIST
       }
    }
 }
-|ID { outputError("Expected ';' "); hasErrors = true; }
+|ID 
+{ 
+   outputError("Expected ';' "); 
+   hasErrors = true;
+}
 |ID LIST
 {
    outputError("Expected ',' ");
@@ -631,8 +636,8 @@ TYPE : INT
 CDECL : FINAL TYPE ID ASSIGNOP NUM';'CDECL
 {//0     1      2   3   4       5  6   7
    printf("CDECL --> FINAL TYPE ID ASSIGNOP NUM ';' CDECL\n");
-   char* codeBodyStr = (char*)calloc(200, sizeof(char));
-   char* codeHeadStr = (char*)calloc(200, sizeof(char));
+   char codeBodyStr[200] = { 0 };
+   char codeHeadStr[200] = { 0 };
    char errorMessage[ERROR_STRING_LEN];
    if(lookup(*ptr2symbolTable, $3) == NULL) //id not in symbol table
    {
@@ -717,7 +722,7 @@ STMT : ASSIGNMENT_STMT
 OUT_STMT : OUT'('EXPRESSION')'';'
 {//0        1  2   3        4  5
    printf("OUT_STMT --> OUT '(' EXPRESSION ')' ';'\n");
-   char* codeBodyStr = (char*)calloc(200,sizeof(char));
+   char codeBodyStr[200] = { 0 };
    dbg_print("out(d)");
    dbg_print($3.type);
    if(strcmp($3.type, "int") == 0)   //print an int
@@ -744,12 +749,11 @@ OUT_STMT : OUT'('EXPRESSION')'';'
       $$.head = strdup("");
    }
    
-   // dbg_print(codeBodyStr);
+   dbg_print(codeBodyStr);
    $$.head = $3.codeHead;
    dbg_print($$.head);
    $$.body = strConcat($3.codeBody, codeBodyStr);
    dbg_print($$.body);
-   free(codeBodyStr);
 }
 |OUT EXPRESSION')'';'
 {
@@ -765,19 +769,20 @@ OUT_STMT : OUT'('EXPRESSION')'';'
    $$.body = strdup("");
    $$.head = strdup("");
 }
-
 |OUT'('EXPRESSION')'
 { 
    outputError("expected ';' ");
    hasErrors = true;
    $$.body = strdup("");
    $$.head = strdup("");
-}
-|OUT'('STRING_LITERAL')'';'
-{//1 2   3      4  5
+};
+
+
+OUT_STMT: OUT'('STRING_LITERAL')'';'
+{//0        1 2   3            4  5
    printf("OUT_STMT --> OUT '(' STRING_LITERAL ')' ';'\n");
-   char* codeBodyStr = (char*)calloc(200,sizeof(char));
-   char* codeHeadStr = (char*)calloc(200,sizeof(char));
+   char codeBodyStr[200] = { 0 };
+   char codeHeadStr[200] = { 0 };
    char* label = getLabel();
    
    sprintf(codeHeadStr, "%s: .asciiz %s\n", label, $3);
@@ -785,8 +790,6 @@ OUT_STMT : OUT'('EXPRESSION')'';'
    
    $$.head = strdup(codeHeadStr);
    $$.body = strdup(codeBodyStr);
-   free(codeHeadStr);
-   free(codeBodyStr);
 }   // error handling
 |OUT STRING_LITERAL')'';'
 {
@@ -802,7 +805,6 @@ OUT_STMT : OUT'('EXPRESSION')'';'
    $$.body = strdup("");
    $$.head = strdup("");
 }
-
 |OUT'('STRING_LITERAL')'
 {
    outputError("expected ';'");
@@ -815,7 +817,7 @@ OUT_STMT : OUT'('EXPRESSION')'';'
 IN_STMT : IN'('ID')'';'
 {//0      1     2     3    4    5
    printf("IN_STMT --> IN '(' ID ')' ';'\n");
-   char* codeBodyStr = (char*)calloc(200,sizeof(char));
+   char codeBodyStr[200] = { 0 };
    char errorMessage[ERROR_STRING_LEN];
 
    symTblEntry*  symbol = lookup(*ptr2symbolTable, $3);
@@ -852,7 +854,6 @@ IN_STMT : IN'('ID')'';'
       hasErrors = true;
    }
    $$.body = strdup(codeBodyStr);
-   free(codeBodyStr);
 }
 |IN ID')'';'
 {
@@ -877,7 +878,7 @@ IN_STMT : IN'('ID')'';'
 ASSIGNMENT_STMT : ID ASSIGNOP EXPRESSION';'
 {//0               1      2      3       4
    printf("ASSIGNMENT_STMT --> ID ASSIGNOP EXPRESSION';'\n");
-   char* codeBodyStr = (char*)calloc(200,sizeof(char));
+   char codeBodyStr[200] = { 0 };
    char errorMessage[ERROR_STRING_LEN];
    char* reg;
 
@@ -932,7 +933,6 @@ ASSIGNMENT_STMT : ID ASSIGNOP EXPRESSION';'
 
    $$.head = strdup($3.codeHead);
    $$.body = strConcat($3.codeBody, codeBodyStr);
-   free(codeBodyStr);
 }
 |ID ASSIGNOP EXPRESSION
 {
@@ -941,28 +941,37 @@ ASSIGNMENT_STMT : ID ASSIGNOP EXPRESSION';'
    $$.head = strdup("");
    $$.body = strdup("");
 }
-|ID ASSIGNOP STRING_LITERAL';'
-{//1   2            3       4
+|ID ASSIGNOP
+{
+   outputError("Expected assignment value");
+   hasErrors = true;
+   $$.head = strdup("");
+   $$.body = strdup("");
+ };
+
+
+ASSIGNMENT_STMT : ID ASSIGNOP STRING_LITERAL';'
+{// 0              1    2            3       4
    printf("STMT --> ID ASSIGNOP STRING_LITERAL ';'\n");
    
-   char* codeBodyStr = (char*)calloc(200,sizeof(char));
-   char* codeHeadStr = (char*)calloc(200,sizeof(char));
-   char* temp;
+   char codeBodyStr[200] = { 0 };
+   char codeHeadStr[200] = { 0 };
    char errorMessage[ERROR_STRING_LEN];
 
    char* reg = getRegisterT();
    char* label = getLabel();
    symTblEntry*  symbol = lookup(*ptr2symbolTable, $1);
+   dbg_print("Symbol name:");
+   dbg_print(symbol->name);
    if (symbol != NULL)
    {   
       if(symbol->isConst == false)
       {
          if(symbol->type == string)
-         {   
-            temp = (char*)calloc(1, sizeof(char) * (strlen($3)+1));
-            temp = strcpy(temp, $3);
-	    dbg_print(temp);
-            symbol->value.sval = temp;
+         {
+            symbol->value.sval = strdup($3);
+	    dbg_print("Symbol name:");
+	    dbg_print(symbol->name);
             sprintf(codeHeadStr,"%s: .asciiz %s\n", label, $3);
             sprintf(codeBodyStr,"lw %s, %s\nsw %s, %s\n", reg, label, reg, $1);
             dbg_print(codeHeadStr);
@@ -995,8 +1004,6 @@ ASSIGNMENT_STMT : ID ASSIGNOP EXPRESSION';'
    freeRegisterT(reg);
    $$.head = strdup(codeHeadStr);
    $$.body = strdup(codeBodyStr);
-   free(codeHeadStr);
-   free(codeBodyStr);
 }
 |ID ASSIGNOP STRING_LITERAL
 { 
@@ -1004,14 +1011,7 @@ ASSIGNMENT_STMT : ID ASSIGNOP EXPRESSION';'
    hasErrors = true;
    $$.head = strdup("");
    $$.body = strdup("");
-}
-|ID ASSIGNOP
-{
-   outputError("Expected assignment value");
-   hasErrors = true;
-   $$.head = strdup("");
-   $$.body = strdup("");
- };
+};
 
 
 CONTROL_STMT : IF'('BOOLEXPR')'THEN STMT ELSE STMT
@@ -1471,7 +1471,7 @@ STEP : ID ASSIGNOP ID ADDOP NUM
 |ID ASSIGNOP ID MULOP NUM
 {//1   2     3    4    5
    printf("STEP : ID ASSIGNOP ID MULOP NUM\n");
-   char* codeBodyStr = (char*)calloc(200,sizeof(char));
+   char codeBodyStr[200] = { 0 };
    symTblEntry*  symbol1 = lookup(*ptr2symbolTable, $1);
    symTblEntry*  symbol2 = lookup(*ptr2symbolTable, $3);
 
@@ -1481,7 +1481,6 @@ STEP : ID ASSIGNOP ID ADDOP NUM
       hasErrors = true;
       $$.head = strdup("");
       $$.body = strdup("");
-      free(codeBodyStr);
    }
    else
    {
@@ -1506,7 +1505,6 @@ STEP : ID ASSIGNOP ID ADDOP NUM
    }
    $$.head = strdup("");
    $$.body = strdup(codeBodyStr);
-   free(codeBodyStr);
 }
 |ID ASSIGNOP MULOP NUM
 {
@@ -1527,7 +1525,7 @@ STEP : ID ASSIGNOP ID ADDOP NUM
 BOOLEXPR : BOOLEXPR OROP BOOLTERM
 {//0       1       2      3
    printf("BOOLEXPR --> BOOLEXPR OROP BOOLTERM\n");
-   char* codeBodyStr = (char*)calloc(200,sizeof(char));
+   char codeBodyStr[200] = { 0 };
    char* tmp;
    char* reg = getRegisterT();
    char* label = getLabel();
@@ -1540,7 +1538,6 @@ BOOLEXPR : BOOLEXPR OROP BOOLTERM
    freeRegisterT($1.reg);
    freeRegisterT($3.reg);
    free(tmp);
-   free(codeBodyStr);
 }
 |BOOLTERM
 {//1
