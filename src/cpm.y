@@ -1309,7 +1309,7 @@ switch : SWITCH'('CHOICE')''{' CASES '}'
 CHOICE : ID
 {//0     1
    printf("CHOICE --> ID\n");
-   char* codeBodyStr = (char*)calloc(200,sizeof(char));
+   char codeBodyStr[200] = { 0 };
    char* reg;
    symTblEntry*  symbol = lookup(*ptr2symbolTable, $1);
 
@@ -1338,13 +1338,12 @@ CHOICE : ID
    }
    
    $$.codeHead = string_duplicate("");
-   free(codeBodyStr);
 }
 |NUM
 {//1
    printf("CHOICE --> NUM\n");
-   char* codeBodyStr = (char*)calloc(200,sizeof(char));
-   char* codeHeadStr = (char*)calloc(200,sizeof(char));
+   char codeBodyStr[200] = { 0 };
+   char codeHeadStr[200] = { 0 };
    char* reg;
    
    if($1.type == I)
@@ -1360,8 +1359,6 @@ CHOICE : ID
    }
    $$.codeHead = string_duplicate(codeHeadStr);
    $$.codeBody = string_duplicate(codeBodyStr);
-   free(codeBodyStr);
-   free(codeHeadStr);
 };
 
 
@@ -1417,7 +1414,7 @@ CASES : CASE NUM':'STMTLIST BREAK';'CASES
 STEP : ID ASSIGNOP ID ADDOP NUM
 {//0   1   2       3   4    5
    printf("STEP : ID ASSIGNOP ID ADDOP NUM\n");
-   char* codeBodyStr = (char*)calloc(200,sizeof(char));
+   char codeBodyStr[200] = { 0 };
    char errorMessage[ERROR_STRING_LEN];
    symTblEntry*  symbol1 = lookup(*ptr2symbolTable, $1);
    symTblEntry*  symbol2 = lookup(*ptr2symbolTable, $3);
@@ -1428,7 +1425,6 @@ STEP : ID ASSIGNOP ID ADDOP NUM
       hasErrors = true;
       $$.head = string_duplicate("");
       $$.body = string_duplicate("");
-      free(codeBodyStr);
    }
    else
    {
@@ -1454,7 +1450,6 @@ STEP : ID ASSIGNOP ID ADDOP NUM
       
    $$.head = string_duplicate("");
    $$.body = string_duplicate(codeBodyStr);
-   free(codeBodyStr);
 }
 |ID ID ADDOP NUM
 {
@@ -1574,7 +1569,7 @@ BOOLEXPR : BOOLEXPR OROP BOOLTERM
 BOOLTERM : BOOLTERM ANDOP BOOLFACTOR
 {//0      1      2      3
    printf("BOOLTERM --> BOOLTERM ANDOP BOOLFACTOR\n");
-   char* codeBodyStr = (char*)calloc(200,sizeof(char));
+   char codeBodyStr[200] = { 0 };
    char* tmp;
    char* reg = getRegisterT();
    
@@ -1586,7 +1581,6 @@ BOOLTERM : BOOLTERM ANDOP BOOLFACTOR
    freeRegisterT($1.reg);
    freeRegisterT($3.reg);
    free(tmp);
-   free(codeBodyStr);
 }
 |BOOLTERM BOOLFACTOR
 {
@@ -1608,7 +1602,7 @@ BOOLFACTOR : '!''('BOOLFACTOR')'
 {//0         1   2   3        4
    /*Meaning not BOOLFACTOR*/
    printf("BOOLFACTOR -->  '!' '(' BOOLFACTOR ')'\n");
-   char* codeBodyStr = (char*)calloc(200,sizeof(char));
+   char codeBodyStr[200] = { 0 };
    char* reg = getRegisterT();
    
    sprintf(codeBodyStr,"li %s ,1\nsub %s, %s, %s\n", reg, $3.reg, reg, $3.reg);
@@ -1616,7 +1610,6 @@ BOOLFACTOR : '!''('BOOLFACTOR')'
    $$.codeBody = strConcat($3.codeBody, codeBodyStr);
    $$.codeHead = $3.codeHead;
    freeRegisterT(reg);
-   free(codeBodyStr);
 }
 |'!' BOOLFACTOR')'
 {
@@ -1642,9 +1635,9 @@ BOOLFACTOR : '!''('BOOLFACTOR')'
 |EXPRESSION RELOP EXPRESSION
 {//1         2      3
    printf("BOOLFACTOR -->  EXPRESSION  RELOP  EXPRESSION\n");
-   char* codeBodyStr = (char*)calloc(200,sizeof(char));
-   char* tmpBody = (char*)calloc(200,sizeof(char));
-   char* tmpHead = (char*)calloc(200,sizeof(char));
+   char codeBodyStr[200] = { 0 };
+   char tmpBody[200] = { 0 };
+   char tmpHead[200] = { 0 };
    char* reg = getRegisterT();
 
    if(strcmp($1.type,"int") == 0 && strcmp($3.type,"int") == 0) //RELOP between ints
@@ -1693,16 +1686,13 @@ BOOLFACTOR : '!''('BOOLFACTOR')'
    strcat(tmpHead,$3.codeHead);
    $$.codeBody = string_duplicate(tmpBody);
    $$.codeHead = string_duplicate(tmpHead);
-   free(tmpBody);
-   free(tmpHead);
-   free(codeBodyStr);
 };
 
 
 EXPRESSION : EXPRESSION ADDOP TERM 
 {//0         1         2      3
    printf("EXPRESSION --> EXPRESSION  ADDOP  TERM\n");
-   char* codeBodyStr = (char*)calloc(200,sizeof(char));
+   char codeBodyStr[200] = { 0 };
    char* tmp;
    
    if(strcmp($1.type,"int") == 0 && strcmp($3.type,"int") == 0) //ADDOP between ints
@@ -1754,7 +1744,6 @@ EXPRESSION : EXPRESSION ADDOP TERM
    $$.codeBody= strConcat(tmp, codeBodyStr);
    $$.codeHead= strConcat($1.codeHead,$3.codeHead);
    free(tmp);
-   free(codeBodyStr);
 }
 |TERM
 {//1
@@ -1770,7 +1759,7 @@ EXPRESSION : EXPRESSION ADDOP TERM
 TERM : TERM MULOP FACTOR
 {//0   1   2      3
    printf("TERM --> TERM MULOP FACTOR\n");
-   char* codeBodyStr = (char*)calloc(200,sizeof(char));
+   char codeBodyStr[200] = { 0 };
    char* tmp;
    
    if(strcmp($1.type,"int") == 0 && strcmp($3.type,"int") == 0)   //MULOP between ints
@@ -1822,7 +1811,6 @@ TERM : TERM MULOP FACTOR
    $$.codeBody = strConcat(tmp, codeBodyStr);
    $$.codeHead = strConcat($1.codeHead, $3.codeHead);
    free(tmp);
-   free(codeBodyStr);
 }
 |TERM FACTOR
 {
@@ -1868,7 +1856,7 @@ FACTOR : '('EXPRESSION')'
 |ID
 {//1
    printf("FACTOR --> ID\n");
-   char* codeBodyStr = (char*)calloc(200,sizeof(char));
+   char codeBodyStr[200] = { 0 };
    char* reg;
    char* label = getLabel();
    dbg_print(label);
@@ -1904,13 +1892,12 @@ FACTOR : '('EXPRESSION')'
       $$.codeBody = string_duplicate("");
       $$.codeHead = string_duplicate("");
    }
-   free(codeBodyStr);
 }
 |NUM
 {//1
    printf("FACTOR --> NUM\n");
-   char* codeBodyStr = (char*)calloc(200,sizeof(char));
-   char* codeHeadStr = (char*)calloc(200,sizeof(char));
+   char codeBodyStr[200] = { 0 };
+   char codeHeadStr[200] = { 0 };
    char* reg;
    
    if($1.type == I) //int
@@ -1931,8 +1918,6 @@ FACTOR : '('EXPRESSION')'
    $$.reg = string_duplicate(reg);
    $$.codeHead = string_duplicate(codeHeadStr);
    $$.codeBody = string_duplicate(codeBodyStr);
-   free(codeHeadStr);
-   free(codeBodyStr);
 };
 %%
 
