@@ -6,8 +6,6 @@ decl real : a,b;
     in(a);
     in(b);
     d="the result is ";
-	e = 5;
-	out(e);
     out(d);
     if (a<b) then out(a);
 	else   out(b);

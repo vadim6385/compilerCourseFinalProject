@@ -979,9 +979,15 @@ ASSIGNMENT_STMT : ID ASSIGNOP STRING_LITERAL';'
       {
          if(symbol->type == string)
          {
-            symbol->value.sval = string_duplicate($3);
 	    dbg_print("Symbol name:");
 	    dbg_print(symbol->name);
+            free(symbol->name);
+            symbol->value.sval = string_duplicate($3);
+            symbol->name = string_duplicate($1);
+	    dbg_print("Symbol name:");
+	    dbg_print(symbol->name);
+	    dbg_print("Symbol value");
+	    dbg_print(symbol->value.sval);
             sprintf(codeHeadStr,"%s: .asciiz %s\n", label, $3);
             sprintf(codeBodyStr,"lw %s, %s\nsw %s, %s\n", reg, label, reg, $1);
             dbg_print(codeHeadStr);

@@ -1,20 +1,17 @@
 Vadim Darchuk 316920974 and Yotam Alter 302955679
 
-1: program  Min  /* Finding minimum between two numbers */
+1: program ForPrint 
 2: start
-3: decl real : a,b;
+3: decl int:a;
 4:     string: d;
-5:     int: e;
-6:     in(a);
-7:     in(b);
-8:     d="the result is ";
-9: 	e = 5;
-10: 	out(e);
-11:     out(d);
-12:     if (a<b) then out(a);
-13: 	else   out(b);
-14: end
-15: end
+5:         d="Pls enter a number ";
+6: 	  out(d);
+7:         in(a);  
+8:         /* Printing numbers between 1 and a*/
+9:   	  foreach i=1 till a with i=i+1
+10: 		out(i);           
+11: end
+12: end
 
-ERROR in line: 10, expected ';'
-ERROR in line: 11, Id not declared
+ERROR in line: 9, Id not declared
+ERROR in line: 10, Id not declared
