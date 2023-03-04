@@ -319,14 +319,14 @@ void destroySymTable(symTbl* symTbl)
    for (i = 0; i < SYM_TBL_ROWS_COUNT; i++)
    {
       symbol = symTbl->symbolTableHead[i];
-      if (symbol != NULL)	// not an empty row
+      if (symbol != NULL) // not an empty row
       {
-	while (symbol != NULL)
-	{
-		nextSymbol = symbol->next;
-		destroyEntry(symbol);
-		symbol = nextSymbol;
-		}
+         while (symbol != NULL)
+         {
+            nextSymbol = symbol->next;
+            destroyEntry(symbol);
+            symbol = nextSymbol;
+         }
       }
    }
    free(symTbl);
@@ -564,7 +564,6 @@ DECL :  TYPE':'LIST
             sprintf(errorMessage, "Duplicated declaration. %s already declared\n", $3.IDarray[i]);
             outputError(errorMessage);
             sprintf(codeHeadStr,"");
-            hasErrors = true;
          }
       i++;
    } while ($3.IDarray[i] != NULL);
@@ -574,7 +573,6 @@ DECL :  TYPE':'LIST
 |TYPE LIST 
 {
    outputError("Expected ':' ");
-   hasErrors = true;
    $$.codeHead = string_duplicate("");
 };
 
@@ -617,12 +615,10 @@ LIST : ID','LIST
 |ID 
 { 
    outputError("Expected ';' "); 
-   hasErrors = true;
 }
 |ID LIST
 {
    outputError("Expected ',' ");
-   hasErrors = true;
 };
 
 
@@ -666,7 +662,7 @@ CDECL : FINAL TYPE ID ASSIGNOP NUM';'CDECL
       sprintf(errorMessage, "Duplicted declaration. %s already declared\n", $3);
       outputError(errorMessage);
       sprintf(codeHeadStr,"");
-      hasErrors = true;
+
    }
    $$.codeHead = strConcat(codeHeadStr, $7.codeHead);
    $$.codeBody = strConcat(codeBodyStr, $7.codeBody);
@@ -674,7 +670,7 @@ CDECL : FINAL TYPE ID ASSIGNOP NUM';'CDECL
 |FINAL TYPE ID ASSIGNOP NUM CDECL
 {
    outputError("Expected ';' ");
-   hasErrors = true;
+
    $$.codeHead = string_duplicate("");
    $$.codeBody = string_duplicate("");
 }
@@ -754,7 +750,7 @@ OUT_STMT : OUT'('EXPRESSION')'';'
    {
       dbg_print("wrong type");
       outputError("Unknown type");
-      hasErrors = true;
+
       $$.body = string_duplicate("");
       $$.head = string_duplicate("");
    }
@@ -768,21 +764,21 @@ OUT_STMT : OUT'('EXPRESSION')'';'
 |OUT EXPRESSION')'';'
 {
    outputError("Expected '(' ");
-   hasErrors = true;
+
    $$.body = string_duplicate("");
    $$.head = string_duplicate("");
 }
 |OUT'('EXPRESSION ';'
 {
    outputError("Expected ')'");
-   hasErrors = true;
+
    $$.body = string_duplicate("");
    $$.head = string_duplicate("");
 }
 |OUT'('EXPRESSION')'
 { 
    outputError("expected ';' ");
-   hasErrors = true;
+
    $$.body = string_duplicate("");
    $$.head = string_duplicate("");
 };
@@ -804,21 +800,21 @@ OUT_STMT: OUT'('STRING_LITERAL')'';'
 |OUT STRING_LITERAL')'';'
 {
    outputError("Expected '('");
-   hasErrors = true;
+
    $$.body = string_duplicate("");
    $$.head = string_duplicate("");
 }
 |OUT'('STRING_LITERAL ';'
 {
    outputError("Expected ')'");
-   hasErrors = true;
+
    $$.body = string_duplicate("");
    $$.head = string_duplicate("");
 }
 |OUT'('STRING_LITERAL')'
 {
    outputError("expected ';'");
-   hasErrors = true;
+
    $$.body = string_duplicate("");
    $$.head = string_duplicate("");
 };
@@ -853,7 +849,7 @@ IN_STMT : IN'('ID')'';'
          sprintf(errorMessage,"Can't assign to a constant");
          outputError(errorMessage);
          sprintf(codeBodyStr,"");
-         hasErrors = true;
+   
       }
    }
    else
@@ -861,26 +857,26 @@ IN_STMT : IN'('ID')'';'
       sprintf(errorMessage,"Id isn't declared");
       outputError(errorMessage);
       sprintf(codeBodyStr,"");
-      hasErrors = true;
+
    }
    $$.body = string_duplicate(codeBodyStr);
 }
 |IN ID')'';'
 {
    outputError("expected '('");
-   hasErrors = true;
+
    $$.body=string_duplicate("");
 }
 |IN'('ID ';'
 {
    outputError("expected ')'");
-   hasErrors = true;
+
    $$.body=string_duplicate("");
 }
 |IN'('ID')'
 {
    outputError("expected ';'");
-   hasErrors = true;
+
    $$.body=string_duplicate("");
 };
 
@@ -921,7 +917,7 @@ ASSIGNMENT_STMT : ID ASSIGNOP EXPRESSION';'
                   sprintf(errorMessage,"Can't convert from a real number to integer. Illegal assignment");
                   outputError(errorMessage);
                   sprintf(codeBodyStr,"");
-                  hasErrors = true;
+            
                }
             }
       }
@@ -930,7 +926,7 @@ ASSIGNMENT_STMT : ID ASSIGNOP EXPRESSION';'
          sprintf(errorMessage,"Can't assign to a constant");
          outputError(errorMessage);
          sprintf(codeBodyStr,"");
-         hasErrors = true;
+   
       }
    }
    else
@@ -938,7 +934,7 @@ ASSIGNMENT_STMT : ID ASSIGNOP EXPRESSION';'
       sprintf(errorMessage,"Id isn't declared");
       outputError(errorMessage);
       sprintf(codeBodyStr,"");
-      hasErrors = true;
+
    }
 
    $$.head = string_duplicate($3.codeHead);
@@ -947,14 +943,14 @@ ASSIGNMENT_STMT : ID ASSIGNOP EXPRESSION';'
 |ID ASSIGNOP EXPRESSION
 {
    outputError("expected ';'");
-   hasErrors = true;
+
    $$.head = string_duplicate("");
    $$.body = string_duplicate("");
 }
 |ID ASSIGNOP
 {
    outputError("Expected assignment value");
-   hasErrors = true;
+
    $$.head = string_duplicate("");
    $$.body = string_duplicate("");
  };
@@ -998,7 +994,7 @@ ASSIGNMENT_STMT : ID ASSIGNOP STRING_LITERAL';'
             sprintf(errorMessage, "Trying to assign sentence to an id which is not of type string");
             outputError(errorMessage);
             sprintf(codeBodyStr,"");
-            hasErrors = true;
+      
          }
       }
       else
@@ -1006,7 +1002,7 @@ ASSIGNMENT_STMT : ID ASSIGNOP STRING_LITERAL';'
          sprintf(errorMessage, "Can not assign to a constant variable");
          outputError(errorMessage);
          sprintf(codeBodyStr,"");
-         hasErrors = true;
+   
          }
    }
    else
@@ -1014,7 +1010,7 @@ ASSIGNMENT_STMT : ID ASSIGNOP STRING_LITERAL';'
       sprintf(errorMessage,"string id is not declared");
       outputError(errorMessage);
       sprintf(codeBodyStr,"");
-      hasErrors = true;
+
    }
 
    freeRegisterT(reg);
@@ -1024,7 +1020,7 @@ ASSIGNMENT_STMT : ID ASSIGNOP STRING_LITERAL';'
 |ID ASSIGNOP STRING_LITERAL
 { 
    outputError("Expected ';' ");
-   hasErrors = true;
+
    $$.head = string_duplicate("");
    $$.body = string_duplicate("");
 };
@@ -1048,14 +1044,14 @@ CONTROL_STMT : IF'('BOOLEXPR')'THEN STMT ELSE STMT
 |IF BOOLEXPR')'THEN STMT ELSE STMT 
 {
    outputError("expected '('");
-   hasErrors = true;
+
    $$.body=string_duplicate("");
    $$.head=string_duplicate("");
 }
 |IF'(' ')'THEN STMT ELSE STMT
 {
    outputError("Expected a boolean expression");
-   hasErrors = true;
+
    $$.body=string_duplicate("");
    $$.head=string_duplicate("");
 }
@@ -1080,21 +1076,21 @@ CONTROL_STMT : IF'('BOOLEXPR')'THEN STMT ELSE STMT
 |WHILE BOOLEXPR')'STMT_BLOCK 
 {
    outputError("expected '('");
-   hasErrors = true;
+
    $$.body = string_duplicate("");
    $$.head = string_duplicate("");   
 }
 |WHILE'(' ')'STMT_BLOCK
 {
    outputError("Expected a boolean expression");
-   hasErrors = true; 
+ 
    $$.body = string_duplicate("");
    $$.head = string_duplicate("");
 } 
 |WHILE'('BOOLEXPR STMT_BLOCK 
 {
    outputError("expected ')'");
-   hasErrors = true; 
+ 
    $$.body = string_duplicate("");
    $$.head = string_duplicate("");
 }
@@ -1154,7 +1150,7 @@ CONTROL_STMT : IF'('BOOLEXPR')'THEN STMT ELSE STMT
                   sprintf(errorMessage,"Can't convert from a real number to integer");
                   outputError(errorMessage);
                   sprintf(codeBodyStr,"");
-                  hasErrors = true;
+            
                }
             }
          }
@@ -1164,7 +1160,7 @@ CONTROL_STMT : IF'('BOOLEXPR')'THEN STMT ELSE STMT
          sprintf(errorMessage,"Can't assign to a constant");
          outputError(errorMessage);
          sprintf(codeBodyStr,"");
-         hasErrors = true;
+   
       }
    }
    else
@@ -1172,7 +1168,7 @@ CONTROL_STMT : IF'('BOOLEXPR')'THEN STMT ELSE STMT
       sprintf(errorMessage,"Id isn't declared");
       outputError(errorMessage);
       sprintf(codeBodyStr,"");
-      hasErrors = true;
+
    }
 
    if (assignDone == true)
@@ -1193,7 +1189,7 @@ CONTROL_STMT : IF'('BOOLEXPR')'THEN STMT ELSE STMT
       {   //error - iterator must be of type int !!!
          sprintf(errorMessage,"Iterator must be of type int");
          outputError(errorMessage);
-         hasErrors = true;
+   
          $$.body = string_duplicate("");
          $$.head = string_duplicate("");
       }
@@ -1215,21 +1211,21 @@ CONTROL_STMT : IF'('BOOLEXPR')'THEN STMT ELSE STMT
 |FOREACH ID NUM TILL NUM WITH STEP STMT
 {
    outputError("expected an assignment operation");
-   hasErrors = true;
+
    $$.body = string_duplicate("");
    $$.head = string_duplicate("");
 }
 |FOREACH ID ASSIGNOP NUM NUM WITH STEP STMT
 {
    outputError("expected '='");
-   hasErrors = true;
+
    $$.body = string_duplicate("");
    $$.head = string_duplicate("");
 }
 |FOREACH ID ASSIGNOP NUM ID WITH STEP STMT
 {
    outputError("expected '='");
-   hasErrors = true;
+
    $$.body = string_duplicate("");
    $$.head = string_duplicate("");
 }
@@ -1250,14 +1246,14 @@ STMT_BLOCK : '{'STMTLIST'}'
 |STMTLIST'}'
 { //error handling
    outputError("expected '{'");
-   hasErrors = true;
+
    $$.body = string_duplicate("");
    $$.head = string_duplicate("");   
 }
 |'{'STMTLIST 
 {
    outputError("expected '}'");
-   hasErrors = true;
+
    $$.body = string_duplicate("");
    $$.head = string_duplicate("");   
 };
@@ -1272,35 +1268,35 @@ switch : SWITCH'('CHOICE')''{' CASES '}'
 |SWITCH  CHOICE')''{' CASES '}'
 { 
    outputError("expected '('");
-   hasErrors = true;
+
    $$.codeBody = string_duplicate("");
    $$.codeHead = string_duplicate("");
 }
 |SWITCH'(' ')''{'CASES'}'
 { 
    outputError("expected a CHOICE");
-   hasErrors = true;
+
    $$.codeBody = string_duplicate("");
    $$.codeHead = string_duplicate("");
 }
 |SWITCH'('CHOICE '{'CASES'}'
 {
    outputError("expected ')'");
-   hasErrors = true;
+
    $$.codeBody = string_duplicate("");
    $$.codeHead = string_duplicate("");
 }
 |SWITCH'('CHOICE')' CASES'}'
 {
    outputError("expected '{'");
-   hasErrors = true;
+
    $$.codeBody = string_duplicate("");
    $$.codeHead = string_duplicate("");
 }
 |SWITCH'('CHOICE')''{'CASES 
 {
    outputError("expected '}'");
-   hasErrors = true;
+
    $$.codeBody = string_duplicate("");
    $$.codeHead = string_duplicate("");
 };
@@ -1333,7 +1329,7 @@ CHOICE : ID
    else
    {
       outputError("Id not declared");
-      hasErrors = true;
+
       $$.codeBody = string_duplicate("");
    }
    
@@ -1379,14 +1375,14 @@ CASES : CASE NUM':'STMTLIST BREAK';'CASES
 |CASE NUM STMTLIST BREAK';'CASES
 {
    outputError("expected ':'");
-   hasErrors = true; 
+ 
    $$.codeBody = string_duplicate("");
    $$.codeHead = string_duplicate("");
 }
 |CASE NUM':'STMTLIST BREAK CASES
 {
    outputError("expected ';'");
-   hasErrors = true;
+
    $$.codeBody = string_duplicate("");
    $$.codeHead = string_duplicate("");
 }
@@ -1405,7 +1401,7 @@ CASES : CASE NUM':'STMTLIST BREAK';'CASES
 |DEFAULT STMTLIST
 {
    outputError("expected ':'");
-   hasErrors = true;
+
    $$.codeBody = string_duplicate("");
    $$.codeHead = string_duplicate("");
 };
@@ -1422,7 +1418,7 @@ STEP : ID ASSIGNOP ID ADDOP NUM
    if (symbol1 == NULL || symbol2 == NULL)
    {
       outputError("Id not declared");
-      hasErrors = true;
+
       $$.head = string_duplicate("");
       $$.body = string_duplicate("");
    }
@@ -1454,28 +1450,28 @@ STEP : ID ASSIGNOP ID ADDOP NUM
 |ID ID ADDOP NUM
 {
    outputError("expected an assigment operation");
-   hasErrors = true;
+
    $$.body = string_duplicate("");
    $$.head = string_duplicate("");
 }
 |ID ASSIGNOP ADDOP NUM
 {
    outputError("expected an ID");
-   hasErrors = true;
+
    $$.body = string_duplicate("");
    $$.head = string_duplicate("");
 }
 |ID ASSIGNOP ID NUM
 {
    outputError("expected an operation");
-   hasErrors = true;
+
    $$.body = string_duplicate("");
    $$.head = string_duplicate("");
 }
 |ID ASSIGNOP ID ADDOP 
 {
    outputError("expected a number");
-   hasErrors = true;
+
    $$.body = string_duplicate("");
    $$.head = string_duplicate("");
 }
@@ -1489,7 +1485,7 @@ STEP : ID ASSIGNOP ID ADDOP NUM
    if (symbol1 == NULL || symbol2 == NULL)
    {
       outputError("Id not declared");
-      hasErrors = true;
+
       $$.head = string_duplicate("");
       $$.body = string_duplicate("");
    }
@@ -1520,14 +1516,14 @@ STEP : ID ASSIGNOP ID ADDOP NUM
 |ID ASSIGNOP MULOP NUM
 {
    outputError("expected an ID");
-   hasErrors = true;
+
    $$.body = string_duplicate("");
    $$.head = string_duplicate("");
 }
 |ID ASSIGNOP ID MULOP
 {
    outputError("expected a number");
-   hasErrors = true;
+
    $$.body = string_duplicate("");
    $$.head = string_duplicate("");
 };
@@ -1560,7 +1556,7 @@ BOOLEXPR : BOOLEXPR OROP BOOLTERM
 |BOOLEXPR BOOLTERM
 {
    outputError("expected an OROP");
-   hasErrors = true;
+
    $$.codeBody = string_duplicate("");
    $$.codeHead = string_duplicate("");
 };
@@ -1585,7 +1581,7 @@ BOOLTERM : BOOLTERM ANDOP BOOLFACTOR
 |BOOLTERM BOOLFACTOR
 {
    outputError("expected an ANDOP");
-   hasErrors = true;
+
    $$.codeBody = string_duplicate("");
    $$.codeHead = string_duplicate("");
 }
@@ -1614,21 +1610,21 @@ BOOLFACTOR : '!''('BOOLFACTOR')'
 |'!' BOOLFACTOR')'
 {
    outputError("expected an '('");
-   hasErrors = true;
+
    $$.codeBody = string_duplicate("");
    $$.codeHead = string_duplicate("");
 }
 |'!''(' ')'
 {
    outputError("expected a BOOLFACTOR");
-   hasErrors = true;
+
    $$.codeBody = string_duplicate("");
    $$.codeHead = string_duplicate("");
 }
 |'!''('BOOLFACTOR 
 {
    outputError("expected a ')'");
-   hasErrors = true;
+
    $$.codeBody = string_duplicate("");
    $$.codeHead = string_duplicate("");
 }
@@ -1797,14 +1793,12 @@ TERM : TERM MULOP FACTOR
 |TERM FACTOR
 {
    outputError("expected a MULOP");
-   hasErrors = true;
    $$.codeBody = string_duplicate("");
    $$.codeHead = string_duplicate("");
 }
 |TERM MULOP
 {
    outputError("expected a FACTOR");
-   hasErrors = true;
    $$.codeBody = string_duplicate("");
    $$.codeHead = string_duplicate("");
 }
@@ -1831,7 +1825,6 @@ FACTOR : '('EXPRESSION')'
 |'('EXPRESSION
 {
    outputError("expected a ')'");
-   hasErrors = true;
    $$.codeBody = string_duplicate("");
    $$.codeHead = string_duplicate("");
 }
@@ -1870,7 +1863,6 @@ FACTOR : '('EXPRESSION')'
    else
    {
       outputError("Id not declared");
-      hasErrors = true;
       $$.codeBody = string_duplicate("");
       $$.codeHead = string_duplicate("");
    }
