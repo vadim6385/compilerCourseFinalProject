@@ -1642,18 +1642,12 @@ BOOLFACTOR : '!''('BOOLFACTOR')'
 
    if(strcmp($1.type,"int") == 0 && strcmp($3.type,"int") == 0) //RELOP between ints
    {
-      if($2 == EQ)
-         sprintf(codeBodyStr,"seq %s, %s, %s\n", reg, $1.reg, $3.reg);
-      if($2 == NEQ)
-         sprintf(codeBodyStr,"sne %s, %s, %s\n", reg, $1.reg, $3.reg);
-      if($2 == LT)
-         sprintf(codeBodyStr,"slt %s, %s, %s\n", reg, $1.reg, $3.reg);
-      if($2 == GT)
-         sprintf(codeBodyStr,"sgt %s, %s, %s\n", reg, $1.reg, $3.reg);
-      if($2 == LTEQ)
-         sprintf(codeBodyStr,"sle %s, %s, %s\n", reg, $1.reg, $3.reg);
-      if($2 == GTEQ)
-         sprintf(codeBodyStr,"sge %s, %s, %s\n", reg, $1.reg, $3.reg);
+      if($2 == EQ)        sprintf(codeBodyStr,"seq %s, %s, %s\n", reg, $1.reg, $3.reg);
+      else if($2 == NEQ)  sprintf(codeBodyStr,"sne %s, %s, %s\n", reg, $1.reg, $3.reg);
+      else if($2 == LT)   sprintf(codeBodyStr,"slt %s, %s, %s\n", reg, $1.reg, $3.reg);
+      else if($2 == GT)   sprintf(codeBodyStr,"sgt %s, %s, %s\n", reg, $1.reg, $3.reg);
+      else if($2 == LTEQ) sprintf(codeBodyStr,"sle %s, %s, %s\n", reg, $1.reg, $3.reg);
+      else if($2 == GTEQ) sprintf(codeBodyStr,"sge %s, %s, %s\n", reg, $1.reg, $3.reg);
 
       freeRegisterT($1.reg);
       freeRegisterT($3.reg);         
@@ -1661,18 +1655,12 @@ BOOLFACTOR : '!''('BOOLFACTOR')'
    if(strcmp($1.type,"float") == 0 && strcmp($3.type,"float") == 0) //RELOP between floats
    {
       char* label = getLabel();
-      if($2 == EQ)
-         sprintf(codeBodyStr,"c.eq.s %s, %s\nbc1f else%s\naddi %s,$0,1\nj end%s\nelse%s: move %s,$0\nend%s:\n", $1.reg ,$3.reg, label, reg, label, label, reg, label);
-      if($2 == NEQ)
-         sprintf(codeBodyStr,"c.eq.s %s, %s\nbc1t else%s\naddi %s,$0,1\nj end%s\nelse%s: move %s,$0\nend%s:\n", $1.reg, $3.reg, label, reg, label, label, reg, label);
-      if($2 == LT)
-         sprintf(codeBodyStr,"c.lt.s %s, %s\nbc1t else%s\naddi %s,$0,1\nj end%s\nelse%s: move %s,$0\nend%s:\n", $3.reg, $1.reg, label, reg, label, label, reg, label);
-      if($2 == GT)
-         sprintf(codeBodyStr,"c.lt.s %s, %s\nbc1t else%s\naddi %s,$0,1\nj end%s\nelse%s: move %s,$0\nend%s:\n", $1.reg, $3.reg, label, reg, label, label, reg, label);
-      if($2 == LTEQ)
-         sprintf(codeBodyStr,"c.le.s %s, %s\nbc1t else%s\naddi %s,$0,1\nj end%s\nelse%s: move %s,$0\nend%s:\n", $3.reg, $1.reg, label, reg, label, label, reg, label);
-      if($2 == GTEQ)
-         sprintf(codeBodyStr,"c.le.s %s, %s\nbc1t else%s\naddi %s,$0,1\nj end%s\nelse%s: move %s,$0\nend%s:\n", $1.reg, $3.reg, label, reg, label, label, reg, label);
+      if($2 == EQ)        sprintf(codeBodyStr,"c.eq.s %s, %s\nbc1f else%s\naddi %s,$0,1\nj end%s\nelse%s: move %s,$0\nend%s:\n", $1.reg ,$3.reg, label, reg, label, label, reg, label);
+      else if($2 == NEQ)  sprintf(codeBodyStr,"c.eq.s %s, %s\nbc1t else%s\naddi %s,$0,1\nj end%s\nelse%s: move %s,$0\nend%s:\n", $1.reg, $3.reg, label, reg, label, label, reg, label);
+      else if($2 == LT)   sprintf(codeBodyStr,"c.lt.s %s, %s\nbc1t else%s\naddi %s,$0,1\nj end%s\nelse%s: move %s,$0\nend%s:\n", $3.reg, $1.reg, label, reg, label, label, reg, label);
+      else if($2 == GT)   sprintf(codeBodyStr,"c.lt.s %s, %s\nbc1t else%s\naddi %s,$0,1\nj end%s\nelse%s: move %s,$0\nend%s:\n", $1.reg, $3.reg, label, reg, label, label, reg, label);
+      else if($2 == LTEQ) sprintf(codeBodyStr,"c.le.s %s, %s\nbc1t else%s\naddi %s,$0,1\nj end%s\nelse%s: move %s,$0\nend%s:\n", $3.reg, $1.reg, label, reg, label, label, reg, label);
+      else if($2 == GTEQ) sprintf(codeBodyStr,"c.le.s %s, %s\nbc1t else%s\naddi %s,$0,1\nj end%s\nelse%s: move %s,$0\nend%s:\n", $1.reg, $3.reg, label, reg, label, label, reg, label);
 
       freeRegisterF($1.reg);
       freeRegisterF($3.reg);
@@ -1697,10 +1685,9 @@ EXPRESSION : EXPRESSION ADDOP TERM
    
    if(strcmp($1.type,"int") == 0 && strcmp($3.type,"int") == 0) //ADDOP between ints
    {
-      if($2 == PLUS)
-         sprintf(codeBodyStr,"add %s, %s ,%s\n", $3.reg, $3.reg, $1.reg);
-      else
-         sprintf(codeBodyStr,"sub %s, %s ,%s\n", $3.reg, $1.reg, $3.reg);
+      if($2 == PLUS) sprintf(codeBodyStr,"add %s, %s ,%s\n", $3.reg, $3.reg, $1.reg);
+      else           sprintf(codeBodyStr,"sub %s, %s ,%s\n", $3.reg, $1.reg, $3.reg);
+ 
       freeRegisterT($1.reg);
       $$.type = string_duplicate("int");
       $$.reg = string_duplicate($3.reg);
@@ -1708,10 +1695,9 @@ EXPRESSION : EXPRESSION ADDOP TERM
    if(strcmp($1.type,"float") == 0 && strcmp($3.type,"int") == 0)   //ADDOP between a float and an int
    {
       char* reg = getRegisterF();
-      if($2 == PLUS)
-         sprintf(codeBodyStr,"mtc1 %s, %s\ncvt.s.w %s, %s\nadd.s %s, %s ,%s\n", $3.reg, reg, reg, reg, $1.reg, $1.reg, reg);
-      else
-         sprintf(codeBodyStr,"mtc1 %s, %s\ncvt.s.w %s, %s\nsub.s %s, %s ,%s\n", $3.reg, reg, reg, reg, $1.reg, $1.reg, reg);
+      if($2 == PLUS) sprintf(codeBodyStr,"mtc1 %s, %s\ncvt.s.w %s, %s\nadd.s %s, %s ,%s\n", $3.reg, reg, reg, reg, $1.reg, $1.reg, reg);
+      else           sprintf(codeBodyStr,"mtc1 %s, %s\ncvt.s.w %s, %s\nsub.s %s, %s ,%s\n", $3.reg, reg, reg, reg, $1.reg, $1.reg, reg);
+ 
       freeRegisterF(reg);
       freeRegisterT($3.reg);
       $$.type = string_duplicate("float");
@@ -1720,10 +1706,9 @@ EXPRESSION : EXPRESSION ADDOP TERM
    if(strcmp($1.type,"int") == 0 && strcmp($3.type,"float") == 0)   //ADDOP between an int and a float
    {
       char* reg = getRegisterF();
-      if($2 == PLUS)
-         sprintf(codeBodyStr,"mtc1 %s, %s\ncvt.s.w %s, %s\nadd.s %s, %s ,%s\n", $1.reg, reg, reg, reg, $3.reg, $3.reg, reg);
-      else
-         sprintf(codeBodyStr,"mtc1 %s, %s\ncvt.s.w %s, %s\nsub.s %s, %s ,%s\n", $1.reg, reg, reg, reg, $3.reg, reg, $3.reg);
+      if($2 == PLUS) sprintf(codeBodyStr,"mtc1 %s, %s\ncvt.s.w %s, %s\nadd.s %s, %s ,%s\n", $1.reg, reg, reg, reg, $3.reg, $3.reg, reg);
+      else           sprintf(codeBodyStr,"mtc1 %s, %s\ncvt.s.w %s, %s\nsub.s %s, %s ,%s\n", $1.reg, reg, reg, reg, $3.reg, reg, $3.reg);
+
       freeRegisterF(reg);
       freeRegisterT($1.reg);
       $$.type = string_duplicate("float");
@@ -1731,10 +1716,9 @@ EXPRESSION : EXPRESSION ADDOP TERM
    }
    if(strcmp($1.type,"float") == 0 && strcmp($3.type,"float") == 0)   //ADDOP between floats
    {
-      if($2 == PLUS)
-         sprintf(codeBodyStr,"add.s %s, %s ,%s\n", $3.reg, $1.reg, $3.reg);
-      else
-         sprintf(codeBodyStr,"sub.s %s, %s ,%s\n", $3.reg, $1.reg, $3.reg);
+      if($2 == PLUS)  sprintf(codeBodyStr,"add.s %s, %s ,%s\n", $3.reg, $1.reg, $3.reg);
+      else            sprintf(codeBodyStr,"sub.s %s, %s ,%s\n", $3.reg, $1.reg, $3.reg);
+
       freeRegisterF($1.reg);
       $$.type = string_duplicate("float");
       $$.reg = string_duplicate($3.reg);
@@ -1764,10 +1748,9 @@ TERM : TERM MULOP FACTOR
    
    if(strcmp($1.type,"int") == 0 && strcmp($3.type,"int") == 0)   //MULOP between ints
    {
-      if($2 == MUL) 
-         sprintf(codeBodyStr,"mul %s, %s ,%s\n", $3.reg, $3.reg, $1.reg);
-      else
-         sprintf(codeBodyStr,"div %s, %s ,%s\n", $3.reg, $3.reg, $1.reg);
+      if($2 == MUL) sprintf(codeBodyStr,"mul %s, %s ,%s\n", $3.reg, $3.reg, $1.reg);
+      else          sprintf(codeBodyStr,"div %s, %s ,%s\n", $3.reg, $3.reg, $1.reg);
+
       freeRegisterT($1.reg);
       $$.type = string_duplicate("int");
       $$.reg = string_duplicate($3.reg);
@@ -1775,10 +1758,10 @@ TERM : TERM MULOP FACTOR
    if(strcmp($1.type,"float") == 0 && strcmp($3.type,"int") == 0) //MULOP between a float and an int
    {
       char* reg = getRegisterF();
-      if($2 == MUL) 
-         sprintf(codeBodyStr,"mtc1 %s, %s\ncvt.s.w %s, %s\nmul.s %s, %s ,%s\n", $3.reg, reg, reg, reg, $1.reg, $1.reg, reg);
-      else
-         sprintf(codeBodyStr,"mtc1 %s, %s\ncvt.s.w %s, %s\ndiv.s %s, %s ,%s\n", $3.reg, reg, reg, reg, $1.reg, $1.reg, reg);
+
+      if($2 == MUL) sprintf(codeBodyStr,"mtc1 %s, %s\ncvt.s.w %s, %s\nmul.s %s, %s ,%s\n", $3.reg, reg, reg, reg, $1.reg, $1.reg, reg);
+      else          sprintf(codeBodyStr,"mtc1 %s, %s\ncvt.s.w %s, %s\ndiv.s %s, %s ,%s\n", $3.reg, reg, reg, reg, $1.reg, $1.reg, reg);
+
       freeRegisterF(reg);
       freeRegisterT($3.reg);
       $$.type = string_duplicate("float");
@@ -1787,10 +1770,10 @@ TERM : TERM MULOP FACTOR
    if(strcmp($1.type,"int") == 0 && strcmp($3.type,"float") == 0)   //MULOP between an int and a float
    {
       char* reg = getRegisterF();
-      if($2 == MUL) 
-         sprintf(codeBodyStr,"mtc1 %s, %s\ncvt.s.w %s, %s\nmul.s %s, %s ,%s\n", $1.reg, reg, reg, reg, $3.reg, $3.reg, reg);
-      else
-         sprintf(codeBodyStr,"mtc1 %s, %s\ncvt.s.w %s, %s\ndiv.s %s, %s ,%s\n", $1.reg, reg, reg, reg, $3.reg, $3.reg, reg);
+
+      if($2 == MUL) sprintf(codeBodyStr,"mtc1 %s, %s\ncvt.s.w %s, %s\nmul.s %s, %s ,%s\n", $1.reg, reg, reg, reg, $3.reg, $3.reg, reg);
+      else          sprintf(codeBodyStr,"mtc1 %s, %s\ncvt.s.w %s, %s\ndiv.s %s, %s ,%s\n", $1.reg, reg, reg, reg, $3.reg, $3.reg, reg);
+
       freeRegisterF(reg);
       freeRegisterT($1.reg);
       $$.type = string_duplicate("float");
@@ -1798,10 +1781,9 @@ TERM : TERM MULOP FACTOR
    }
    if(strcmp($1.type,"float") == 0 && strcmp($3.type,"float") == 0)   //MULOP between floats
    {
-      if($2 == MUL)
-         sprintf(codeBodyStr,"mul.s %s, %s ,%s\n", $3.reg, $3.reg, $1.reg);
-      else
-         sprintf(codeBodyStr,"div.s %s, %s ,%s\n", $3.reg, $3.reg, $1.reg);
+      if($2 == MUL) sprintf(codeBodyStr,"mul.s %s, %s ,%s\n", $3.reg, $3.reg, $1.reg);
+      else          sprintf(codeBodyStr,"div.s %s, %s ,%s\n", $3.reg, $3.reg, $1.reg);
+
       freeRegisterF($1.reg);
       $$.type = string_duplicate("float");
       $$.reg = string_duplicate($3.reg);
