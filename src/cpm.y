@@ -56,6 +56,16 @@ void dbg_print(char* str)
 #endif
 }
 
+/*
+* String duplicate function
+*/
+char* string_duplicate(char* orig_str)
+{
+   char* new_str = (char*)malloc(strlen(orig_str)+1);
+   strcpy(new_str, orig_str);
+   return new_str;
+}
+
 // ############### Symbol table related functions ####################
 /*
 * Initiates a symbol table for the compilation process
@@ -149,7 +159,7 @@ symTblEntry* createSymTblEntry(symTbl* symTbl, char * lexeme, Type type, bool is
          return NULL;
       }
 
-   newSymTblEntry->name = strdup(lexeme);
+   newSymTblEntry->name = string_duplicate(lexeme);
    newSymTblEntry->isConst = isConst;
    newSymTblEntry->isDeclared = true;
    newSymTblEntry->isInit = false;
@@ -226,9 +236,9 @@ char* EnumType2charType(Type type)
 {
    char* newType = NULL;      // enum Type {integer, real, string}
 
-   if (type == integer) newType = strdup("int");
-   else if (type == real) newType = strdup("float");
-   else if (type == string) newType = strdup("string");
+   if (type == integer) newType = string_duplicate("int");
+   else if (type == real) newType = string_duplicate("float");
+   else if (type == string) newType = string_duplicate("string");
    return newType;
 }
 
@@ -422,7 +432,7 @@ char* getLabel()
 {
    char str[100];
    sprintf(str,"Label%d",nextLabelNum++);
-   return strdup(str);
+   return string_duplicate(str);
 }
 
 
@@ -499,16 +509,16 @@ program : PROGRAM ID START DECLARATIONS STMTLIST END
 DECLARATIONS : DCL DECLARLIST CDECL
 {//0            1      2      3
    printf("DECLARATIONS --> DCL DECLARLIST CDECL\n");
-   $$.codeHead = strdup(strcat($2.codeHead, $3.codeHead));
-   $$.codeBody = strdup($3.codeBody);
+   $$.codeHead = string_duplicate(strcat($2.codeHead, $3.codeHead));
+   $$.codeBody = string_duplicate($3.codeBody);
    dbg_print($$.codeHead);
    dbg_print($$.codeBody);
 }
 |
 {
    printf("DECLARATIONS --> epsilon\n");
-   $$.codeHead = strdup("");
-   $$.codeBody = strdup("");
+   $$.codeHead = string_duplicate("");
+   $$.codeBody = string_duplicate("");
 };
 
 
@@ -520,7 +530,7 @@ DECLARLIST : DECLARLIST DECL
 |DECL
 {
    printf("DECLARLIST --> DECL\n");
-   $$.codeHead = strdup($1.codeHead);
+   $$.codeHead = string_duplicate($1.codeHead);
 };
 
 
@@ -559,13 +569,13 @@ DECL :  TYPE':'LIST
       i++;
    } while ($3.IDarray[i] != NULL);
 
-   $$.codeHead = strdup(codeHeadStr);
+   $$.codeHead = string_duplicate(codeHeadStr);
 }
 |TYPE LIST 
 {
    outputError("Expected ':' ");
    hasErrors = true;
-   $$.codeHead = strdup("");
+   $$.codeHead = string_duplicate("");
 };
 
 
@@ -619,17 +629,17 @@ LIST : ID','LIST
 TYPE : INT
 {//0    1
    printf("TYPE --> INT\n");
-   $$.type = strdup("int");
+   $$.type = string_duplicate("int");
 }
 |REAL
 {//1
    printf("TYPE --> REAL\n");
-   $$.type = strdup("float");
+   $$.type = string_duplicate("float");
 }
 |STRING
 {//1
    printf("TYPE --> STRING\n");
-   $$.type = strdup("string");
+   $$.type = string_duplicate("string");
 };
 
 
@@ -665,14 +675,14 @@ CDECL : FINAL TYPE ID ASSIGNOP NUM';'CDECL
 {
    outputError("Expected ';' ");
    hasErrors = true;
-   $$.codeHead = strdup("");
-   $$.codeBody = strdup("");
+   $$.codeHead = string_duplicate("");
+   $$.codeBody = string_duplicate("");
 }
 | 
 {
    printf("CDECL --> epsilon\n");
-   $$.codeHead = strdup("");
-   $$.codeBody = strdup("");
+   $$.codeHead = string_duplicate("");
+   $$.codeBody = string_duplicate("");
 };
 
 
@@ -684,38 +694,38 @@ STMTLIST : STMTLIST STMT
 |
 {
    printf("STMTLIST --> epsilon\n");
-   $$.body = strdup("");
+   $$.body = string_duplicate("");
 };
 
 
 STMT : ASSIGNMENT_STMT
 {//0   1
    printf("STMT --> ASSIGNMENT_STMT\n");
-   $$.head = strdup($1.head);
-   $$.body = strdup($1.body);
+   $$.head = string_duplicate($1.head);
+   $$.body = string_duplicate($1.body);
 }
 |CONTROL_STMT
 {   //1
    printf("STMT --> CONTROL_STMT\n");
-   $$.head = strdup($1.head);
-   $$.body = strdup($1.body);
+   $$.head = string_duplicate($1.head);
+   $$.body = string_duplicate($1.body);
 }
 |IN_STMT
 { //1
    printf("STMT --> IN_STMT\n");
-   $$.body = strdup($1.body);
+   $$.body = string_duplicate($1.body);
 }
 |OUT_STMT
 { //1 
    printf("STMT --> OUT_STMT\n");
-   $$.head = strdup($1.head);
-   $$.body = strdup($1.body);
+   $$.head = string_duplicate($1.head);
+   $$.body = string_duplicate($1.body);
 }
 |STMT_BLOCK
 { //1
    printf("STMT --> STMT_BLOCK\n");
-   $$.head = strdup($1.head);
-   $$.body = strdup($1.body);
+   $$.head = string_duplicate($1.head);
+   $$.body = string_duplicate($1.body);
 };
 
 
@@ -745,8 +755,8 @@ OUT_STMT : OUT'('EXPRESSION')'';'
       dbg_print("wrong type");
       outputError("Unknown type");
       hasErrors = true;
-      $$.body = strdup("");
-      $$.head = strdup("");
+      $$.body = string_duplicate("");
+      $$.head = string_duplicate("");
    }
    
    dbg_print(codeBodyStr);
@@ -759,22 +769,22 @@ OUT_STMT : OUT'('EXPRESSION')'';'
 {
    outputError("Expected '(' ");
    hasErrors = true;
-   $$.body = strdup("");
-   $$.head = strdup("");
+   $$.body = string_duplicate("");
+   $$.head = string_duplicate("");
 }
 |OUT'('EXPRESSION ';'
 {
    outputError("Expected ')'");
    hasErrors = true;
-   $$.body = strdup("");
-   $$.head = strdup("");
+   $$.body = string_duplicate("");
+   $$.head = string_duplicate("");
 }
 |OUT'('EXPRESSION')'
 { 
    outputError("expected ';' ");
    hasErrors = true;
-   $$.body = strdup("");
-   $$.head = strdup("");
+   $$.body = string_duplicate("");
+   $$.head = string_duplicate("");
 };
 
 
@@ -788,29 +798,29 @@ OUT_STMT: OUT'('STRING_LITERAL')'';'
    sprintf(codeHeadStr, "%s: .asciiz %s\n", label, $3);
    sprintf(codeBodyStr, "la $a0,%s\nli $v0,4\nsyscall\n", label); //print a string
    
-   $$.head = strdup(codeHeadStr);
-   $$.body = strdup(codeBodyStr);
+   $$.head = string_duplicate(codeHeadStr);
+   $$.body = string_duplicate(codeBodyStr);
 }   // error handling
 |OUT STRING_LITERAL')'';'
 {
    outputError("Expected '('");
    hasErrors = true;
-   $$.body = strdup("");
-   $$.head = strdup("");
+   $$.body = string_duplicate("");
+   $$.head = string_duplicate("");
 }
 |OUT'('STRING_LITERAL ';'
 {
    outputError("Expected ')'");
    hasErrors = true;
-   $$.body = strdup("");
-   $$.head = strdup("");
+   $$.body = string_duplicate("");
+   $$.head = string_duplicate("");
 }
 |OUT'('STRING_LITERAL')'
 {
    outputError("expected ';'");
    hasErrors = true;
-   $$.body = strdup("");
-   $$.head = strdup("");
+   $$.body = string_duplicate("");
+   $$.head = string_duplicate("");
 };
 
 
@@ -853,25 +863,25 @@ IN_STMT : IN'('ID')'';'
       sprintf(codeBodyStr,"");
       hasErrors = true;
    }
-   $$.body = strdup(codeBodyStr);
+   $$.body = string_duplicate(codeBodyStr);
 }
 |IN ID')'';'
 {
    outputError("expected '('");
    hasErrors = true;
-   $$.body=strdup("");
+   $$.body=string_duplicate("");
 }
 |IN'('ID ';'
 {
    outputError("expected ')'");
    hasErrors = true;
-   $$.body=strdup("");
+   $$.body=string_duplicate("");
 }
 |IN'('ID')'
 {
    outputError("expected ';'");
    hasErrors = true;
-   $$.body=strdup("");
+   $$.body=string_duplicate("");
 };
 
 
@@ -931,22 +941,22 @@ ASSIGNMENT_STMT : ID ASSIGNOP EXPRESSION';'
       hasErrors = true;
    }
 
-   $$.head = strdup($3.codeHead);
+   $$.head = string_duplicate($3.codeHead);
    $$.body = strConcat($3.codeBody, codeBodyStr);
 }
 |ID ASSIGNOP EXPRESSION
 {
    outputError("expected ';'");
    hasErrors = true;
-   $$.head = strdup("");
-   $$.body = strdup("");
+   $$.head = string_duplicate("");
+   $$.body = string_duplicate("");
 }
 |ID ASSIGNOP
 {
    outputError("Expected assignment value");
    hasErrors = true;
-   $$.head = strdup("");
-   $$.body = strdup("");
+   $$.head = string_duplicate("");
+   $$.body = string_duplicate("");
  };
 
 
@@ -969,7 +979,7 @@ ASSIGNMENT_STMT : ID ASSIGNOP STRING_LITERAL';'
       {
          if(symbol->type == string)
          {
-            symbol->value.sval = strdup($3);
+            symbol->value.sval = string_duplicate($3);
 	    dbg_print("Symbol name:");
 	    dbg_print(symbol->name);
             sprintf(codeHeadStr,"%s: .asciiz %s\n", label, $3);
@@ -1002,15 +1012,15 @@ ASSIGNMENT_STMT : ID ASSIGNOP STRING_LITERAL';'
    }
 
    freeRegisterT(reg);
-   $$.head = strdup(codeHeadStr);
-   $$.body = strdup(codeBodyStr);
+   $$.head = string_duplicate(codeHeadStr);
+   $$.body = string_duplicate(codeBodyStr);
 }
 |ID ASSIGNOP STRING_LITERAL
 { 
    outputError("Expected ';' ");
    hasErrors = true;
-   $$.head = strdup("");
-   $$.body = strdup("");
+   $$.head = string_duplicate("");
+   $$.body = string_duplicate("");
 };
 
 
@@ -1033,15 +1043,15 @@ CONTROL_STMT : IF'('BOOLEXPR')'THEN STMT ELSE STMT
 {
    outputError("expected '('");
    hasErrors = true;
-   $$.body=strdup("");
-   $$.head=strdup("");
+   $$.body=string_duplicate("");
+   $$.head=string_duplicate("");
 }
 |IF'(' ')'THEN STMT ELSE STMT
 {
    outputError("Expected a boolean expression");
    hasErrors = true;
-   $$.body=strdup("");
-   $$.head=strdup("");
+   $$.body=string_duplicate("");
+   $$.head=string_duplicate("");
 }
 |WHILE'('BOOLEXPR')'STMT_BLOCK
 {//1    2      3     4      5
@@ -1065,22 +1075,22 @@ CONTROL_STMT : IF'('BOOLEXPR')'THEN STMT ELSE STMT
 {
    outputError("expected '('");
    hasErrors = true;
-   $$.body = strdup("");
-   $$.head = strdup("");   
+   $$.body = string_duplicate("");
+   $$.head = string_duplicate("");   
 }
 |WHILE'(' ')'STMT_BLOCK
 {
    outputError("Expected a boolean expression");
    hasErrors = true; 
-   $$.body = strdup("");
-   $$.head = strdup("");
+   $$.body = string_duplicate("");
+   $$.head = string_duplicate("");
 } 
 |WHILE'('BOOLEXPR STMT_BLOCK 
 {
    outputError("expected ')'");
    hasErrors = true; 
-   $$.body = strdup("");
-   $$.head = strdup("");
+   $$.body = string_duplicate("");
+   $$.head = string_duplicate("");
 }
 |FOREACH ID ASSIGNOP NUM TILL NUM WITH STEP STMT
 {//1     2      3     4    5    6   7    8    9
@@ -1178,8 +1188,8 @@ CONTROL_STMT : IF'('BOOLEXPR')'THEN STMT ELSE STMT
          sprintf(errorMessage,"Iterator must be of type int");
          outputError(errorMessage);
          hasErrors = true;
-         $$.body = strdup("");
-         $$.head = strdup("");
+         $$.body = string_duplicate("");
+         $$.head = string_duplicate("");
       }
 
       freeRegisterT(reg1);
@@ -1192,58 +1202,58 @@ CONTROL_STMT : IF'('BOOLEXPR')'THEN STMT ELSE STMT
 |FOREACH ID ASSIGNOP NUM TILL ID WITH STEP STMT
 { //1     2   3      4     5   6   7    8   9 
    printf("CONTROL_STMT --> FOREACH ID ASSIGNOP NUM TILL ID WITH STEP STMT\n");
-   $$.body = strdup("");
-   $$.head = strdup("");
+   $$.body = string_duplicate("");
+   $$.head = string_duplicate("");
 
 }
 |FOREACH ID NUM TILL NUM WITH STEP STMT
 {
    outputError("expected an assignment operation");
    hasErrors = true;
-   $$.body = strdup("");
-   $$.head = strdup("");
+   $$.body = string_duplicate("");
+   $$.head = string_duplicate("");
 }
 |FOREACH ID ASSIGNOP NUM NUM WITH STEP STMT
 {
    outputError("expected '='");
    hasErrors = true;
-   $$.body = strdup("");
-   $$.head = strdup("");
+   $$.body = string_duplicate("");
+   $$.head = string_duplicate("");
 }
 |FOREACH ID ASSIGNOP NUM ID WITH STEP STMT
 {
    outputError("expected '='");
    hasErrors = true;
-   $$.body = strdup("");
-   $$.head = strdup("");
+   $$.body = string_duplicate("");
+   $$.head = string_duplicate("");
 }
 |switch
 {//1
    printf("CONTROL_STMT --> switch\n");
-   $$.head = strdup($1.codeHead);
-   $$.body = strdup($1.codeBody);
+   $$.head = string_duplicate($1.codeHead);
+   $$.body = string_duplicate($1.codeBody);
 };
 
 
 STMT_BLOCK : '{'STMTLIST'}'
 {//0        1      2      3
    printf("STMT_BLOCK --> '{' STMTLIST '}'\n");
-   $$.head = strdup($2.head);
-   $$.body = strdup($2.body);
+   $$.head = string_duplicate($2.head);
+   $$.body = string_duplicate($2.body);
 }
 |STMTLIST'}'
 { //error handling
    outputError("expected '{'");
    hasErrors = true;
-   $$.body = strdup("");
-   $$.head = strdup("");   
+   $$.body = string_duplicate("");
+   $$.head = string_duplicate("");   
 }
 |'{'STMTLIST 
 {
    outputError("expected '}'");
    hasErrors = true;
-   $$.body = strdup("");
-   $$.head = strdup("");   
+   $$.body = string_duplicate("");
+   $$.head = string_duplicate("");   
 };
 
 
@@ -1257,36 +1267,36 @@ switch : SWITCH'('CHOICE')''{' CASES '}'
 { 
    outputError("expected '('");
    hasErrors = true;
-   $$.codeBody = strdup("");
-   $$.codeHead = strdup("");
+   $$.codeBody = string_duplicate("");
+   $$.codeHead = string_duplicate("");
 }
 |SWITCH'(' ')''{'CASES'}'
 { 
    outputError("expected a CHOICE");
    hasErrors = true;
-   $$.codeBody = strdup("");
-   $$.codeHead = strdup("");
+   $$.codeBody = string_duplicate("");
+   $$.codeHead = string_duplicate("");
 }
 |SWITCH'('CHOICE '{'CASES'}'
 {
    outputError("expected ')'");
    hasErrors = true;
-   $$.codeBody = strdup("");
-   $$.codeHead = strdup("");
+   $$.codeBody = string_duplicate("");
+   $$.codeHead = string_duplicate("");
 }
 |SWITCH'('CHOICE')' CASES'}'
 {
    outputError("expected '{'");
    hasErrors = true;
-   $$.codeBody = strdup("");
-   $$.codeHead = strdup("");
+   $$.codeBody = string_duplicate("");
+   $$.codeHead = string_duplicate("");
 }
 |SWITCH'('CHOICE')''{'CASES 
 {
    outputError("expected '}'");
    hasErrors = true;
-   $$.codeBody = strdup("");
-   $$.codeHead = strdup("");
+   $$.codeBody = string_duplicate("");
+   $$.codeHead = string_duplicate("");
 };
 
 
@@ -1312,16 +1322,16 @@ CHOICE : ID
             freeRegisterF(reg);
          }
       }
-      $$.codeBody = strdup(codeBodyStr);
+      $$.codeBody = string_duplicate(codeBodyStr);
    }
    else
    {
       outputError("Id not declared");
       hasErrors = true;
-      $$.codeBody = strdup("");
+      $$.codeBody = string_duplicate("");
    }
    
-   $$.codeHead = strdup("");
+   $$.codeHead = string_duplicate("");
    free(codeBodyStr);
 }
 |NUM
@@ -1342,8 +1352,8 @@ CHOICE : ID
       sprintf(codeHeadStr,"%s: .float %f\n", label, $1.val.fval);
       sprintf(codeBodyStr,"l.s %s,%s\n", reg, label);
    }
-   $$.codeHead = strdup(codeHeadStr);
-   $$.codeBody = strdup(codeBodyStr);
+   $$.codeHead = string_duplicate(codeHeadStr);
+   $$.codeBody = string_duplicate(codeBodyStr);
    free(codeBodyStr);
    free(codeHeadStr);
 };
@@ -1367,15 +1377,15 @@ CASES : CASE NUM':'STMTLIST BREAK';'CASES
 {
    outputError("expected ':'");
    hasErrors = true; 
-   $$.codeBody = strdup("");
-   $$.codeHead = strdup("");
+   $$.codeBody = string_duplicate("");
+   $$.codeHead = string_duplicate("");
 }
 |CASE NUM':'STMTLIST BREAK CASES
 {
    outputError("expected ';'");
    hasErrors = true;
-   $$.codeBody = strdup("");
-   $$.codeHead = strdup("");
+   $$.codeBody = string_duplicate("");
+   $$.codeHead = string_duplicate("");
 }
 |DEFAULT':'STMTLIST
 {//1      2   3
@@ -1384,17 +1394,17 @@ CASES : CASE NUM':'STMTLIST BREAK';'CASES
    char* label = getLabel();
 
    sprintf(codeBodyStr,"default%s:\n%s\nEnd%s:", label, $3.body, label);
-   $$.label = strdup(label);
-   $$.codeHead = strdup($3.head);
-   $$.codeBody = strdup(codeBodyStr);
+   $$.label = string_duplicate(label);
+   $$.codeHead = string_duplicate($3.head);
+   $$.codeBody = string_duplicate(codeBodyStr);
    free(codeBodyStr);
 }
 |DEFAULT STMTLIST
 {
    outputError("expected ':'");
    hasErrors = true;
-   $$.codeBody = strdup("");
-   $$.codeHead = strdup("");
+   $$.codeBody = string_duplicate("");
+   $$.codeHead = string_duplicate("");
 };
 
 
@@ -1410,8 +1420,8 @@ STEP : ID ASSIGNOP ID ADDOP NUM
    {
       outputError("Id not declared");
       hasErrors = true;
-      $$.head = strdup("");
-      $$.body = strdup("");
+      $$.head = string_duplicate("");
+      $$.body = string_duplicate("");
       free(codeBodyStr);
    }
    else
@@ -1436,37 +1446,37 @@ STEP : ID ASSIGNOP ID ADDOP NUM
       }
    }
       
-   $$.head = strdup("");
-   $$.body = strdup(codeBodyStr);
+   $$.head = string_duplicate("");
+   $$.body = string_duplicate(codeBodyStr);
    free(codeBodyStr);
 }
 |ID ID ADDOP NUM
 {
    outputError("expected an assigment operation");
    hasErrors = true;
-   $$.body = strdup("");
-   $$.head = strdup("");
+   $$.body = string_duplicate("");
+   $$.head = string_duplicate("");
 }
 |ID ASSIGNOP ADDOP NUM
 {
    outputError("expected an ID");
    hasErrors = true;
-   $$.body = strdup("");
-   $$.head = strdup("");
+   $$.body = string_duplicate("");
+   $$.head = string_duplicate("");
 }
 |ID ASSIGNOP ID NUM
 {
    outputError("expected an operation");
    hasErrors = true;
-   $$.body = strdup("");
-   $$.head = strdup("");
+   $$.body = string_duplicate("");
+   $$.head = string_duplicate("");
 }
 |ID ASSIGNOP ID ADDOP 
 {
    outputError("expected a number");
    hasErrors = true;
-   $$.body = strdup("");
-   $$.head = strdup("");
+   $$.body = string_duplicate("");
+   $$.head = string_duplicate("");
 }
 |ID ASSIGNOP ID MULOP NUM
 {//1   2     3    4    5
@@ -1479,8 +1489,8 @@ STEP : ID ASSIGNOP ID ADDOP NUM
    {
       outputError("Id not declared");
       hasErrors = true;
-      $$.head = strdup("");
-      $$.body = strdup("");
+      $$.head = string_duplicate("");
+      $$.body = string_duplicate("");
    }
    else
    {
@@ -1503,22 +1513,22 @@ STEP : ID ASSIGNOP ID ADDOP NUM
          freeRegisterF(reg);                                                    
       }
    }
-   $$.head = strdup("");
-   $$.body = strdup(codeBodyStr);
+   $$.head = string_duplicate("");
+   $$.body = string_duplicate(codeBodyStr);
 }
 |ID ASSIGNOP MULOP NUM
 {
    outputError("expected an ID");
    hasErrors = true;
-   $$.body = strdup("");
-   $$.head = strdup("");
+   $$.body = string_duplicate("");
+   $$.head = string_duplicate("");
 }
 |ID ASSIGNOP ID MULOP
 {
    outputError("expected a number");
    hasErrors = true;
-   $$.body = strdup("");
-   $$.head = strdup("");
+   $$.body = string_duplicate("");
+   $$.head = string_duplicate("");
 };
 
 
@@ -1531,7 +1541,7 @@ BOOLEXPR : BOOLEXPR OROP BOOLTERM
    char* label = getLabel();
 
    sprintf(codeBodyStr,"bne %s, %s, else%s\nadd %s, $0, %s\nj end%s\nelse%s: addi %s, $0, 1\nend%s", $1.reg ,$3.reg, label, reg, $1.reg, label, label, reg, label);
-   $$.reg = strdup(reg);
+   $$.reg = string_duplicate(reg);
    tmp = strConcat($1.codeBody, $3.codeBody);
    $$.codeBody = strConcat(tmp, codeBodyStr);
    $$.codeHead = strConcat($1.codeHead, $3.codeHead);
@@ -1542,16 +1552,16 @@ BOOLEXPR : BOOLEXPR OROP BOOLTERM
 |BOOLTERM
 {//1
    printf("BOOLEXPR --> BOOLTERM\n");
-   $$.reg = strdup($1.reg);
-   $$.codeBody = strdup($1.codeBody);
-   $$.codeHead = strdup($1.codeHead);
+   $$.reg = string_duplicate($1.reg);
+   $$.codeBody = string_duplicate($1.codeBody);
+   $$.codeHead = string_duplicate($1.codeHead);
 }
 |BOOLEXPR BOOLTERM
 {
    outputError("expected an OROP");
    hasErrors = true;
-   $$.codeBody = strdup("");
-   $$.codeHead = strdup("");
+   $$.codeBody = string_duplicate("");
+   $$.codeHead = string_duplicate("");
 };
 
 
@@ -1563,7 +1573,7 @@ BOOLTERM : BOOLTERM ANDOP BOOLFACTOR
    char* reg = getRegisterT();
    
    sprintf(codeBodyStr,"mul %s, %s, %s\n", reg, $1.reg ,$3.reg);
-   $$.reg = strdup(reg);
+   $$.reg = string_duplicate(reg);
    tmp = strConcat($1.codeBody, $3.codeBody);
    $$.codeBody = strConcat(tmp, codeBodyStr);
    $$.codeHead = strConcat($1.codeHead,$3.codeHead);
@@ -1576,15 +1586,15 @@ BOOLTERM : BOOLTERM ANDOP BOOLFACTOR
 {
    outputError("expected an ANDOP");
    hasErrors = true;
-   $$.codeBody = strdup("");
-   $$.codeHead = strdup("");
+   $$.codeBody = string_duplicate("");
+   $$.codeHead = string_duplicate("");
 }
 |BOOLFACTOR
 {//1
    printf("BOOLTERM --> BOOLFACTOR\n");
-   $$.reg = strdup($1.reg);
-   $$.codeBody = strdup($1.codeBody);
-   $$.codeHead = strdup($1.codeHead);
+   $$.reg = string_duplicate($1.reg);
+   $$.codeBody = string_duplicate($1.codeBody);
+   $$.codeHead = string_duplicate($1.codeHead);
 };
 
 
@@ -1606,22 +1616,22 @@ BOOLFACTOR : '!''('BOOLFACTOR')'
 {
    outputError("expected an '('");
    hasErrors = true;
-   $$.codeBody = strdup("");
-   $$.codeHead = strdup("");
+   $$.codeBody = string_duplicate("");
+   $$.codeHead = string_duplicate("");
 }
 |'!''(' ')'
 {
    outputError("expected a BOOLFACTOR");
    hasErrors = true;
-   $$.codeBody = strdup("");
-   $$.codeHead = strdup("");
+   $$.codeBody = string_duplicate("");
+   $$.codeHead = string_duplicate("");
 }
 |'!''('BOOLFACTOR 
 {
    outputError("expected a ')'");
    hasErrors = true;
-   $$.codeBody = strdup("");
-   $$.codeHead = strdup("");
+   $$.codeBody = string_duplicate("");
+   $$.codeHead = string_duplicate("");
 }
 |EXPRESSION RELOP EXPRESSION
 {//1         2      3
@@ -1669,14 +1679,14 @@ BOOLFACTOR : '!''('BOOLFACTOR')'
       freeRegisterF($3.reg);
    }
 
-   $$.reg = strdup(reg);
+   $$.reg = string_duplicate(reg);
    strcat(tmpBody,$1.codeBody);
    strcat(tmpBody,$3.codeBody);
    strcat(tmpBody,codeBodyStr);
    strcat(tmpHead,$1.codeHead);
    strcat(tmpHead,$3.codeHead);
-   $$.codeBody = strdup(tmpBody);
-   $$.codeHead = strdup(tmpHead);
+   $$.codeBody = string_duplicate(tmpBody);
+   $$.codeHead = string_duplicate(tmpHead);
    free(tmpBody);
    free(tmpHead);
    free(codeBodyStr);
@@ -1696,8 +1706,8 @@ EXPRESSION : EXPRESSION ADDOP TERM
       else
          sprintf(codeBodyStr,"sub %s, %s ,%s\n", $3.reg, $1.reg, $3.reg);
       freeRegisterT($1.reg);
-      $$.type = strdup("int");
-      $$.reg = strdup($3.reg);
+      $$.type = string_duplicate("int");
+      $$.reg = string_duplicate($3.reg);
    }
    if(strcmp($1.type,"float") == 0 && strcmp($3.type,"int") == 0)   //ADDOP between a float and an int
    {
@@ -1708,8 +1718,8 @@ EXPRESSION : EXPRESSION ADDOP TERM
          sprintf(codeBodyStr,"mtc1 %s, %s\ncvt.s.w %s, %s\nsub.s %s, %s ,%s\n", $3.reg, reg, reg, reg, $1.reg, $1.reg, reg);
       freeRegisterF(reg);
       freeRegisterT($3.reg);
-      $$.type = strdup("float");
-      $$.reg = strdup($1.reg);
+      $$.type = string_duplicate("float");
+      $$.reg = string_duplicate($1.reg);
    }
    if(strcmp($1.type,"int") == 0 && strcmp($3.type,"float") == 0)   //ADDOP between an int and a float
    {
@@ -1720,8 +1730,8 @@ EXPRESSION : EXPRESSION ADDOP TERM
          sprintf(codeBodyStr,"mtc1 %s, %s\ncvt.s.w %s, %s\nsub.s %s, %s ,%s\n", $1.reg, reg, reg, reg, $3.reg, reg, $3.reg);
       freeRegisterF(reg);
       freeRegisterT($1.reg);
-      $$.type = strdup("float");
-      $$.reg = strdup($3.reg);
+      $$.type = string_duplicate("float");
+      $$.reg = string_duplicate($3.reg);
    }
    if(strcmp($1.type,"float") == 0 && strcmp($3.type,"float") == 0)   //ADDOP between floats
    {
@@ -1730,8 +1740,8 @@ EXPRESSION : EXPRESSION ADDOP TERM
       else
          sprintf(codeBodyStr,"sub.s %s, %s ,%s\n", $3.reg, $1.reg, $3.reg);
       freeRegisterF($1.reg);
-      $$.type = strdup("float");
-      $$.reg = strdup($3.reg);
+      $$.type = string_duplicate("float");
+      $$.reg = string_duplicate($3.reg);
    }         
    
    tmp = strConcat($1.codeBody, $3.codeBody);
@@ -1743,10 +1753,10 @@ EXPRESSION : EXPRESSION ADDOP TERM
 |TERM
 {//1
    printf("EXPRESSION --> TERM\n");
-   $$.reg =  strdup($1.reg);
-   $$.codeBody = strdup($1.codeBody);
-   $$.codeHead = strdup($1.codeHead);
-   $$.type = strdup($1.type);
+   $$.reg =  string_duplicate($1.reg);
+   $$.codeBody = string_duplicate($1.codeBody);
+   $$.codeHead = string_duplicate($1.codeHead);
+   $$.type = string_duplicate($1.type);
    dbg_print($$.type);
 };
 
@@ -1764,8 +1774,8 @@ TERM : TERM MULOP FACTOR
       else
          sprintf(codeBodyStr,"div %s, %s ,%s\n", $3.reg, $3.reg, $1.reg);
       freeRegisterT($1.reg);
-      $$.type = strdup("int");
-      $$.reg = strdup($3.reg);
+      $$.type = string_duplicate("int");
+      $$.reg = string_duplicate($3.reg);
    }
    if(strcmp($1.type,"float") == 0 && strcmp($3.type,"int") == 0) //MULOP between a float and an int
    {
@@ -1776,8 +1786,8 @@ TERM : TERM MULOP FACTOR
          sprintf(codeBodyStr,"mtc1 %s, %s\ncvt.s.w %s, %s\ndiv.s %s, %s ,%s\n", $3.reg, reg, reg, reg, $1.reg, $1.reg, reg);
       freeRegisterF(reg);
       freeRegisterT($3.reg);
-      $$.type = strdup("float");
-      $$.reg = strdup($1.reg);
+      $$.type = string_duplicate("float");
+      $$.reg = string_duplicate($1.reg);
    }
    if(strcmp($1.type,"int") == 0 && strcmp($3.type,"float") == 0)   //MULOP between an int and a float
    {
@@ -1788,8 +1798,8 @@ TERM : TERM MULOP FACTOR
          sprintf(codeBodyStr,"mtc1 %s, %s\ncvt.s.w %s, %s\ndiv.s %s, %s ,%s\n", $1.reg, reg, reg, reg, $3.reg, $3.reg, reg);
       freeRegisterF(reg);
       freeRegisterT($1.reg);
-      $$.type = strdup("float");
-      $$.reg = strdup($3.reg);
+      $$.type = string_duplicate("float");
+      $$.reg = string_duplicate($3.reg);
    }
    if(strcmp($1.type,"float") == 0 && strcmp($3.type,"float") == 0)   //MULOP between floats
    {
@@ -1798,8 +1808,8 @@ TERM : TERM MULOP FACTOR
       else
          sprintf(codeBodyStr,"div.s %s, %s ,%s\n", $3.reg, $3.reg, $1.reg);
       freeRegisterF($1.reg);
-      $$.type = strdup("float");
-      $$.reg = strdup($3.reg);
+      $$.type = string_duplicate("float");
+      $$.reg = string_duplicate($3.reg);
    }
    
    tmp = strConcat($1.codeBody, $3.codeBody);
@@ -1812,23 +1822,23 @@ TERM : TERM MULOP FACTOR
 {
    outputError("expected a MULOP");
    hasErrors = true;
-   $$.codeBody = strdup("");
-   $$.codeHead = strdup("");
+   $$.codeBody = string_duplicate("");
+   $$.codeHead = string_duplicate("");
 }
 |TERM MULOP
 {
    outputError("expected a FACTOR");
    hasErrors = true;
-   $$.codeBody = strdup("");
-   $$.codeHead = strdup("");
+   $$.codeBody = string_duplicate("");
+   $$.codeHead = string_duplicate("");
 }
 |FACTOR
 {//1
    printf("TERM --> FACTOR\n");
-   $$.reg =  strdup($1.reg);
-   $$.codeBody = strdup($1.codeBody);
-   $$.codeHead = strdup($1.codeHead);
-   $$.type = strdup($1.type);
+   $$.reg =  string_duplicate($1.reg);
+   $$.codeBody = string_duplicate($1.codeBody);
+   $$.codeHead = string_duplicate($1.codeHead);
+   $$.type = string_duplicate($1.type);
    dbg_print($$.type);
 };
 
@@ -1836,18 +1846,18 @@ TERM : TERM MULOP FACTOR
 FACTOR : '('EXPRESSION')'
 {//0     1      2      3
    printf("FACTOR --> '(' EXPRESSION ')'\n");
-   $$.reg =  strdup($2.reg);
-   $$.codeBody = strdup($2.codeBody);
-   $$.codeHead = strdup($2.codeHead);
-   $$.type = strdup($2.type);
+   $$.reg =  string_duplicate($2.reg);
+   $$.codeBody = string_duplicate($2.codeBody);
+   $$.codeHead = string_duplicate($2.codeHead);
+   $$.type = string_duplicate($2.type);
    dbg_print($$.type);
 }
 |'('EXPRESSION
 {
    outputError("expected a ')'");
    hasErrors = true;
-   $$.codeBody = strdup("");
-   $$.codeHead = strdup("");
+   $$.codeBody = string_duplicate("");
+   $$.codeHead = string_duplicate("");
 }
 |ID
 {//1
@@ -1876,17 +1886,17 @@ FACTOR : '('EXPRESSION')'
          reg = $1;
 	 dbg_print(reg);
       }
-      $$.reg = strdup(reg);
+      $$.reg = string_duplicate(reg);
       $$.type = EnumType2charType(symbol->type);
-      $$.codeBody = strdup(codeBodyStr);
-      $$.codeHead = strdup("");
+      $$.codeBody = string_duplicate(codeBodyStr);
+      $$.codeHead = string_duplicate("");
    }
    else
    {
       outputError("Id not declared");
       hasErrors = true;
-      $$.codeBody = strdup("");
-      $$.codeHead = strdup("");
+      $$.codeBody = string_duplicate("");
+      $$.codeHead = string_duplicate("");
    }
    free(codeBodyStr);
 }
@@ -1901,7 +1911,7 @@ FACTOR : '('EXPRESSION')'
    {
       reg = getRegisterT();
       sprintf(codeBodyStr,"addi %s, $0, %d\n", reg, $1.val.ival);
-      $$.type = strdup("int");
+      $$.type = string_duplicate("int");
 
    }
    else   //$1.type == F
@@ -1910,11 +1920,11 @@ FACTOR : '('EXPRESSION')'
       char* label = getLabel();
       sprintf(codeHeadStr,"%s: .float %f\n", label, $1.val.fval);
       sprintf(codeBodyStr,"l.s %s, %s\n", reg, label);
-      $$.type = strdup("float");
+      $$.type = string_duplicate("float");
    }
-   $$.reg = strdup(reg);
-   $$.codeHead = strdup(codeHeadStr);
-   $$.codeBody = strdup(codeBodyStr);
+   $$.reg = string_duplicate(reg);
+   $$.codeHead = string_duplicate(codeHeadStr);
+   $$.codeBody = string_duplicate(codeBodyStr);
    free(codeHeadStr);
    free(codeBodyStr);
 };
@@ -1946,7 +1956,7 @@ int main (int argc, char **argv)
    printf("Input validation stage started\n");
    if (argc >= 2 && argv[1] != NULL)
    {
-      inputFileName = strdup(argv[1]);
+      inputFileName = string_duplicate(argv[1]);
       inputFileType = strrchr(inputFileName, '.');
       if (strcmp(inputFileType, ".cpl") != 0 && strcmp(inputFileType, ".CPL") != 0)
       {
