@@ -287,7 +287,6 @@ void addSymbol(symTbl* symTbl, char* lexeme, char* type, bool isConst)
 */
 void destroyEntry(symTblEntry* entry)
 {
-   int x;
    if (entry == NULL)
    {
       fprintf(stderr, "Entry to be destroyed is NULL!!\n");
@@ -373,7 +372,7 @@ void output_error(char* s){
 /*
 * Concatenates two strings into one - useful for appending mips code as it is gets written
 */
-char* strConcat(char* str1, char* str2)
+char* string_concat(char* str1, char* str2)
 {
    char* newString =(char*)calloc(sizeof(char) * (strlen(str1) + strlen(str2) + 1), sizeof(char));
    strcat(newString, str1);
@@ -525,7 +524,7 @@ DECLARATIONS : DCL DECLARLIST CDECL
 DECLARLIST : DECLARLIST DECL
 {
    printf("DECLARLIST --> DECLARLIST DECL\n");
-   $$.codeHead = strConcat($1.codeHead, $2.codeHead);
+   $$.codeHead = string_concat($1.codeHead, $2.codeHead);
 }
 |DECL
 {
@@ -664,8 +663,8 @@ CDECL : FINAL TYPE ID ASSIGNOP NUM';'CDECL
       sprintf(codeHeadStr,"");
 
    }
-   $$.codeHead = strConcat(codeHeadStr, $7.codeHead);
-   $$.codeBody = strConcat(codeBodyStr, $7.codeBody);
+   $$.codeHead = string_concat(codeHeadStr, $7.codeHead);
+   $$.codeBody = string_concat(codeBodyStr, $7.codeBody);
 }
 |FINAL TYPE ID ASSIGNOP NUM CDECL
 {
@@ -685,7 +684,7 @@ CDECL : FINAL TYPE ID ASSIGNOP NUM';'CDECL
 STMTLIST : STMTLIST STMT
 {//0      1       2
    printf("STMTLIST --> STMTLIST STMT\n");
-   $$.body = strConcat($1.body, $2.body);
+   $$.body = string_concat($1.body, $2.body);
 }
 |
 {
@@ -758,7 +757,7 @@ OUT_STMT : OUT'('EXPRESSION')'';'
    dbg_print(codeBodyStr);
    $$.head = $3.codeHead;
    dbg_print($$.head);
-   $$.body = strConcat($3.codeBody, codeBodyStr);
+   $$.body = string_concat($3.codeBody, codeBodyStr);
    dbg_print($$.body);
 }
 |OUT EXPRESSION')'';'
@@ -938,7 +937,7 @@ ASSIGNMENT_STMT : ID ASSIGNOP EXPRESSION';'
    }
 
    $$.head = string_duplicate($3.codeHead);
-   $$.body = strConcat($3.codeBody, codeBodyStr);
+   $$.body = string_concat($3.codeBody, codeBodyStr);
 }
 |ID ASSIGNOP EXPRESSION
 {
@@ -1034,9 +1033,9 @@ CONTROL_STMT : IF'('BOOLEXPR')'THEN STMT ELSE STMT
    char* str;
    
    sprintf(codeBodyStr,"beq %s,$0,Else%s\n%s\nj End%s\nElse%s:\n%s\nEnd%s:\n", $3.reg, label, $6.body, label, label ,$8.body, label);   
-   str = strConcat($6.head, $8.head);
-   $$.head = strConcat($3.codeHead, str);
-   $$.body = strConcat($3.codeBody, codeBodyStr);
+   str = string_concat($6.head, $8.head);
+   $$.head = string_concat($3.codeHead, str);
+   $$.body = string_concat($3.codeBody, codeBodyStr);
    freeRegisterT($3.reg);
    free(str);
    free(codeBodyStr);
@@ -1067,8 +1066,8 @@ CONTROL_STMT : IF'('BOOLEXPR')'THEN STMT ELSE STMT
    sprintf(str,"Loop%s:\n", label);
    strcat(str, $3.codeBody);
 
-   $$.head = strConcat($3.codeHead, $5.head);
-   $$.body = strConcat(str, codeBodyStr);
+   $$.head = string_concat($3.codeHead, $5.head);
+   $$.body = string_concat(str, codeBodyStr);
    freeRegisterT($3.reg);
    free(str);
    free(codeBodyStr);
@@ -1182,8 +1181,8 @@ CONTROL_STMT : IF'('BOOLEXPR')'THEN STMT ELSE STMT
               //   reg2 $2     reg1,reg2      reg3,$6.val.ival   reg2,reg3,reg1         $9.body                 label
       sprintf(str,"la %s,%s\nlw %s,0(%s)\nli $s,%d\nLOOP%s:\nnslt %s,%s,%s\nbnez $s,End%s\n$s\naddi $s,%s,%s\nj LOOP%s\nEnd%s:", reg2, $2, reg1, reg2, reg3, $6.val.ival, label, reg2, reg3, reg1, reg2, label, $9.body, reg2, reg2, $8.body, label, label);
                                           //label                reg2,label          reg2,reg2,$8.body      label
-      $$.body = strConcat("codeBodyStr",str);
-      $$.head = strConcat($8.head,$9.head);
+      $$.body = string_concat("codeBodyStr",str);
+      $$.head = string_concat($8.head,$9.head);
       }
       else
       {   //error - iterator must be of type int !!!
@@ -1262,8 +1261,8 @@ STMT_BLOCK : '{'STMTLIST'}'
 switch : SWITCH'('CHOICE')''{' CASES '}'
 {//0      1    2     3      4   5   6     7
    printf("switch --> SWITCH '(' CHOICE ')' '{' CASES '}'\n");
-   $$.codeBody = strConcat($3.codeBody,$6.codeBody);
-   $$.codeHead = strConcat($3.codeHead,$6.codeHead);
+   $$.codeBody = string_concat($3.codeBody,$6.codeBody);
+   $$.codeHead = string_concat($3.codeHead,$6.codeHead);
 }
 |SWITCH  CHOICE')''{' CASES '}'
 { 
@@ -1367,8 +1366,8 @@ CASES : CASE NUM':'STMTLIST BREAK';'CASES
 
    sprintf(codeBodyStr,"li %s, %d\nbne %s, $s1 ,next%s\n%s\nj end%s\nnext%s:\n", reg, $2.val.ival, reg, label, $4.body, $7.label, label);   
    $$.label = $7.label;
-   $$.codeHead = strConcat($4.head, $7.codeHead);
-   $$.codeBody = strConcat(codeBodyStr, $7.codeBody);
+   $$.codeHead = string_concat($4.head, $7.codeHead);
+   $$.codeBody = string_concat(codeBodyStr, $7.codeBody);
    freeRegisterT(reg);
    free(codeBodyStr);
 }
@@ -1539,9 +1538,9 @@ BOOLEXPR : BOOLEXPR OROP BOOLTERM
 
    sprintf(codeBodyStr,"bne %s, %s, else%s\nadd %s, $0, %s\nj end%s\nelse%s: addi %s, $0, 1\nend%s", $1.reg ,$3.reg, label, reg, $1.reg, label, label, reg, label);
    $$.reg = string_duplicate(reg);
-   tmp = strConcat($1.codeBody, $3.codeBody);
-   $$.codeBody = strConcat(tmp, codeBodyStr);
-   $$.codeHead = strConcat($1.codeHead, $3.codeHead);
+   tmp = string_concat($1.codeBody, $3.codeBody);
+   $$.codeBody = string_concat(tmp, codeBodyStr);
+   $$.codeHead = string_concat($1.codeHead, $3.codeHead);
    freeRegisterT($1.reg);
    freeRegisterT($3.reg);
    free(tmp);
@@ -1571,9 +1570,9 @@ BOOLTERM : BOOLTERM ANDOP BOOLFACTOR
    
    sprintf(codeBodyStr,"mul %s, %s, %s\n", reg, $1.reg ,$3.reg);
    $$.reg = string_duplicate(reg);
-   tmp = strConcat($1.codeBody, $3.codeBody);
-   $$.codeBody = strConcat(tmp, codeBodyStr);
-   $$.codeHead = strConcat($1.codeHead,$3.codeHead);
+   tmp = string_concat($1.codeBody, $3.codeBody);
+   $$.codeBody = string_concat(tmp, codeBodyStr);
+   $$.codeHead = string_concat($1.codeHead,$3.codeHead);
    freeRegisterT($1.reg);
    freeRegisterT($3.reg);
    free(tmp);
@@ -1603,7 +1602,7 @@ BOOLFACTOR : '!''('BOOLFACTOR')'
    
    sprintf(codeBodyStr,"li %s ,1\nsub %s, %s, %s\n", reg, $3.reg, reg, $3.reg);
    $$.reg= $3.reg;
-   $$.codeBody = strConcat($3.codeBody, codeBodyStr);
+   $$.codeBody = string_concat($3.codeBody, codeBodyStr);
    $$.codeHead = $3.codeHead;
    freeRegisterT(reg);
 }
@@ -1720,9 +1719,9 @@ EXPRESSION : EXPRESSION ADDOP TERM
       $$.reg = string_duplicate($3.reg);
    }         
    
-   tmp = strConcat($1.codeBody, $3.codeBody);
-   $$.codeBody= strConcat(tmp, codeBodyStr);
-   $$.codeHead= strConcat($1.codeHead,$3.codeHead);
+   tmp = string_concat($1.codeBody, $3.codeBody);
+   $$.codeBody= string_concat(tmp, codeBodyStr);
+   $$.codeHead= string_concat($1.codeHead,$3.codeHead);
    free(tmp);
 }
 |TERM
@@ -1785,9 +1784,9 @@ TERM : TERM MULOP FACTOR
       $$.reg = string_duplicate($3.reg);
    }
    
-   tmp = strConcat($1.codeBody, $3.codeBody);
-   $$.codeBody = strConcat(tmp, codeBodyStr);
-   $$.codeHead = strConcat($1.codeHead, $3.codeHead);
+   tmp = string_concat($1.codeBody, $3.codeBody);
+   $$.codeBody = string_concat(tmp, codeBodyStr);
+   $$.codeHead = string_concat($1.codeHead, $3.codeHead);
    free(tmp);
 }
 |TERM FACTOR
