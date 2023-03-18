@@ -10,7 +10,7 @@
 #define ERROR_STRING_LEN 100
 #define STUDENTS_DETAILS "Vadim Darchuk 316920974 and Yotam Alter 302955679\n\n"
 #define SYM_TBL_ROWS_COUNT 20
-#define DEBUG_PRINT
+// #define DEBUG_PRINT
 
 extern int yylex();
 extern int yylineno;
