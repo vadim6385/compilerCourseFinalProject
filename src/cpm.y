@@ -1983,7 +1983,7 @@ int main (int argc, char **argv)
    yyparse();
    printf("Parsing process completed\n");
 
-   printf("%s", mipsCode);
+   // printf("%s", mipsCode);
 
    if (hasErrors == false) // no errors were found during parsing process -> creating MIPS file
    {
