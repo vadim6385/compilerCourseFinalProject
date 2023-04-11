@@ -340,79 +340,72 @@ int idxF=0;
 
 // ############### Service functions ####################
 
-/*
-* Writes an error to listing file
-* Since listing file content is written as a whole before compilation proccess,
-* this function re-opens listing file and appends the given error string
-*/
-void output_error(char* s){
-     FILE* listFile;
-     listFile = fopen("listing.lst","a+");
-     hasErrors = true;
-     if (listFile == NULL)
-     {
-       return;
-     }
-     else
-     {
-       fprintf(listFile,"ERROR in line: %d, %s\n", yylineno, s);
-       fclose(listFile);
-     }
+// Writes an error to listing file
+void output_error(char* s)
+{
+    FILE* listFile;
+    listFile = fopen("listing.lst", "a");
+    hasErrors = true;
+    if (listFile == NULL)
+    {
+        return;
+    }
+    fprintf(listFile, "ERROR in line: %d, %s\n", yylineno, s);
+    fclose(listFile);
 }
 
 
-/*
-* Concatenates two strings into one - useful for appending mips code as it is gets written
-*/
+// Concatenates two strings into one - useful for appending mips code as it is gets written
 char* string_concat(char* str1, char* str2)
 {
-   char* newString =(char*)calloc(sizeof(char) * (strlen(str1) + strlen(str2) + 1), sizeof(char));
-   strcat(newString, str1);
-   strcat(newString, str2);
-   return newString;
+    if (str1 == NULL || str2 == NULL)
+    {
+        return NULL;
+    }
+
+    char* newString = (char*)calloc(strlen(str1) + strlen(str2) + 1, sizeof(char));
+    strcat(newString, str1);
+    strcat(newString, str2);
+    return newString;
 }
 
-
-/*
-* Gets the next available T register for use
-*/
+// Gets the next available T register for use
 char* getRegisterT()
 {
-   char* res = registerT[idxT];
-   idxT++;
-   return res;
+    char* res = registerT[idxT];
+    idxT++;
+    return res;
 }
 
 
-
-/*
-* Frees a given T register
-*/
+// Frees a given T register
 void freeRegisterT(char* reg)
 {
-   idxT--;
-   registerT[idxT] = reg;
+    if (idxT > 0)
+    {
+        idxT--;
+        registerT[idxT] = reg;
+    }
 }
 
 
-/*
-* Gets the next available F register for use
-*/
+// Gets the next available F register for use
 char* getRegisterF()
 {
-   char* res = registerF[idxF];
-   idxF++;
-   return res;
+    char* res = registerF[idxF];
+    idxF++;
+    return res;
 }
 
 
-/*
-* Frees a given T register
-*/
+// Frees a given F register
 void freeRegisterF(char* reg)
 {
-   idxF--;
-   registerF[idxF] = reg;
+    if (idxF > 0)
+    {
+        idxF--;
+        registerF[idxF] = reg;
+    }
 }
 
 
@@ -421,9 +414,9 @@ void freeRegisterF(char* reg)
 */
 char* getLabel()
 {
-   char str[100];
-   sprintf(str,"Label%d",nextLabelNum++);
-   return string_duplicate(str);
+    char str[100] = {0};
+    sprintf(str,"Label%d",nextLabelNum++);
+    return string_duplicate(str);
 }
 
 
