@@ -49,12 +49,19 @@ typedef struct symTbl
 /*
 * Debug print function
 */
-void dbg_print(char* str)
-{
 #ifdef DEBUG_PRINT
-   printf("DEBUG: %s\n", str);
-#endif
+void dbg_print(const char* format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    fprintf(stderr, "DEBUG: ");
+    vfprintf(stderr, format, args);
+    fprintf(stderr, "\n");
+    va_end(args);
 }
+#else
+void dbg_print(const char* format, ...) {}
+#endif
 
 /*
 * String duplicate function
@@ -72,15 +79,16 @@ char* string_duplicate(char* orig_str)
 */
 symTbl* initSymTbl()
 {
-   symTbl* symbolTbl = (symTbl*)calloc(1, sizeof(symTbl));
-   
-   if (symbolTbl == NULL)
-   {
-      fprintf(stderr, "Failed to init a symbol table. Compilation process is terminated\n");
-      exit(1);
-   }
+    symTbl* symbolTbl = (symTbl*)calloc(1, sizeof(symTbl));
 
-   return symbolTbl;
+    if (symbolTbl == NULL)
+    {
+        dbg_print("Failed to init a symbol table. Compilation process is terminated");
+        fprintf(stderr, "Failed to init a symbol table. Compilation process is terminated\n");
+        exit(1);
+    }
+
+    return symbolTbl;
 }
 
 /*
@@ -88,85 +96,82 @@ symTbl* initSymTbl()
 */
 int getHash(char* lexeme)
 {
-   if (lexeme == NULL || strlen(lexeme) < 1)
+   int len_lex = strlen(lexeme);
+   if (lexeme == NULL || len_lex < 1)
    {
       return -1;
    }
-   return strlen(lexeme) % SYM_TBL_ROWS_COUNT;
+   return len_lex % SYM_TBL_ROWS_COUNT;
 }
 
-/*
-* Searches for an entry in a symbol table in an effective hash-based algorithm
-*/
+
+// Searches for an entry in a symbol table using an efficient hash-based algorithm.
 symTblEntry* lookupSymbol(symTbl* symTbl, char* lexeme)
 {
-   symTblEntry* ptr = NULL;
-   int hashValue;
+    if (symTbl == NULL || lexeme == NULL)
+    {
+        dbg_print("symTbl == NULL || lexeme == NULL");
+        return NULL;
+    }
 
-   dbg_print("looking for");
-   dbg_print(lexeme);
+    int hashValue = getHash(lexeme);
 
-   if(symTbl == NULL || lexeme == NULL)
-   {
-      dbg_print("symTbl == NULL || lexeme == NULL");
-      return NULL;
-   }
+    if (hashValue == -1)
+    {
+        dbg_print("Failed to get hash value");
+        fprintf(stderr, "Failed to get hash value\n");
+        return NULL;
+    }
 
-   hashValue = getHash(lexeme);
-   if (hashValue == -1)
-   {
-      dbg_print("Failed to get hash value");
-      fprintf(stderr, "Failed to get hash value\n");
-      return NULL;
-   }
-   if (hashValue > 0 && hashValue < SYM_TBL_ROWS_COUNT)
-   {
-      dbg_print("hashValue > 0 && hashValue < SYM_TBL_ROWS_COUNT");
-      ptr = symTbl->symbolTableHead[hashValue];   // lookup symbol only in the line matched  by the hash
-      while (ptr != NULL)
-      {   
-         dbg_print("ptr not null");
-         dbg_print(ptr->name);
-         if (0 == strcmp(ptr->name, lexeme))
-         {
-            dbg_print("found symbol");
+    dbg_print("looking for: %s, hashValue: %d", lexeme, hashValue);
+
+    symTblEntry* ptr = symTbl->symbolTableHead[hashValue];
+
+    while (ptr != NULL)
+    {
+        dbg_print("ptr not null: %s", ptr->name);
+
+        if (strcmp(ptr->name, lexeme) == 0)
+        {
+            dbg_print("found symbol: %s", lexeme);
             return ptr;
-         }
-         ptr = ptr->next;
-      }
-   }
-   dbg_print("symbol not in table");
-   return NULL; //requested symbol is not in table
+        }
+        
+        ptr = ptr->next;
+    }
+
+    dbg_print("symbol not in table: %s", lexeme);
+    return NULL;
 }
 
 
-/*
-* Creates a new symbol instance
-*/
-symTblEntry* createSymTblEntry(symTbl* symTbl, char * lexeme, Type type, bool isConst, int hashValue)
+// Creates a new symbol instance.
+symTblEntry* createSymTblEntry(symTbl* symTbl, char* lexeme, Type type, bool isConst, int hashValue)
 {
-   if (symTbl == NULL || lexeme == NULL || hashValue < 0 || hashValue >= SYM_TBL_ROWS_COUNT)
-   {
-      fprintf(stderr, "Bad arguments passed to createSymTblEntry\n");
-      return NULL;
-   }
+    if (symTbl == NULL || lexeme == NULL || hashValue < 0 || hashValue >= SYM_TBL_ROWS_COUNT)
+    {
+        dbg_print("Bad arguments passed to createSymTblEntry");
+        fprintf(stderr, "Bad arguments passed to createSymTblEntry\n");
+        return NULL;
+    }
 
-   symTblEntry* newSymTblEntry = NULL;
-   newSymTblEntry = (symTblEntry*)calloc(1, sizeof(newSymTblEntry));
-   if (newSymTblEntry == NULL)
-      {
-         fprintf(stderr, "Failed to allocate memory for a new symbol\n");
-         return NULL;
-      }
+    symTblEntry* newSymTblEntry = (symTblEntry*)calloc(1, sizeof(symTblEntry));
+    if (newSymTblEntry == NULL)
+    {
+        dbg_print("Failed to allocate memory for a new symbol");
+        fprintf(stderr, "Failed to allocate memory for a new symbol\n");
+        return NULL;
+    }
 
-   newSymTblEntry->name = string_duplicate(lexeme);
-   newSymTblEntry->isConst = isConst;
-   newSymTblEntry->isDeclared = true;
-   newSymTblEntry->isInit = false;
-   newSymTblEntry->type = type;
-   newSymTblEntry->occurences = 1;
-   newSymTblEntry->next = NULL;
-   return newSymTblEntry;
+    newSymTblEntry->name = string_duplicate(lexeme);
+    newSymTblEntry->isConst = isConst;
+    newSymTblEntry->isDeclared = true;
+    newSymTblEntry->isInit = false;
+    newSymTblEntry->type = type;
+    newSymTblEntry->occurences = 1;
+    newSymTblEntry->next = NULL;
+
+    return newSymTblEntry;
 }
 
 
