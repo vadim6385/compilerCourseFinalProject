@@ -175,165 +175,152 @@ symTblEntry* createSymTblEntry(symTbl* symTbl, char* lexeme, Type type, bool isC
 }
 
 
-/*
-* Add a symbol to the symbol table. Added symbol is added to the tail of the appropriate line of the symbol table
-*/
+// Adds a symbol to the symbol table.
+// The added symbol is added to the tail of the appropriate line of the symbol table.
 void insertEntry(symTbl* symTbl, symTblEntry* newEntry, int hashValue)
 {
-   if (symTbl == NULL || newEntry == NULL || hashValue < 0 || hashValue >= SYM_TBL_ROWS_COUNT)
-   {
-      dbg_print("Bad arguments passed to insertEntry");
-      fprintf(stderr, "Bad arguments passed to insertEntry\n");
-      return;
-   }
+    if (symTbl == NULL || newEntry == NULL || hashValue < 0 || hashValue >= SYM_TBL_ROWS_COUNT)
+    {
+        dbg_print("Bad arguments passed to insertEntry");
+        fprintf(stderr, "Bad arguments passed to insertEntry\n");
+        return;
+    }
 
-   symTblEntry* temp = NULL;
-   if (symTbl->symbolTableHead[hashValue] == NULL) // the symbol table row is empty
-   {
-      dbg_print("symbol is null, inserting new symbol");
-      symTbl->symbolTableHead[hashValue] = newEntry;
-   }
-   else   //otherwise, add newEntry to the tail of the appropriate list
-   {
-      dbg_print("add newEntry to the tail of the appropriate list");
-      temp = symTbl->symbolTableHead[hashValue];
-      while (temp->next)
-      {
-         temp = temp->next;
-      }
-      newEntry->next = NULL;
-      temp->next = newEntry;
-   }
+    if (symTbl->symbolTableHead[hashValue] == NULL) // the symbol table row is empty
+    {
+        dbg_print("symbol is null, inserting new symbol");
+        symTbl->symbolTableHead[hashValue] = newEntry;
+    }
+    else // otherwise, add newEntry to the tail of the appropriate list
+    {
+        dbg_print("add newEntry to the tail of the appropriate list");
+        symTblEntry* temp = symTbl->symbolTableHead[hashValue];
+        while (temp->next)
+        {
+            temp = temp->next;
+        }
+        temp->next = newEntry;
+    }
 }
 
 
-/*
-* Converts char* type to Enum Type of symbol table
-*/
+// Converts char* type to Enum Type of symbol table.
 Type charType2EnumType(char* type)
 {
-   Type newType;      // enum Type {integer, real, string}
-   if (type == NULL)   // for argument protection only
-   {
-      newType = integer;
-   }
-   else if (0 == strcmp(type, "int")) 
-   {
-      newType = integer;
-   }
-   else if (0 == strcmp(type, "real")) 
-   {
-      newType = real;
-   }
-   else if (0 == strcmp(type, "string")) 
-   {
-      newType = string;
-   }
-
-   return newType;
+    if (type == NULL) // for argument protection only
+    {
+        return integer;
+    }
+    else if (strcmp(type, "int") == 0)
+    {
+        return integer;
+    }
+    else if (strcmp(type, "real") == 0)
+    {
+        return real;
+    }
+    else if (strcmp(type, "string") == 0)
+    {
+        return string;
+    }
+    
+    return integer; // Default to integer for unknown types.
 }
 
 
-/*
-* Converts Enum Type of symbol table to char* type
-*/
+// Converts Enum Type of symbol table to char* type.
 char* EnumType2charType(Type type)
 {
-   char* newType = NULL;      // enum Type {integer, real, string}
-
-   if (type == integer) newType = string_duplicate("int");
-   else if (type == real) newType = string_duplicate("float");
-   else if (type == string) newType = string_duplicate("string");
-   return newType;
+    switch (type)
+    {
+        case integer:
+            return string_duplicate("int");
+        case real:
+            return string_duplicate("float");
+        case string:
+            return string_duplicate("string");
+        default:
+            return NULL; // Return NULL for unknown types.
+    }
 }
 
-/*
-* A wrapper function for adding a new symbol to a symbol table
-*/
+// A wrapper function for adding a new symbol to a symbol table.
 void addSymbol(symTbl* symTbl, char* lexeme, char* type, bool isConst)
 {
-   if (symTbl == NULL || lexeme == NULL || type == NULL)
-   {
-      fprintf(stderr, "Bad arguments passed to addSymbol\n");
-      return;
-   }
+    if (symTbl == NULL || lexeme == NULL || type == NULL)
+    {
+        dbg_print("Bad arguments passed to addSymbol");
+        fprintf(stderr, "Bad arguments passed to addSymbol\n");
+        return;
+    }
 
-   int hashValue = getHash(lexeme);
-   if (hashValue == -1)
-   {
-      fprintf(stderr, "Bad hash value returned\n");
-      return;
-   }
+    int hashValue = getHash(lexeme);
+    if (hashValue == -1)
+    {
+        dbg_print("Bad hash value returned");
+        fprintf(stderr, "Bad hash value returned\n");
+        return;
+    }
 
-   if (lookupSymbol(symTbl, lexeme) != NULL) // enetry already in symbol table
-   {
-      fprintf(stderr, "%s is already in symbol table\n", lexeme);
-      return;
-   }
-   dbg_print(type);
-   dbg_print(lexeme);
-   Type newType = charType2EnumType(type);      // Converting char* type to Enum Type
-   symTblEntry* newSymbol = createSymTblEntry(symTbl, lexeme, newType, isConst, hashValue);
+    if (lookupSymbol(symTbl, lexeme) != NULL) // entry already in symbol table
+    {
+        dbg_print("Symbol already in symbol table");
+        fprintf(stderr, "%s is already in symbol table\n", lexeme);
+        return;
+    }
 
-   if (newSymbol == NULL)
-   {
-      dbg_print("Null Symbol");
-      return;
-   }
-   insertEntry(symTbl, newSymbol, hashValue);
+    dbg_print(type);
+    dbg_print(lexeme);
+    Type newType = charType2EnumType(type);
+    symTblEntry* newSymbol = createSymTblEntry(symTbl, lexeme, newType, isConst, hashValue);
+
+    if (newSymbol == NULL)
+    {
+        dbg_print("Null Symbol");
+        return;
+    }
+    insertEntry(symTbl, newSymbol, hashValue);
 }
 
-
-/* 
-* Because destroyEntry is only used at the end of the compilation process,
-* deletion will be performed from the head of the list to it's tail. 
-* It's impossible to delete a middle entry.
-* This function DOESN'T handle the linked-list connections. It's the caller's responsibility
-*/
+// This function doesn't handle the linked-list connections. It's the caller's responsibility.
 void destroyEntry(symTblEntry* entry)
 {
-   if (entry == NULL)
-   {
-      fprintf(stderr, "Entry to be destroyed is NULL!!\n");
-      return;
-   }
-   if(entry->type == string)
-   {
-      free(entry->value.sval);
-      entry->value.sval = NULL;
-   }
-   free(entry->name);
-   entry->name = NULL;
-   entry->next = NULL;
-   free(entry);
-   entry = NULL;
+    if (entry == NULL)
+    {
+        dbg_print("Entry to be destroyed is NULL");
+        fprintf(stderr, "Entry to be destroyed is NULL!!\n");
+        return;
+    }
+    if (entry->type == string)
+    {
+        free(entry->value.sval);
+    }
+    free(entry->name);
+    free(entry);
 }
 
-
-/*
-* This function is responsible to destroy the entire symbol table at the end of the compilation process
-* The destruction process is done in a sequential order from the head of the list to the tail
-* Finally the table itself is destroyed
-*/
+// This function is responsible for destroying the entire symbol table at the end of the compilation process.
 void destroySymTable(symTbl* symTbl)
 {
-   symTblEntry* symbol = NULL;
-   symTblEntry* nextSymbol = NULL;
-   int i;
-   for (i = 0; i < SYM_TBL_ROWS_COUNT; i++)
-   {
-      symbol = symTbl->symbolTableHead[i];
-      if (symbol != NULL) // not an empty row
-      {
-         while (symbol != NULL)
-         {
+    int i;
+    symTblEntry* symbol = NULL;
+    symTblEntry* nextSymbol = NULL;
+    if (symTbl == NULL)
+    {
+        return;
+    }
+
+    for (i = 0; i < SYM_TBL_ROWS_COUNT; i++)
+    {
+        symbol = symTbl->symbolTableHead[i];
+        while (symbol != NULL)
+        {
             nextSymbol = symbol->next;
             destroyEntry(symbol);
             symbol = nextSymbol;
-         }
-      }
-   }
-   free(symTbl);
+        }
+    }
+    free(symTbl);
 }
 
 
